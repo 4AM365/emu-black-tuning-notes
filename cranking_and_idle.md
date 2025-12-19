@@ -7,6 +7,12 @@
 - Shoot for 45% TPS at cold start and 15% on hot start. You'll know what DC values to put into the sheet from the last step.
 - Try 25% enrichment (125 in the table) when cold, and 5% hot.
 
+# Establishing sync fast
+- EMU has a setting where you can infer position based on the status of the cam (high or low) when it encounters the first missing tooth gap, which you can also define.
+- A smaller missing tooth gap is more aggressive and has less noise rejection. 90% might be a value here. 100% is default.
+- Setting up the sensors correctly first is ideal - look at the scope during cranking and see how noisy the signal is if at all. If the sensors are shielded and close to the wheel, it's probably good to avoid using a noise filter and have a low adaptive threshold to get faster sync and eliminate the processing time associated with the filter. The filter is most likely a rolling average, so it eneds to fill the rolling average buffer before it can work.
+- Check out the new cam sensitivity table - you can look at VR sensor voltage vs RPM!
+
 # Idle
 - Once the car is started, you'll want to define the actuator range. The larger the range, the less resolution you have.
 - On cold start, override the airflow amount for idle and see how much throttle angle / DC it takes to idle at the absolute top of your range. For me, that's around 1500RPM once you add in post-start RPM increase, A/C RPM increase, and cold idle increase. I needed 6.2% angle, which becomes my max actuator value.
