@@ -41,16 +41,15 @@ Get your fuel trims right! My FFIM needs another 9% fuel on cylinder 6 at idle. 
 
 - Idle stability becomes marginal when you combine high intake temps with cams. Your idle RPM target needs to increase so you get some intake air momentum fighting the exhaust reversion and you store more energy in the flywheel to overcome misfires. For me this is an 1100rpm target in winter, but 1200 target in summer.
 
+- Ignition timing just doesn't do as much work per degree at idle with cams. Tune your idle PID to be more aggressive and trim with the ignition. Try it out - sweep ignition timing while running and airflow override.
 
+# Extreme charge temps at idle
 
-
+- Ultra high charge temps do decrease the density of air, but also encourage superior fuel vaporization and artificially advance timing by increasing flame front velocity so that peak cylinder pressure hits easier. I find that I need a 30% airflow restriction when going from 30C to 65C charge temps. I re-purposed the idle airflow compensation table for this.
 
 Look at your hot idle TPS. You never need significantly less than this TPS. Put your actuator floor just below this, and put your DBW min position DC % just below this. Sometimes there can be a gap where you're exiting idle air flow but the blend values aren't enough to support the engine, so the engine can die when you tap the throttle. If it's blending between a worst-case-the-engine-lives DBW value and a known-good-idle-ref, you're going to be OK.
 
-Ignition timing just doesn't do as much work per degree at idle with cams. Tune your idle PID to be more aggressive and trim with the ignition. Try it out - sweep ignition timing while running and airflow override.
-
-The active state airflow is mostly overcoming oil resistance. Oil resistance is exponential - more with colder oil.
-
-Ultra high charge temps / IAT will cause superior fuel vaporization and thus cause the airflow PID to pull down airflow, so that the integrator winds up and then after a short movement, you'll choke the engine out and it will die. Combat this by running near-MBT ignition timing and then pulling timing as the charge temp heats up in order to maintain a stable airflow position.
+# PID tuning
+Be careful here. You can really screw yourself up. Keep the integrator limits lower than the proportional limits, because the proportional can respond quickly, but the integrator takes a little while, potentially trapping you in a low airflow state for just long enough to kill the engine.
 
 Set the airflow PID integrator so that changes take about 5 seconds to ready steady state.
