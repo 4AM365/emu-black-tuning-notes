@@ -8,3 +8,5 @@
 - I like to populate the region where the turbo isn't spolled with a high number like 100% to prioritize the turbo while it's spooling, then back it off in the midrange to manage torque. After 5000rpm, we can build boost again out to redline.
 
 - I also like to match boost to pedal position so the car is manageable. You don't want a big hammer of boost hitting whenever you breathe on the throttle, you want to be able to ask for something and get it.
+
+- Critically, you should know where your cams 'peak'. Look at a dyno chart of your car with fixed boost, or an N/A version of the same engine. At this peak, you'll need to pull back timing due to unusually high cylinder pressure.
