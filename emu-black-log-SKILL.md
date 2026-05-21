@@ -142,6 +142,21 @@ Check in order:
 
 Fix: add fuel to idle VE cells (MAP 30–40 kPa, RPM 800–1200) at the operating CLT. Verify ASE decay rate isn't faster than WBO validation time.
 
+Also check `Idle state` — a persistent value of 0 throughout means idle PID is disabled. Check brake switch state; a continuously active brake switch locks idle control into permanent open-loop mode and prevents all ignition correction and airflow recovery.
+
+### Overrun-to-idle stall
+
+Signature: stall occurs after lift-off from high RPM/boost; RPM drops toward idle, stumbles, then dies. A rich lambda spike is often visible just before the stall.
+
+Check in order:
+1. `Idle air %` / armed state airflow at the transition RPM (1800–2200 RPM) — resolving near 0% is the root cause.
+2. `DBW Out. DC` at the transition — if it is −80% or worse, the throttle is fighting its return spring and supplying no air.
+3. `Overrun status` and `Fuel Cut` — when does fuel return? Returning into near-zero airflow makes a rich stumble unavoidable.
+4. `Short term trim` / `Lambda` immediately after fuel cut exit — a large positive lambda spike (lean) confirms fuel returned into too little air.
+5. `Idle state` — if it stays at 0 through the transition, idle PID never engaged; check brake switch.
+
+Fix: populate armed state airflow at 60–80% for the 1800–2200 RPM bins. The rich spike and stall will both disappear.
+
 ### Cold-start stall (CLT < 50°C)
 
 Same as warm stall but also check:
@@ -163,11 +178,24 @@ knock = df[df['Knock count'].diff() > 0]
 
 Check: `Knock Level Peak` vs `Knock Engine Noise` (S/N ratio). If noise floor is high, may be false detection. Check `Knock ign retard cyl N` for per-cylinder distribution. A single cylinder repeating = possible detonation hot-spot.
 
-### Boost overshoot
+### Boost overshoot / control fault
 
 Signature: `Boost` spikes above `Boost Target`; `Boost out of margin` = 1.
 
-Check: `Boost PID correction` — high values mean the PID gains are too aggressive. Also check if `Boost DC` is saturating (0% or 100%) before the spike.
+Distinguish the two failure modes before adjusting anything:
+- **Margin protection triggered** (`Boost out of margin` = 1, `Boost PID correction` stable): thresholds are too tight or base WGDC table is wrong. Widen margins and verify open-loop WGDC from ramp-run data.
+- **PID hunting** (`Boost PID correction` oscillating, boost overshooting and undershooting): gains are too aggressive. Reduce P, then I.
+
+Also check `Boost DC` saturation (0% or 100%) before the spike — a saturated duty cycle means the feed-forward table is miscalibrated, not a PID issue.
+
+### VVT fault
+
+Signature: `VVT CAM1 angle` deviates from `VVT CAM1 angle target` and does not recover.
+
+- Large persistent error (>5°): oil pressure or solenoid issue. Check oil pressure at idle; VVT authority is limited below ~1.5 bar.
+- Small oscillation (±2–3°): normal PID hunting — not a fault.
+- `VVT CAM1 status` non-zero: ECU has flagged an error condition.
+- Cold-engine deviation is expected if VVT is intentionally disabled below a CLT threshold.
 
 ---
 
