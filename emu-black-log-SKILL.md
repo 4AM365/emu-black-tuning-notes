@@ -96,6 +96,7 @@ protection = df[df['Engine protection code'] != 0]
 | `Idle air %` | requested airflow; if maxed and RPM still low = not enough base air |
 | `DBW Out. DC` | throttle drive %; negative = closing, positive = opening |
 | `DBW target` | requested throttle % |
+| `DBW target source` | enum; who is commanding the throttle target — see enumerations table |
 | `Idle PID air % correction` | PID output; large correction = system fighting hard |
 | `Idle ignition correction` | timing bump for idle recovery |
 | `Idle effective DC` | final output to IAC/throttle |
@@ -117,7 +118,7 @@ protection = df[df['Engine protection code'] != 0]
 | `VVT CAM1 angle` | intake cam position degrees |
 | `VVT CAM1 angle target` | requested position |
 | `VVT CAM1 solenoid DC` | oil pressure solenoid duty cycle |
-| `VVT CAM1 status` | 0=OK, non-zero = error (cam not following target) |
+| `VVT CAM1 status` | 0=OK, 1=error (cam not reaching target), 2=moving wrong direction, 3=disabled/locked out |
 
 ### Tier 7: sensor validation (status channels)
 
@@ -257,5 +258,17 @@ print(knock_summary[knock_summary > 0])
 | `Lambda is valid` | 0 | WBO not ready (no trim) |
 | `Lambda is valid` | 1 | WBO validated (trim active) |
 | `Overrun status` | 1 | Overrun condition met (check `Overrun fuel corr.` for actual cut) |
+| `DBW target source` | 0 | Driver / pedal (PPS characteristic map) |
+| `DBW target source` | 1 | Idle control (armed state or PID airflow) |
+| `DBW target source` | 2 | Traction control |
+| `DBW target source` | 3 | Launch control |
+| `VVT CAM1 status` | 0 | OK |
+| `VVT CAM1 status` | 1 | Error — cam not reaching target |
+| `VVT CAM1 status` | 2 | Error — cam moving in wrong direction |
+| `VVT CAM1 status` | 3 | Disabled / locked out |
+| `Engine protection code` | 0 | No fault |
+| `Engine protection code` | non-zero | Protection active; bitmask — use EMU Software live diagnostics to decode |
+| `Check engine code` | 0 | No fault |
+| `Check engine code` | non-zero | Sensor/system fault logged; use EMU Software to decode |
 
 
