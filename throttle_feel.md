@@ -22,7 +22,7 @@ My first instinct was to set it much lower at low speeds and much higher at high
 
 I settled on a universal limit of **700°/sec**, actually *reducing* the limit at high speed so lift-off behavior is gentler under high power.
 
-> **Note on engine protection:** Many high-boost engines fail on lift-off because one cylinder's combustion turns the crank while the next cylinder sees lower MAP/fuel cut and effectively engine brakes—stretching the rod. A gentler lift-off rate limit may help prevent this.
+> **Note on engine protection:** Lift-off rod failures are a real risk on high-boost engines. The mechanism: when you lift off at high RPM, MAP drops, overrun fuel cut activates, and the drivetrain drives the engine rather than the other way around. Every piston on the power stroke is now being *pulled* down by the crank with no combustion pressure behind it — loading the rod in tension, which rods handle far worse than compression. The more direct mitigations are overrun fuel cut strategy (minimum RPM threshold, hysteresis, partial fuel reduction instead of a hard cut) and ignition cut instead of fuel cut. A slower throttle closure rate delays MAP drop and thus fuel cut onset, so it helps indirectly, but it's not the primary lever.
 
 ### The Real Fix
 
