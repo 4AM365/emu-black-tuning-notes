@@ -9,9 +9,9 @@ EGT Exhaust Gas Temperature
 
 
 # General Principles
-- The goal of timing is to place the point of greatest charge gas expansion where 50% of fuel is burned (CA50) at a crank angle where the piston and rod have maximum mechanical advantage over the crankshaft. This is MBT (Maximum Brake Torque).
+- The goal of timing is to place the point of greatest charge gas expansion — where 50% of fuel has burned (CA50) — at the crank angle where the piston and rod have maximum mechanical advantage over the crankshaft. This is MBT (Maximum Brake Torque).
 
-- Knock is a measurement of sudden fuel burn in the engine which results in slapping pistons against a cylinder wall, rods against a main bearing, and so on. You're hearing metal knock against metal.
+- Knock is the audible and mechanical result of abnormal combustion. The pressure shock wave from detonation damages piston crowns, ring lands, and rod bearings. You're hearing the shock wave propagate through the block.
 
 - Preignition is a condition where a hot combustion chamber will ignite a mixture on its own, artificially advancing your timing. Low-speed preignition is a favorite in the Mazda and Ecoboost world where small turbos cause extreme cylinder conditions at low RPM during normal cruising.
 
@@ -34,7 +34,7 @@ EGT Exhaust Gas Temperature
 - Cams that are longer in duration, even if they share a lobe separation angle with stock cams, have more overlap
 - The effect of a higher overlap cam on a turbo car is that there is always more pressure in the exhaust than the intake because of the restriction of the turbine, so exhaust gas will blow back into the intake. The RPM you idle at determines how much the intake inertia fights the exhaust pressure.
 
-- You will need more timing at idle when you have more overlap, because exhaust gas causes charge dilution, and flame front velocity (remember CA50%?) is slower through a polluted charge.
+- You will need more timing at idle when you have more overlap, because exhaust gas causes charge dilution, and flame front velocity (remember CA50?) is slower through a polluted charge.
 
 | Fuel | Cams | Timing |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ EGT Exhaust Gas Temperature
 
 - MBT for a 2jz in boost will be generally in the low 20s. Again, 5 degree spread for ethanol vs pump gas.
 
-- A good indicator of MBT is CA50% at 8 degrees ATDC.
+- A good indicator of MBT is CA50 at 8° ATDC.
 
 - Things that increase volatility and thus reduce peak timing: 
 - Short camshafts (better pumping efficiency), 

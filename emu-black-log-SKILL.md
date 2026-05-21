@@ -31,7 +31,7 @@ df = df.dropna(axis=1, how='all')  # drop empty trailing columns
 
 ## First-pass triage
 
-Before deep analysis, scan these three things:
+Before deep analysis, scan these four things:
 
 1. **ECU State** — 1 = idle/cranking, 3 = running. State drops back to 1 at stall.
 2. **Trigger error count** — any non-zero value = crank/cam signal issue.

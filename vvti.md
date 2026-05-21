@@ -1,22 +1,27 @@
-vvti PID tuning
+# VVT-i PID Tuning
 
-Max and min solenoid output - not too important, used 5% to 90% to keep the range large. We could use this to set a floor and get rid of the vvt-i clatter.
+## Solenoid Output Range
 
-setpoint - this is where all of the calcs start, and is also the inflection point between 'we need more' and 'we need less'. Super important.
+Max and min solenoid output aren't critical — I use 5% to 90% to keep the range wide. You could use the floor to eliminate VVT-i clatter on startup.
 
-P and setpoint - the 'forcing function' of the PID is the oil pressure moving the cam forward. We are enabling the forcing function with the PID. This changes drastically with oil pressure and temperature. Need to set the system with the engine hot. Some may disable vvt-i when the engine is cold entirely.
+## Setpoint
 
-Proportional - this is the initial attack. We want A LOT. We can then control it with strong integral.
+The setpoint is where all calculations originate and is the inflection point between "we need more" and "we need less." It's the most important parameter. Set the system with the engine fully warmed up. Some tuners disable VVT-i entirely when cold.
 
-Imagine chasing after a car that is moving away from you. You approach it, but if you go too fast and don't slow down you'll overshoot it.
+## PID Overview
 
-Proportional control means we 'approach' with speed in proportion to the difference between our position and our target.
+**Proportional** — the initial attack. You want a high P gain; you can rein it in with a strong integral.
 
-If we are a little slow or a little fast, we measure this over time (an integral is the area under a curve over time) and then we add or subtract from the proportional term.
+Think of it like chasing a car moving away from you. You approach it, but if you go too fast without slowing down you'll overshoot.
 
-Proportional control can work on its own, but in order to approach a term very fast we will overshoot very far. Proportional control acts on the difference between position and target and varies the control parameter (speed of approach for us) to get there. The less of a difference there is, the less duty cycle will be commanded. 
+- Proportional control varies the command in proportion to the error between current position and target. As the error shrinks, duty cycle decreases.
+- If the system is running slightly fast or slow, integral control measures that offset over time (an integral is the area under a curve) and adds or subtracts duty cycle to squeeze the error down.
+- Proportional-only control can work, but high P gain causes overshoot. You need damping to allow aggressive P without oscillation.
 
-Damping prevents overshoot, allows for more aggressive P, and prevents oscillation.
+**Integral** — corrects steady-state offsets by accumulating error over time and nudging duty cycle in the right direction. The integral correction limit prevents windup — if the accumulated error is too large, the proportional term probably needs adjustment first.
 
-Integral control corrects for steady-state offsets. It's a running counter of 'how far off we are from the target'. It then adds or subtracts duty cycle to squeeze down the error range.
-An integral correction limit keeps the term from accumulating huge error values. If our error value is too big, we probably need to change the proportional term. 
+**Derivative (damping)** — prevents overshoot, allows more aggressive P, and suppresses oscillation.
+
+## Oil Pressure and Temperature Effects
+
+The forcing function of the PID is oil pressure physically moving the cam. Its authority changes significantly with oil pressure and temperature. Always finalize the tune with the engine fully hot.
