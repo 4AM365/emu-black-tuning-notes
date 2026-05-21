@@ -12,7 +12,7 @@ Throttle response feel is determined by three factors:
 
 Controls the "bucking" sensation at low speed by limiting how quickly the throttle body opens or closes.
 
-The adjustment range is 0–1300°/sec, with a 125°/sec rpm-referenced adjustment range plus or minus on top of the selected value. Start with a small value and dial it back until response feels snappy enough.
+The adjustment range is 0–1300°/sec, with a 125°/sec RPM-referenced adjustment range added on top of the selected value. Start at a conservative value and increase it until response feels snappy enough.
 
 ### What I Tried
 
