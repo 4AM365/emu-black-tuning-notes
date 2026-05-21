@@ -16,7 +16,7 @@
 # Intake / Exhaust
 - SPA exhaust manifold
 - Custom 4" exhaust
-- Borg S361
+- Borg S362
 
 # Drivetrain
 - R155 w/ DM thrust washer and bearing retainer
