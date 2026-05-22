@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="idleCrankingDC" storage="ubyte" width="4" height="1" data="1A 19 18 17 "/>
+  </tables>
+</project>

@@ -53,3 +53,20 @@ Look at your hot idle TPS. You never need significantly less than this TPS. Put 
 Be careful here. You can really screw yourself up. Keep the integrator limits lower than the proportional limits, because the proportional can respond quickly, but the integrator takes a little while, potentially trapping you in a low airflow state for just long enough to kill the engine.
 
 Set the airflow PID integrator so that changes take about 5 seconds to ready steady state.
+
+# Change log
+
+## 2026-05-22 — Dropped actuator floor 3.5% -> 2.4% (ceiling unchanged at 8.0%)
+
+**Why:** with the floor at 3.5%, the minimum commandable throttle was 3.5% TPS, so cranking could never reach the ~3.1% TPS needed to pull enough manifold vacuum for a clean cold start. Lowering the floor to 2.4% restores cranking-vacuum headroom.
+
+**Range:** `idleDBWTargetMin` 35 -> 24 (3.5% -> 2.4%); `idleDBWTargetMax` stays 80 (8.0%). So actuator range `[3.5, 8.0]` -> `[2.4, 8.0]` (these min/max symbols ARE the Airflow-Actuator range, word @ 0.1/count). Set this in EMU before importing the tables.
+
+**Airflow-% values are a % of the control range, so widening the range required re-scaling every airflow-% table** to keep the actual throttle angle the same:
+- Preserve-TPS (absolute tables — Active state, Armed state): `new% = 19.643 + 0.8036 x old%` (slope = old width / new width = 4.5/5.6). Verified to hold actual TPS to within rounding.
+- Custom air flow correction (this table is ADDITIVE, not scalar — the mode is configurable in EMU): it's a delta, so scale by the width ratio only, NO offset: `new = old x 0.8036`. Preserves each correction's TPS effect. (If ever switched to scalar/multiplier mode, do NOT width-scale.)
+- Cranking airflow: NOT preserved — deliberately reset to the original `[2.0, 6.4]` settings that tapered 25.5% -> 24.0% cold->hot (= TPS 3.122 -> 3.056). Re-expressed in `[2.4, 8.0]`: 13.0/12.5/12.0/11.5% (raw 26 25 24 23). Cold cell = 3.13% TPS.
+
+**Watch-out:** the original range was `[2.0, 6.4]`, but the ceiling had already been raised to 8.0 during idle setup. A first calibration pass wrongly assumed the ceiling was still 6.4 (slope 0.5179) and was off by ~0.4% TPS at idle. Always read the CURRENT range from `idleDBWTargetMin/Max`, not from memory.
+
+**Files:** `supra export 05222026 (2.4-8.0 range).xml.emub3` (4 table data lines changed vs the original export) and per-table imports in `rescaled_2.4_8.0_range/`. Checksums in the full project are now stale and I can't recompute them — prefer importing the individual `.emubt` files, or watch for a checksum warning on full-project import.
