@@ -9,9 +9,9 @@ EGT Exhaust Gas Temperature
 
 
 # General Principles
-- The goal of timing is to place the point of greatest charge gas expansion where 50% of fuel is burned (CA50) at a crank angle where the piston and rod have maximum mechanical advantage over the crankshaft. This is MBT (Maximum Brake Torque).
+- The goal of timing is to place the point of greatest charge gas expansion — where 50% of fuel has burned (CA50) — at the crank angle where the piston and rod have maximum mechanical advantage over the crankshaft. This is MBT (Maximum Brake Torque).
 
-- Knock is a measurement of sudden fuel burn in the engine which results in slapping pistons against a cylinder wall, rods against a main bearing, and so on. You're hearing metal knock against metal.
+- Knock is the audible and mechanical result of abnormal combustion. The pressure shock wave from detonation damages piston crowns, ring lands, and rod bearings. You're hearing the shock wave propagate through the block.
 
 - Preignition is a condition where a hot combustion chamber will ignite a mixture on its own, artificially advancing your timing. Low-speed preignition is a favorite in the Mazda and Ecoboost world where small turbos cause extreme cylinder conditions at low RPM during normal cruising.
 
@@ -34,7 +34,7 @@ EGT Exhaust Gas Temperature
 - Cams that are longer in duration, even if they share a lobe separation angle with stock cams, have more overlap
 - The effect of a higher overlap cam on a turbo car is that there is always more pressure in the exhaust than the intake because of the restriction of the turbine, so exhaust gas will blow back into the intake. The RPM you idle at determines how much the intake inertia fights the exhaust pressure.
 
-- You will need more timing at idle when you have more overlap, because exhaust gas causes charge dilution, and flame front velocity (remember CA50%?) is slower through a polluted charge.
+- You will need more timing at idle when you have more overlap, because exhaust gas causes charge dilution, and flame front velocity (remember CA50?) is slower through a polluted charge.
 
 | Fuel | Cams | Timing |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ EGT Exhaust Gas Temperature
 
 - MBT for a 2jz in boost will be generally in the low 20s. Again, 5 degree spread for ethanol vs pump gas.
 
-- A good indicator of MBT is CA50% at 8 degrees ATDC.
+- A good indicator of MBT is CA50 at 8° ATDC.
 
 - Things that increase volatility and thus reduce peak timing: 
 - Short camshafts (better pumping efficiency), 
@@ -174,6 +174,77 @@ Subtract knock retard separately per fuel/CR/charge temp when calibrating.
 | 7k | 55 | 51 | 45 | 40 | 35 | 31 | 27 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 18 | 17 | 17 | 16 |
 | 8k | 55 | 53 | 47 | 42 | 37 | 33 | 29 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 20 | 19 | 19 | 18 |
 
+
+---
+
+# Flex Fuel — Ignition Blend Table
+
+## Blend Table Structure
+
+- Two ignition tables: Table 1 (E0/pump gas endpoint, conservative) and Table 2 (E100 endpoint, more aggressive).
+- The blend table axis is ethanol content %. Its shape controls how quickly authority shifts from Table 1 to Table 2.
+- Correct shape: steep transition from 0–50% ethanol (knock resistance gain is front-loaded), flatter tail above 50%.
+  - At 62.5% ethanol: ~14% Table 1 / 86% Table 2
+  - At 75%+: 0% Table 1
+- **Do not adjust blend table shape to dial in timing.** When the tune needs more timing, advance Table 2 values — the blend table multiplies the delta.
+- The blend scalar at E60 is approximately 0.86×. A 4° advance in Table 2 delivers ~3.4° at the wheel. Account for this when stepping values.
+
+## E60 Timing Targets (10:1 CR, WOT)
+
+Walk up in 1° steps while monitoring per-cylinder knock channels. E60 has headroom but knock onset is still possible, especially if ethanol content is lower than expected.
+
+| Boost (psi) | E60 Target (°BTDC) | vs. 93 octane |
+|---|---|---|
+| 0 (VE cells) | 32–38° | +4–6° |
+| 10 | 20–24° | +4–5° |
+| 14 | 19–23° | +4–5° |
+| 18 | 17–21° | +4–5° |
+| 22 | 14–17° | +3–4° |
+
+## Safe Boost Ceiling
+
+- 93 octane, 10:1 CR, good intercooling: 14–15 psi conservative; 16–18 psi with active knock monitoring.
+- E60, 10:1 CR: aggressive ceiling 22–24 psi.
+- Target for 500 ft-lb flat curve: ~19–22 psi / 17–21° timing at peak boost on E60.
+- 10° below MBT at 10 psi on pump gas ≈ 290–300 ft-lb (MBT at that point ≈ 360 ft-lb).
+
+## Ethanol Characteristics
+
+- E60 ≈ 100–105 RON vs. 91–95 for pump premium.
+- High heat of vaporization creates a charge cooling effect that is largest at high load — exactly when knock risk is highest.
+- At 10:1 CR the knock margin on ethanol is genuine. 10:1 at 24+ psi is problematic on pump gas; on E60 there is real headroom.
+- Watch for ethanol content variation (partial fill, supplier variation) — knock margin compresses quickly. A flex fuel sensor plus a conservative fallback blend table is mandatory insurance.
+
+---
+
+# Cruise Timing — Detailed
+
+## Finding MBT at Cruise
+
+- Cruise region (2400–3500 RPM, 40–80 kPa): MBT is typically 30–36° on pump gas, 34–40° on E60.
+- Use EGT reduction as the primary proxy for timing gain — advancing toward MBT drops EGTs. Target ~730 °C EGT baseline; meaningful reduction confirms you are approaching MBT.
+- Also watch MAP: as combustion efficiency improves, the same pedal position produces higher MAP (more torque → less vacuum needed). MAP increase at constant throttle confirms timing gain.
+- Lambda stability is the smoothness indicator. If closed-loop hunting increases after a timing change, combustion consistency is degrading.
+
+## Creating a Timing Plateau
+
+- Cruise oscillates between 40–60 kPa MAP at constant PPS. If timing changes across that band, small MAP variations translate to small torque variations → slight roughness.
+- Flatten timing across 40–79 kPa into a shallow plateau (1° total variation instead of 4–5°). Use gradual transitions, not cliff edges. Anchor the flat value near the 50 kPa MBT.
+- At very light loads (28–35 kPa), charge density is low and combustion stability competes with MBT as the binding constraint. Step timing in 2° increments and watch for RPM/lambda oscillation, not just knock.
+
+## VVT and the VE/Timing Tables
+
+- VVT cam advance increases volumetric efficiency → MAP rises at constant PPS → the ECU indexes into a different (higher MAP) cell in the VE and timing tables.
+- You are not retuning the fuel map for VVT. The 3D map already has values at those higher MAP cells. VVT moves you around within the existing map. The fuel table does not need discrete VVT-state corrections as long as the MAP axis covers the full operating range.
+- Lock cam advance to the target value for each MAP/RPM cell before pulling for MBT — otherwise ignition timing is chasing a moving VVT target.
+- More cam advance → less residual dilution → slightly faster burn → MBT shifts slightly retard.
+- More overlap → more dilution at light load → slower flame propagation → MBT shifts toward more advance.
+
+## Lambda at Cruise
+
+Lambda 1.0 (stoichiometric) is the practical cruise target without a catalyst. Lean of stoich on a port-injected engine with 264° cams risks combustion instability due to high overlap, high residual dilution, and no charge stratification. There is no meaningful economy gain to justify it.
+
+---
 
 # Reading
 (1) Heywood 1988
