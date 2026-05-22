@@ -1,72 +1,137 @@
-# Migration
-- The idle system is very different from v2 to v3. You will need to redefine most things.
-- Import your setup from v2 and then self-learn the throttle body.
-- Next, override the DBW DC value and take notes of the throttle angle vs DC. This will be used for cranking as well as idle maps.
+# Cranking and Idle
 
-# Cranking
-- Pick values that get you roughly 60-80kPa MAP under cranking. A cold engine needs lower MAP to lower the fuel boiling point and vaporize it, while a hot engine can add heat to vaporize the fuel.
+## Migration from v2
+
+- The idle system changed significantly from v2 to v3. Most settings will need to be redefined.
+- Import your v2 setup, then run the throttle body self-learn.
+- Next, override the DBW duty cycle and note the throttle angle vs. DC relationship. This is used for both cranking and idle maps.
+- v3 flips the primary/secondary actuator roles: **airflow PID is the primary RPM controller**, ignition timing is fast-path fine-tuning only. This is the opposite of v2.
+
+## Cranking
+
+- Target roughly 60–80 kPa MAP during cranking. A cold engine benefits from lower MAP (more vacuum) to reduce the fuel boiling point and aid vaporization; a hot engine relies on heat to do the same job.
 - Try 25% enrichment (125 in the table) when cold, and 5% hot.
 
-# Establishing sync fast
-- EMU has a setting where you can infer position based on the status of the cam (high or low) when it encounters the first missing tooth gap, which you can also define.
-- A smaller missing tooth gap is more aggressive and has less noise rejection. 90% might be a value here. 100% is default.
-- Setting up the sensors correctly first is ideal - look at the scope during cranking and see how noisy the signal is if at all. If the sensors are shielded and close to the wheel, it's probably good to avoid using a noise filter and have a low adaptive threshold to get faster sync and eliminate the processing time associated with the filter. The filter is most likely a rolling average, so it eneds to fill the rolling average buffer before it can work.
-- Check out the new cam sensitivity table - you can look at VR sensor voltage vs RPM!
+## Establishing Sync Quickly
 
-# Idle
-- Once the car is started, you'll want to define the actuator range. The larger the range, the less resolution you have.
-- On cold start, override the airflow amount for idle and see how much throttle angle / DC it takes to idle at the absolute top of your range. For me, that's around 1500RPM once you add in post-start RPM increase, A/C RPM increase, and cold idle increase. I needed 8% angle, which becomes my max actuator value.
-- Oil thins out gradually out until you reach roughly 70C. The idle ref table should look pretty flat between 70C and 90C, and increase exponentially under 70C to overcome oil resistance.
-- Once the engine is hot, figure out the override % required to go just below your ideal hot idle. For me, that's 4.2% throttle angle. So 3.5% and 8.0% becomes my Airflow - Actuator range.
-- The override target maps to the active state air flow. Change the value to achieve your desired RPM in a particular situation, and then populate the active state air flow % with that value. Super important to set this right. Mine goes from 18.5% at minimum (hot, low RPM) to 98% cold high RPM. This is what opens the throttle body a little when you re-enter idle to create a soft landing for your engine speed when you idle down from higher RPM.
+- EMU has a setting to infer position from the cam sensor state (high or low) when it first encounters the missing tooth gap, which you can also define.
+- A smaller missing-tooth gap threshold is more aggressive and has less noise rejection. 90% might work here; 100% is the default.
+- Set up the sensors correctly first — scope the signal during cranking and assess noise. If the sensors are shielded and close to the wheel, skipping the noise filter is reasonable; it will give faster sync and eliminate the filter's processing delay. The filter is most likely a rolling average, so it needs to fill its buffer before it can function.
+- Check the cam sensitivity table — you can plot VR sensor voltage vs. RPM.
 
-# Idle entry
-- Idle DBW blend point is the PPS at which the idle ref value becomes equal to the DBW characteristic value. You want this just above your idle point to give you some 'range' in which to adjust. For me it's 8% hot and 12% cold.
+## Idle
 
-- Armed State Air Flow is what your TB does when you enter the idle armed state and you meet all criteria for idle and enter the RPM defined by idle target value + ramp down max offset.
+- Once the car is started, define the actuator range. The larger the range, the less resolution you have.
+- On cold start, override the idle airflow and note how much throttle angle / DC it takes to idle at the top of your RPM range. For me that's around 1500 RPM once you add post-start RPM increase, A/C RPM increase, and cold idle increase — I needed 8% throttle angle, which becomes my max actuator value.
+- Oil thins out gradually until roughly 70 °C. The idle ref table should be fairly flat between 70 °C and 90 °C, then rise exponentially below 70 °C to overcome oil drag.
+- Once the engine is hot, find the override % required to run just below your ideal hot idle RPM. For me that's 4.2% throttle angle. So 3.5% and 8.0% becomes my actuator range.
+- The override target maps to the active-state airflow. Adjust the value to achieve your desired RPM in a given situation, then populate the active-state airflow % with that value. Mine ranges from 18.5% at minimum (hot, low RPM) to 98% cold high RPM. This is what opens the throttle body slightly on idle re-entry to cushion the RPM drop when coming off higher RPM.
 
-# Idle Ref Table
+### Airflow% and TPS% Conversion
 
-Oil is pretty much warmed up by 71C, so the idle ref table gets linear there. Below 71C it's exponential due to oil viscosity.
+- Idle air % is expressed as `Airflow%`, not raw TPS. Conversion: `TPS% = 2.0 + (Airflow% / 100) × 4.4`
+- Hot idle at 38% Airflow ≈ 3.7% TPS. Armed state at 41% Airflow ≈ 3.8% TPS.
+- A 3% armed-state margin above hot idle (41% vs. 38%) is intentional but tight. Watch the transition carefully.
+- The Active State Airflow table (throttle opening % vs. CLT vs. resulting RPM) must be calibrated from logged data. It is not optional.
 
-The custom correction table does a good job of AC clutch compensation, but the range of time-to-engage for AC clutch should be around 900ms for a 2jz. It's a lot faster than the airflow correction.
+## Idle Entry
 
-Noisy vvt-i values and noisy CLT will push idle all over the place. Lock these down.
+- Idle DBW blend point is the PPS at which the idle ref value equals the DBW characteristic value. Set this just above idle so you have some range for adjustment. Mine is 8% hot and 12% cold. A flat 10% blend point across all CLT works well for a stable, well-tuned setup.
 
-Get your fuel trims right! My FFIM needs another 9% fuel on cylinder 6 at idle. The effect actually lessens with boost; the manifold does a better job when it's under pressure. Get some EGT probes, they're essential.
+- Armed State Air Flow is what the throttle body does when you enter the idle armed state and meet all criteria to enter the RPM defined by idle target + ramp-down max offset.
 
-# Special considerations for long-duration camshafts.
+## Idle Ref Table
 
-- On a cammed engine, there's charge dilution due to overlap so your flame front velocity drops along with your dynamic compression ratio. This means you need more timing at idle and cruise.
+Oil is substantially warmed up by 71 °C, so the idle ref table becomes linear there. Below 71 °C it is exponential due to oil viscosity.
 
-- Idle stability becomes marginal when you combine high intake temps with cams. Your idle RPM target needs to increase so you get some intake air momentum fighting the exhaust reversion and you store more energy in the flywheel to overcome misfires. For me this is an 1100rpm target in winter, but 1200 target in summer.
+The custom correction table handles A/C clutch compensation well, but the engagement time range should be around 900 ms for a 2JZ — much faster than the airflow correction.
 
-- Ignition timing just doesn't do as much work per degree at idle with cams. Tune your idle PID to be more aggressive and trim with the ignition. Try it out - sweep ignition timing while running and airflow override.
+Noisy VVT-i values and noisy CLT will push idle all over the place. Lock these down first.
 
-# Extreme charge temps at idle
+Get your fuel trims right. My FFIM needs about 9% more fuel on cylinder 6 at idle. The effect diminishes with boost — the manifold does a better job of distribution under pressure. Get EGT probes; they're essential.
 
-- Ultra high charge temps do decrease the density of air, but also encourage superior fuel vaporization and artificially advance timing by increasing flame front velocity so that peak cylinder pressure hits easier. I find that I need a 30% airflow restriction when going from 30C to 65C charge temps. I re-purposed the idle airflow compensation table for this.
+## Ignition at Idle
 
-Look at your hot idle TPS. You never need significantly less than this TPS. Put your actuator floor just below this, and put your DBW min position DC % just below this. Sometimes there can be a gap where you're exiting idle air flow but the blend values aren't enough to support the engine, so the engine can die when you tap the throttle. If it's blending between a worst-case-the-engine-lives DBW value and a known-good-idle-ref, you're going to be OK.
+- With aggressive cam profile (264°), the engine does not respond meaningfully to timing changes at idle. Use a flat 16° BTDC across all CLT and RPM.
+- Keep the ignition PID window to ±4°. It is a fast transient corrector, not a primary RPM controller.
+- Varying timing with temperature or RPM creates a competing feedback loop. Keep it flat; let airflow own RPM.
 
-# PID tuning
-Be careful here. You can really screw yourself up. Keep the integrator limits lower than the proportional limits, because the proportional can respond quickly, but the integrator takes a little while, potentially trapping you in a low airflow state for just long enough to kill the engine.
+## Idle PID Baseline
 
-Set the airflow PID integrator so that changes take about 5 seconds to ready steady state.
+- P: 3.0 | I: 1.0 | D: 0.2 as a starting point for DBW builds.
+- Tune P-only first (zero I and D), layer I to eliminate steady-state error, add D sparingly to suppress overshoot.
 
-# Change log
+## Long-Duration Camshafts
 
-## 2026-05-22 — Dropped actuator floor 3.5% -> 2.4% (ceiling unchanged at 8.0%)
+- Longer-duration cams have more overlap even if they share a lobe separation angle with stock cams.
+- On a turbo engine with overlap, exhaust pressure is always higher than intake pressure due to the turbine restriction, so exhaust gas blows back into the intake. The RPM you idle at determines how much intake air momentum fights the exhaust reversion.
+- You will need more ignition timing at idle because exhaust gas dilutes the charge, slowing flame-front velocity (think CA50).
 
-**Why:** with the floor at 3.5%, the minimum commandable throttle was 3.5% TPS, so cranking could never reach the ~3.1% TPS needed to pull enough manifold vacuum for a clean cold start. Lowering the floor to 2.4% restores cranking-vacuum headroom.
+- Idle stability becomes marginal when you combine high intake temps with aggressive cams. Raise your idle RPM target to build intake air momentum against exhaust reversion and store more energy in the flywheel to ride through misfires. I use 1100 RPM in winter and 1200 RPM in summer.
 
-**Range:** `idleDBWTargetMin` 35 -> 24 (3.5% -> 2.4%); `idleDBWTargetMax` stays 80 (8.0%). So actuator range `[3.5, 8.0]` -> `[2.4, 8.0]` (these min/max symbols ARE the Airflow-Actuator range, word @ 0.1/count). Set this in EMU before importing the tables.
+- Ignition timing does less work per degree at idle on a cammed engine. Tune the idle PID more aggressively and trim with ignition timing — sweep timing while running with the airflow override active.
 
-**Airflow-% values are a % of the control range, so widening the range required re-scaling every airflow-% table** to keep the actual throttle angle the same:
-- Preserve-TPS (absolute tables — Active state, Armed state): `new% = 19.643 + 0.8036 x old%` (slope = old width / new width = 4.5/5.6). Verified to hold actual TPS to within rounding.
-- Custom air flow correction (this table is ADDITIVE, not scalar — the mode is configurable in EMU): it's a delta, so scale by the width ratio only, NO offset: `new = old x 0.8036`. Preserves each correction's TPS effect. (If ever switched to scalar/multiplier mode, do NOT width-scale.)
-- Cranking airflow: NOT preserved — deliberately reset to the original `[2.0, 6.4]` settings that tapered 25.5% -> 24.0% cold->hot (= TPS 3.122 -> 3.056). Re-expressed in `[2.4, 8.0]`: 13.0/12.5/12.0/11.5% (raw 26 25 24 23). Cold cell = 3.13% TPS.
+| Fuel | Cams | Idle timing range |
+|------|------|-------------------|
+| Pump gas | Stock | 10–12° |
+| Pump gas | Cammed | 13–16° |
+| Ethanol | Stock | 13–16° |
+| Ethanol | Cammed | 16–19° |
+| Ethanol | Big cams | 19–22° |
 
-**Watch-out:** the original range was `[2.0, 6.4]`, but the ceiling had already been raised to 8.0 during idle setup. A first calibration pass wrongly assumed the ceiling was still 6.4 (slope 0.5179) and was off by ~0.4% TPS at idle. Always read the CURRENT range from `idleDBWTargetMin/Max`, not from memory.
+## Extreme Charge Temps at Idle
 
-**Files:** `supra export 05222026 (2.4-8.0 range).xml.emub3` (4 table data lines changed vs the original export) and per-table imports in `rescaled_2.4_8.0_range/`. Checksums in the full project are now stale and I can't recompute them — prefer importing the individual `.emubt` files, or watch for a checksum warning on full-project import.
+Ultra-high charge temps reduce air density but improve fuel vaporization and effectively advance timing by increasing flame-front velocity, making peak cylinder pressure easier to achieve. I find I need about 30% less airflow when going from 30 °C to 65 °C charge temps. I repurposed the idle airflow compensation table for this correction.
+
+Look at your hot-idle TPS. You never need significantly less than that angle. Set your actuator floor just below it, and set your DBW min position DC% just below it too. Sometimes there is a gap between exiting idle airflow control and the blend values being sufficient to support the engine, causing a stall on a light throttle tap. If you're blending between a worst-case-survival DBW value and a known-good idle ref, you'll be fine.
+
+## PID Tuning
+
+Be careful here — it's easy to make things worse. Keep the integrator limits lower than the proportional limits: the proportional term responds immediately, but the integrator accumulates over time and can trap you in a low-airflow state just long enough to stall the engine.
+
+Set the airflow PID integrator so that corrections take about 5 seconds to reach steady state.
+
+---
+
+## Armed State Airflow
+
+### What "Armed State" Means
+
+Armed state is active when PPS < 2.0% but RPM has not yet dropped into the idle PID engagement window. The armed state airflow table controls DBW target during this window. It is feed-forward guidance down toward idle — not idle PID.
+
+### Overrun-to-Idle Stall Pattern
+
+Stalls at overrun exit follow a consistent sequence:
+1. Armed state airflow table resolves too low (0–4% Airflow) at the transition RPM bins.
+2. DBW drives to mechanical stop (−82% DC or worse) — throttle fights the return spring to stay closed.
+3. Fuel cut exits at ~2021 RPM; fuel returns into a near-zero air column.
+4. VE table mismatch: ECU commands fuel based on MAP/RPM assuming normal throttle, but actual airflow is near zero → rich spike.
+5. Rich stumble causes further RPM drop → armed state requests even lower airflow → feedback loop.
+
+The rich condition just before stall is a **symptom**, not the cause. Fix armed state airflow and the rich spike disappears with the stall.
+
+### Armed State Table Design
+
+- Decel approach bins (1600–2100 RPM): command more airflow than steady idle. The engine needs to breathe through the transition. 68–82% Airflow at the 2100 RPM bin is appropriate.
+- Idle-approach bins (1100–1300 RPM): match idle airflow table values for seamless PID handoff. Do not create a step here.
+- The transition is transient (1–2 seconds max) — higher values at high RPM never persist to steady idle.
+- Values must remain above 2.0% Airflow at all times. Below this the DBW motor fights the return spring with no beneficial airflow result.
+
+### Overrun Fuel Cut Exit
+
+- Raising the exit RPM threshold (e.g., 2500–3000 RPM) gives the idle controller a running start but costs fuel economy.
+- Alternative: stepped correction — reduce to −50% fuel cut at 2500 RPM, full fuel at ~1800 RPM. Gentler than a hard threshold raise.
+- Keep overrun exit enrichment small. A large pulse (+24–25%) fired into a barely-cracked throttle causes a rich stumble that defeats idle recovery.
+
+### Brake Switch Interaction
+
+A continuously active brake switch locks the idle PID into permanent open-loop mode (idle state = 0 throughout), preventing all ignition correction and airflow recovery. Always validate brake switch state in logs when diagnosing persistent idle or stall issues.
+
+---
+
+## Afterstart Enrichment (ASE)
+
+- Rapid throttle closure from cranking TPS (14%) to idle TPS (3.1%) creates a large air deficit that ASE alone cannot compensate.
+- The fix is not to reduce ASE — it is to prevent the throttle from slamming shut post-start. Use a higher idle RPM target for 5–10 seconds after start, then taper down.
+- Configure ASE as a 2D table: coolant temperature vs. post-start engine revolutions (not just time). The revolution axis correlates better to wall-wetting decay rate.
+- Reference: at −10°C / 1 revolution: ~60% enrichment; at 110°C / 20 revolutions: ~0%.
