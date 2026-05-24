@@ -1,0 +1,7 @@
+# Source material — not for tracking
+books/
+corpus/
+
+# Logs are large — keep locally, don't commit unless small
+logs/*.csv
+!logs/.gitkeep
