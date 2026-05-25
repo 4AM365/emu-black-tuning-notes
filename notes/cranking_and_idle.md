@@ -10,6 +10,7 @@
 ## Cranking
 
 - Target roughly 60–80 kPa MAP during cranking. A cold engine benefits from lower MAP (more vacuum) to reduce the fuel boiling point and aid vaporization; a hot engine relies on heat to do the same job.
+- With extended duration cams, you will have a harder time developing MAP during cranking. Don't restrict the throttle arbitrarily to help out, just defer to the airflow targets in the next note.
 - Try 25% enrichment (125 in the table) when cold, and 5% hot.
 
 ### Cranking airflow target principle (2026-05-24)
