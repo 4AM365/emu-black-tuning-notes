@@ -8,6 +8,8 @@ Practitioner notes and analysis tooling for tuning engines with the ECUMaster EM
 .
 ├── notes/        Generic tuning principles — cranking, idle, boost, timing, etc.
 │                  Reusable across any EMU Black build. No vehicle-specific values.
+├── skills/       Claude Code skills for EMU Black workflows (deployable).
+│                  Symlink or copy into ~/.claude/skills/ to use them.
 ├── scripts/      Generic analysis utilities (corpus prep, etc.).
 ├── corpus/       Extracted text from academic engine-tuning books (gitignored).
 ├── books/        Source PDFs / EPUBs of those books (gitignored).
@@ -28,11 +30,13 @@ Practitioner notes and analysis tooling for tuning engines with the ECUMaster EM
 
 The `notes/` directory is deliberately scrubbed of vehicle-specific values, calibration snapshots, and per-build calibration targets. Cross-cutting principles (e.g. "set idle base ignition below MBT for reserve-of-torque headroom") live there; specific numbers ("this car runs 16.5° base at warm idle") live in `supra/notes/`.
 
-## Tooling
+## Skills (`skills/`)
 
-- **`emu-black-tune` skill** — reads/decodes/edits EMU Black `.emub3` XML project exports
-- **`emu-black-emubt-export` skill** — writes `.emubt` single-table imports that EMU Black accepts
-- **`emu-black-log` skill** — analyses EMU Black CSV data logs
+All three live in `skills/` as deployable Claude Code skills with proper YAML frontmatter. Copy or symlink into `~/.claude/skills/` to use.
+
+- **`emu-black-tune`** — reads/decodes/edits EMU Black `.emub3` XML project exports. Knows storage types, sign-magnitude hex, axis bin conventions, the airflow-% encoding (0.5/count, the common trap), the DBW actuator-range rescale formulas, and the symbol glossary for the idle/cranking/airflow domain.
+- **`emu-black-emubt-export`** — writes `.emubt` single-table imports that EMU Black accepts. Bundles `scripts/export_emubt.py` which handles encoding traps (uppercase hex, sign-magnitude, no XML single-quote declarations) and validates per-storage-type ranges.
+- **`emu-black-log`** — analyses EMU Black CSV data logs. Triage flow, channel reference by diagnostic tier, common diagnostic patterns (idle stall, lean surge, knock event, boost overshoot), and ready-to-run Python templates for the common analyses.
 
 ## Academic sources (in `corpus/`)
 
