@@ -1,6 +1,6 @@
 # FFIM Fuel Distribution
 
-Note that FFIMs are terrible for airflow distribution. It's essentially equal at idle, but as soon as you get some air mass inertia going, the distribution will become severely uneven. The popular 2jz FFIMs will need about 10% more fuel on cylinder 6. Notice that your rear EGTs are always hotter and cylinder 6 knocks first- this is why. The max fuel trim will be needed in the cruise region, and you can taper off to about half of that under boost since airflow becomes dominated by boost forcing air into the cylinder rather than resonant effects even though they're still present.
+Note that front-feed intake manifolds (FFIMs) are terrible for airflow distribution. It's essentially equal at idle, but as soon as you get some air mass inertia going, the distribution will become severely uneven. Common inline-6 FFIMs typically need around 10% more fuel on the rearmost cylinder. Notice that your rear EGTs are always hotter and the rear cylinder knocks first — this is why. The max fuel trim will be needed in the cruise region, and you can taper off to about half of that under boost since airflow becomes dominated by boost forcing air into the cylinder rather than resonant effects even though they're still present.
 
 ---
 
