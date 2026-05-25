@@ -15,6 +15,46 @@ description: >
 
 # EMU Black log analysis
 
+## ⚠ RULE: gate every lambda diagnosis behind `Lambda is valid == 1`
+
+EMU Black runs a conservative WBO heater warmup to avoid thermal shock cracking
+the Bosch LSU 4.9 ceramic. During warmup (typically the first **30–60 seconds
+post-start**, sometimes longer on a hot restart), the firmware:
+
+- Holds `Lambda 1` at the placeholder value **1.000**
+- Holds `Lambda 2` at its placeholder
+- Disables closed-loop trim → `Short term trim` stays at 0
+- Forces `Lambda is valid = 0`
+
+**Any diagnosis that uses `Lambda 1`, `Lambda 2`, `AFR`, or `Short term trim`
+during this period is meaningless — the numbers are placeholders, not measurements.**
+
+Common mistake: looking at the first 30 seconds of a log, seeing lambda pinned
+at 1.000 with STFT = 0, and concluding "fueling is perfect." It's not — there
+is no feedback at all. The base fuel calculation could be 10% off in either
+direction and the log would look identical.
+
+Always start log analysis by computing the first time `Lambda is valid == 1`,
+and discard or flag every lambda-based observation before that point:
+
+```python
+valid = df[df['Lambda is valid'] == 1]
+if valid.empty:
+    t_valid = None  # WBO never validated — entire log is open-loop
+else:
+    t_valid = valid.iloc[0]['TIME']
+    print(f"WBO validated at t={t_valid:.1f}s ({t_valid - df['TIME'].iloc[0]:.1f}s into log)")
+
+# Use this mask for anything lambda/STFT/AFR-related:
+trustable = df['Lambda is valid'] == 1
+```
+
+This also constrains street-tuning protocols: any test that uses lambda or
+STFT as feedback (closed-loop VE correction, STFT-as-VE-correctness signal in
+VVT sweeps, lean-cruise tuning) must wait until the WBO is valid. EGT, MAP,
+RPM, ignition retard, knock data are all valid immediately and don't need this
+gate.
+
 ## File format
 
 - **Delimiter**: semicolons (`;`), NOT commas
@@ -31,14 +71,20 @@ df = df.dropna(axis=1, how='all')  # drop empty trailing columns
 
 ## First-pass triage
 
-Before deep analysis, scan these four things:
+Before deep analysis, scan these four things — **in this order**:
 
-1. **ECU State** — 1 = idle/cranking, 3 = running. State drops back to 1 at stall.
-2. **Trigger error count** — any non-zero value = crank/cam signal issue.
-3. **Engine protection code** and **Check engine code** — non-zero = active fault.
-4. **Lambda is valid** — 1 = WBO sensor warmed and validated; 0 = open-loop, no trim.
+1. **Lambda is valid** — find the first `t` where it transitions 0→1.
+   Every lambda/STFT/AFR claim must be qualified by this gate.
+2. **ECU State** — 1 = idle/cranking, 3 = running. State drops back to 1 at stall.
+3. **Trigger error count** — any non-zero value = crank/cam signal issue.
+4. **Engine protection code** and **Check engine code** — non-zero = active fault.
 
 ```python
+# Lambda validity timing — do this FIRST
+valid = df[df['Lambda is valid'] == 1]
+t_valid = valid.iloc[0]['TIME'] if not valid.empty else None
+
+# Standard state checks
 stall_rows = df[df['ECU State'] == 1]
 trigger_faults = df[df['Trigger error count'] > 0]
 protection = df[df['Engine protection code'] != 0]
