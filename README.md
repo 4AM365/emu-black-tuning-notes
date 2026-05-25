@@ -32,11 +32,19 @@ The `notes/` directory is deliberately scrubbed of vehicle-specific values, cali
 
 ## Skills (`skills/`)
 
-All three live in `skills/` as deployable Claude Code skills with proper YAML frontmatter. Copy or symlink into `~/.claude/skills/` to use.
+All six live in `skills/` as deployable Claude Code skills with proper YAML frontmatter. Copy or symlink into `~/.claude/skills/` to use.
+
+**Core tooling:**
 
 - **`emu-black-tune`** — reads/decodes/edits EMU Black `.emub3` XML project exports. Knows storage types, sign-magnitude hex, axis bin conventions, the airflow-% encoding (0.5/count, the common trap), the DBW actuator-range rescale formulas, and the symbol glossary for the idle/cranking/airflow domain.
 - **`emu-black-emubt-export`** — writes `.emubt` single-table imports that EMU Black accepts. Bundles `scripts/export_emubt.py` which handles encoding traps (uppercase hex, sign-magnitude, no XML single-quote declarations) and validates per-storage-type ranges.
 - **`emu-black-log`** — analyses EMU Black CSV data logs. Triage flow, channel reference by diagnostic tier, common diagnostic patterns (idle stall, lean surge, knock event, boost overshoot), and ready-to-run Python templates for the common analyses.
+
+**Workflow automation:**
+
+- **`emu-black-actuator-rescale`** — rescales every airflow-% table in a tune when the DBW actuator range changes, preserving the actual throttle position at each cell. Handles preserve-TPS, additive (slope-only), and PID width-scaling rules; emits a folder of importable `.emubt` files plus a per-cell summary report with clamp warnings.
+- **`emu-black-log-emublog3`** — parses EMU Black's binary `.emublog3` log format directly (skipping the manual CSV export). Includes a schema-discovery tool that bootstraps the binary layout from a paired CSV one time, and a parser that uses the saved schema for all future logs from the same ECU configuration.
+- **`emu-black-tune-review`** — runs a structured review of a tune against codified checks derived from Banish, Hartman, Heywood, and EMU Black architecture conventions. Categorises findings as Validated / Worth-discussing / Verification-gap with citations and suggested actions.
 
 ## Academic sources (in `corpus/`)
 
