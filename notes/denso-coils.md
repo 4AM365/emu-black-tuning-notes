@@ -4,7 +4,7 @@
 
 The GM D585 is a common aftermarket coil used with standalone ECUs. It is not a plug-in replacement for Toyota coils but is a reliable, widely available option.
 
-4 different coils are commonly swapped onto 2JZ builds.
+Several different coils are commonly swapped onto Toyota-engine builds (2JZ, 1JZ, etc.) when running standalone ECUs.
 
 ## Denso 90919-A2004
 
