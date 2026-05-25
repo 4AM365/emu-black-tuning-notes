@@ -45,6 +45,7 @@ All six live in `skills/` as deployable Claude Code skills with proper YAML fron
 - **`emu-black-actuator-rescale`** — rescales every airflow-% table in a tune when the DBW actuator range changes, preserving the actual throttle position at each cell. Handles preserve-TPS, additive (slope-only), and PID width-scaling rules; emits a folder of importable `.emubt` files plus a per-cell summary report with clamp warnings.
 - **`emu-black-log-emublog3`** — parses EMU Black's binary `.emublog3` log format directly (skipping the manual CSV export). Includes a schema-discovery tool that bootstraps the binary layout from a paired CSV one time, and a parser that uses the saved schema for all future logs from the same ECU configuration.
 - **`emu-black-tune-review`** — runs a structured review of a tune against codified checks derived from Banish, Hartman, Heywood, and EMU Black architecture conventions. Categorises findings as Validated / Worth-discussing / Verification-gap with citations and suggested actions.
+- **`emu-black-vvti-street-tune`** — optimizes the intake VVT cam advance table on the street, without a dyno, using MAP-at-fixed-TPS as the primary torque proxy and EGT as a corroborating signal. Provides a sweep planner (which cells to test, in which gear, at what cruise speed), a log analyzer (identifies cam-hold windows, ranks cam positions per cell), and a table proposer (smooths a new `cam1AdvTbl` from multiple cell results).
 
 ## Academic sources (in `corpus/`)
 
