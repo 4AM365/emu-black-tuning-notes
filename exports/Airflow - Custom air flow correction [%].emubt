@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="1.0">
-  <tables>
-    <symbol name="idleCustomCorrection" storage="sbyte" width="5" height="5" data="3 0 -D -26 -32 3 0 -B -20 -2B 2 0 -9 -1C -25 2 0 -6 -13 -19 1 0 -4 -D -11 "/>
-  </tables>
-</project>

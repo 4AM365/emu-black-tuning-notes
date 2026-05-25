@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="idleArmedAirFlow" storage="ubyte" width="8" height="1" data="1C 29 34 3B 43 47 4C 4D "/>
+  </tables>
+</project>

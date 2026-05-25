@@ -52,11 +52,11 @@ The cranking fuel enrichment exists to bridge the gap between "engine spinning s
 
 Oil is substantially warmed up by 71 °C, so the idle ref table becomes linear there. Below 71 °C it is exponential due to oil viscosity.
 
-The custom correction table handles A/C clutch compensation well, but the engagement time range should be around 900 ms for a 2JZ — much faster than the airflow correction.
+The custom correction table handles A/C clutch compensation well, but the engagement time range should be around 900 ms on an inline-6 — much faster than the airflow correction.
 
 Noisy VVT-i values and noisy CLT will push idle all over the place. Lock these down first.
 
-Get your fuel trims right. My FFIM needs about 9% more fuel on cylinder 6 at idle. The effect diminishes with boost — the manifold does a better job of distribution under pressure. Get EGT probes; they're essential.
+Get per-cylinder fuel trims right before chasing idle quality. Front-feed intake manifolds (FFIMs) distribute fuel unevenly — typical correction is 5–10% extra on the rearmost cylinder. The effect diminishes under boost since manifold pressure dominates distribution. EGT probes are essential for diagnosing distribution issues.
 
 ## Ignition at Idle
 
@@ -64,18 +64,18 @@ Get your fuel trims right. My FFIM needs about 9% more fuel on cylinder 6 at idl
 - Keep the ignition PID window to ±4°. It is a fast transient corrector, not a primary RPM controller.
 - Varying timing with temperature or RPM creates a competing feedback loop. Keep it flat; let airflow own RPM.
 
-### Reserve-of-torque strategy (validated 2026-05-24)
+### Reserve-of-torque strategy
 
-Per Banish (*Engine Management: Advanced Tuning* p.4046) and Hartman (*How to Tune EMS* p.21321), idle base ignition should be set **below MBT** to give the controller advance authority for stability recovery. Banish notes "many modern DOHC engines with stock cams idle with single digit spark advance" — your 16.5° base on E25 is conservative-high but appropriate for a cammed build (per the table below).
+Per Banish (*Engine Management: Advanced Tuning* p.4046) and Hartman (*How to Tune EMS* p.21321), idle base ignition should be set **below MBT** to give the controller advance authority for stability recovery. Banish notes "many modern DOHC engines with stock cams idle with single digit spark advance" — cammed builds typically need slightly more, but the principle is the same: leave headroom for the controller to advance into when RPM dips.
 
 EMU Black implements the reserve through three tables:
-- `ignTable` / `ignTable2` blended by ethanol → **base** at the operating MAP/RPM cell (~16.5° at idle, E25)
-- `idleIgnitionTargetTbl` → **target** the idle controller drives toward at steady state (18.0° warm, scale 0.5°/count, sbyte)
-- `idleIgnitionMinTorqueAngleTbl` / `idleIgnitionMaxTorqueAngleTbl` → swing range the controller is allowed to use (~10° to ~30° at warm CLT)
+- `ignTable` / `ignTable2` blended by ethanol → **base** at the operating MAP/RPM cell
+- `idleIgnitionTargetTbl` → **target** the idle controller drives toward at steady state (scale 0.5°/count, sbyte)
+- `idleIgnitionMinTorqueAngleTbl` / `idleIgnitionMaxTorqueAngleTbl` → swing range the controller is allowed to use
 
-So the controller has ±10° authority around an 18° target, with the actual at-rest position depending on RPM error vs target. Plenty of headroom in both directions.
+The controller swings between min and max torque angle around the target, with the actual at-rest position depending on RPM error vs target.
 
-Banish, p.3460: "It is not uncommon to see 10 degrees of swing in idle timing... but 20 to 30 degree changes usually indicate a load measurement or speed pickup accuracy issue." The 8° post-start ramp (24° → 16.5°) seen in logs is well within normal.
+Banish, p.3460: "It is not uncommon to see 10 degrees of swing in idle timing... but 20 to 30 degree changes usually indicate a load measurement or speed pickup accuracy issue." Post-start ramps of 5–10° from initial advance back to base are normal.
 
 ## Idle PID Baseline
 
@@ -140,11 +140,11 @@ The rich condition just before stall is a **symptom**, not the cause. Fix armed 
 
 ### Overrun Fuel Cut Exit
 
-- Current settings (as of 2026-05-24): enter at 3000 RPM, exit at 2950 RPM, 50 RPM hysteresis. PPS hysteresis 2/3%. Exit fuel enrichment 16% with 2%/cycle decay. Ignition exit rate 0.5°/cycle.
-- For a 264° cam / 10:1 build, Banish recommends DE (deceleration enleanment) only above 2500–3000 RPM. 2950 lands in that range — leave alone.
-- Asymmetric ignition rates are correct: ignition enter rate 3°/cycle (cut fast), exit rate 0.5°/cycle (restore slowly). Slow advance prevents a torque pulse stacking with the re-fuel event, which the airflow PID would have to chase down.
-- Keep overrun exit enrichment small. A large pulse (+24–25%) fired into a barely-cracked throttle causes a rich stumble that defeats idle recovery. 16% is conservative and well-suited.
-- Alternative if needed: stepped correction — reduce to −50% fuel cut at 2500 RPM, full fuel at ~1800 RPM. Gentler than a hard threshold raise.
+- For cammed / high-compression builds, Banish recommends DE (deceleration enleanment) only above 2500–3000 RPM. Stock/mild-cam engines can tolerate DE down to ~1000 RPM. The larger the overlap, the bigger the gap between idle and DE exit threshold should be.
+- Use **asymmetric** ignition transition rates: enter rate 2–3°/cycle (cut fast), exit rate 0.3–1.0°/cycle (restore slowly). Slow advance prevents a torque pulse stacking with the re-fuel event, which the airflow PID would have to chase down.
+- Keep overrun exit enrichment small (10–18%). A large pulse (+24–25%) fired into a barely-cracked throttle causes a rich stumble that defeats idle recovery.
+- A 50 RPM hysteresis between enter and exit thresholds is typical.
+- Alternative to a hard threshold raise: stepped correction — partial fuel cut at the intermediate band, full fuel on at the lower bound. Gentler transition for sensitive setups.
 
 ### Brake Switch Interaction
 
@@ -161,42 +161,6 @@ A continuously active brake switch locks the idle PID into permanent open-loop m
 
 ---
 
-## 2026-05-24 Session Summary
-
-### Findings from driving log (37 MB, 14.6 min, ~12 sec warm idle)
-
-- PID **saturated at floor (−10%)** during warm idle. RPM hung at 1240 vs 1200 target.
-- I.Idle correction near zero at steady state — base ignition table was the actual output.
-- Banish (p.3470) on this exact signature: *"If the IAC displays as either all the way open or closed at all times, it's time for a throttle stop adjustment. The more range the IAC motor has in both directions, the better chances it has of controlling a stable idle speed."* The intervention is to fix the base airflow table, not widen PID limits.
-
-### Action taken: `exports/Airflow - Active state air flow [%].emubt`
-
-| Cell | Before | After | Δ |
-|---|---|---|---|
-| Row 2 (≈1200 RPM band), cols 4–7 (CLT 60/75/96/105°C) | 50, 50, 49.5, 49.5% | 42, 42, 41.5, 41.5% | −8% |
-| Row 1 (≈1000 RPM band), cols 4–7 | 37.5, 36, 37.5, 37.5% | 33.5, 32, 33.5, 33.5% | −4% |
-
-Predicted outcome: PID centers around −2 to −5%, RPM reaches target, I.Idle correction near zero, Ignition Angle settles at ~18° (the idle target).
-
-### Verified-current settings (overriding stale supra-specs entries)
-
-| Setting | Value | Notes |
-|---|---|---|
-| Idle RPM target (warm) | 1200 | Raised from 1100 for IAT stability buffer — drivetrain inertia rides through hot-day misfires |
-| Idle lambda target (E0 endpoint, idle cells) | 0.93 | Slight enrichment for stability, well clear of bore-wash (~0.85) — Banish-aligned |
-| Overrun enter / exit RPM | 3000 / 2950 | 50 RPM hysteresis. In Banish's recommended range for cam/comp |
-| Overrun exit fuel enrichment | 16% with 2%/cycle decay | Conservative — avoids rich stumble post-cut |
-| Overrun ignition enter / exit rate | 3° / 0.5° per cycle | Asymmetric: cut fast, restore slow |
-| PPS hysteresis | 2% active / 3% inactive | 1% gap prevents flicker on pedal jitter |
-| Cranking airflow (warm) | 50% | Excellent hot start — close to idle airflow demand (see principle above) |
-| Idle ignition base (E25, warm idle cell) | 16.5° | Below MBT, leaves reserve. Per the cammed/ethanol table above |
-| Idle ignition target | 18.0° (warm cells, flat across RPM) | ±10° controller swing range |
-
-### Optional refinements queued
-
-- **Idle RPM target reduction**: 1200 → 1100–1150 after airflow fix proves stable, per Banish "reduce 50 RPM at a time" approach. Hold at 1200 for now given IAT history.
-- Everything else: nothing to do.
-
-### Source synthesis on idle physics
+## Physics background
 
 Heywood (*Internal Combustion Engine Fundamentals* Ch. 6.4): residual gas fraction at idle is **~30%** on a throttled SI engine. The engine is intrinsically running on a 30% EGR'd charge at idle. Cycle-to-cycle combustion variability is inherent at light load — Heywood Ch. 9: "acceptable COV of imep is a few percent, depending on load." Some idle roughness is physics, not a tune bug; the tune's job is to manage it, not eliminate it.
