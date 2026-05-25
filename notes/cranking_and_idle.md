@@ -21,6 +21,17 @@ Concretely: at hot start with 50% cranking airflow on this build, the handoff to
 
 The cranking fuel enrichment exists to bridge the gap between "engine spinning slowly with poor mixture formation" and "engine running and metering its own charge" — it pays the wall-film tax until surfaces warm up. It is NOT compensating for air starvation; air is plentiful at near-atmospheric cranking MAP.
 
+#### First-principles basis (Kiencke & Nielsen, §3.2.6 and §5.2)
+
+Two physical facts from K&N explain why pre-positioning matters:
+
+- **Manifold time constant at idle is ~740ms** (§3.2.6, p.68). At idle MAP (~0.35 bar) and idle airflow (~6 kg/h), any throttle correction takes ~740ms to show up as changed cylinder charge. A large initial error means multiple slow correction cycles before RPM stabilises — the same lag that makes overrun-exit dangerous.
+- **Integrator wind-up is the documented stall mechanism** (§5.2.2, p.120): "If in a next step the driver would release the gas pedal, the control actuation takes some time to adapt to this. With an improper design, the engine might stall in such situations." K&N's fix: detect the transition and interrupt integration — i.e., use a feedforward value (cranking airflow) to initialise the integrator near its steady-state value rather than letting it wind up from zero.
+
+Bosch (Gasoline Engine Management, p.235) adds the OEM mechanism: the idle RPM setpoint is elevated post-start, which causes the airflow PID to naturally demand more throttle to satisfy the higher target. This means even a cold start with mismatch between cranking airflow and idle demand is partially bridged by the elevated setpoint — the PID climbs toward the setpoint rather than overshooting from a wound-up state.
+
+**Practical implication:** cold cranking airflow target = active-state airflow at the post-start RPM target for that CLT bin. Hot cranking airflow target = active-state airflow at nominal hot idle RPM (1200 RPM on this build). The specific numbers come from the active state airflow table, not from theory.
+
 ## Establishing Sync Quickly
 
 - EMU has a setting to infer position from the cam sensor state (high or low) when it first encounters the missing tooth gap, which you can also define.
