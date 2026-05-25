@@ -230,8 +230,12 @@ Specific targets are inherently build-dependent (CR, intercooler, cam, fuel syst
 - VVT cam advance increases volumetric efficiency → MAP rises at constant PPS → the ECU indexes into a different (higher MAP) cell in the VE and timing tables.
 - You are not retuning the fuel map for VVT. The 3D map already has values at those higher MAP cells. VVT moves you around within the existing map. The fuel table does not need discrete VVT-state corrections as long as the MAP axis covers the full operating range.
 - Lock cam advance to the target value for each MAP/RPM cell before pulling for MBT — otherwise ignition timing is chasing a moving VVT target.
-- More cam advance → less residual dilution → slightly faster burn → MBT shifts slightly retard.
-- More overlap → more dilution at light load → slower flame propagation → MBT shifts toward more advance.
+- **Cam advance shifts MBT, and the direction depends on load.** On a single-cam VVT-i system, advance and overlap move together:
+  - **Light load (vacuum)**: exhaust pressure > intake pressure during overlap → more advance pushes residuals back into the intake → more dilution → slower burn → **MBT moves toward more advance**.
+  - **Boost**: intake pressure > exhaust pressure during overlap → more advance scavenges residuals out → less dilution → faster burn → **MBT moves toward less advance**.
+  - At any load, advancing the intake cam also closes the intake valve earlier, raising effective compression at low RPM → faster burn → **MBT moves toward less advance**.
+- Plan to re-verify ignition at any cells where you change cam advance. The two tables are coupled.
+- See `notes/vvti.md` for the full mechanism breakdown.
 
 ## Lambda at Cruise
 

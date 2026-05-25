@@ -52,6 +52,23 @@ optimized" is a property of the ignition table you already have, not a
 confound in the sweep. The sweep finds the best cam for the current ignition
 table; if you later re-optimize ignition, re-verify cam (second iteration).
 
+**MBT shifts with cam position because residual gas fraction shifts.** The
+direction depends on load:
+- **At light load (vacuum)**: more cam advance → more overlap → exhaust gas
+  blows back into the intake (because exhaust pressure > intake pressure) →
+  more in-cylinder dilution → slower flame propagation → MBT shifts toward
+  MORE advance.
+- **Under boost**: more cam advance → more overlap → boost scavenges residuals
+  out the exhaust during overlap (intake pressure > exhaust pressure) → less
+  dilution → faster burn → MBT shifts toward LESS advance.
+- At low RPM (any load), advancing the intake cam also closes IVC earlier
+  which raises effective compression → faster burn → MBT toward LESS advance.
+
+This means **the same cam-table cell can need opposite-direction ignition
+re-tuning depending on whether it's a cruise cell or a boost cell.** When
+following up a cam sweep with ignition optimization, treat cruise and boost
+cells as separate problems. See `notes/vvti.md` for full mechanism.
+
 ## Cell priority (which to test first)
 
 Test in this order — earlier cells give more drivability gain per session:
