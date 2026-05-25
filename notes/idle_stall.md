@@ -121,10 +121,10 @@ Look at hot-idle TPS. You never need significantly less throttle than you use at
 
 Fix: set the actuator floor just below steady hot-idle TPS. Set DBW min position DC% just below this too.
 
-**5. Fuel trim maldistribution (FFIM builds)**
-FFIMs distribute fuel unevenly under air mass inertia. Cylinder 6 consistently runs lean at cruise — visible as rear EGTs always hotter and cylinder 6 knocking first. At idle this is less severe, but a poorly trimmed FFIM can cause a cylinder to misfire, dropping RPM enough to stall.
+**5. Fuel trim maldistribution (front-feed intake manifolds)**
+Front-feed intake manifolds distribute fuel unevenly under air mass inertia. The rearmost cylinder consistently runs lean at cruise — visible as rear EGT hotter than the others, and that cylinder knocking first. At idle this is less severe, but a poorly trimmed FFIM can cause a cylinder to misfire, dropping RPM enough to stall.
 
-Fix: add ~9–10% fuel trim to cylinder 6 at idle MAP/RPM. Taper to ~5% under boost (manifold distribution improves with pressure).
+Fix: add ~9–10% fuel trim to the lean cylinder at idle MAP/RPM. Taper to ~5% under boost (manifold distribution improves with pressure).
 
 ---
 
@@ -163,11 +163,11 @@ A noisy CLT makes the idle ref table, warmup enrichment, and ASE all oscillate s
 
 Fix: check `CLT` for rapid small fluctuations (1–2°C jitter at stable temperature). This points to a wiring or sensor issue, not a calibration issue.
 
-### FFIM maldistribution at idle
+### Front-feed manifold maldistribution at idle
 
-At idle with cams, misfires on one cylinder are enough to cause RPM oscillation. If cylinder 6 is consistently lean, every few cycles it misfires, RPM dips, the idle PID opens the throttle, the misfire stops, RPM rises, PID closes, misfire recurs — oscillation.
+At idle with cams, misfires on one cylinder are enough to cause RPM oscillation. If a rear cylinder is consistently lean, every few cycles it misfires, RPM dips, the idle PID opens the throttle, the misfire stops, RPM rises, PID closes, misfire recurs — oscillation.
 
-Fix: EGT probes on each cylinder. If rear EGTs are 30–50°C hotter at idle, fuel trim that cylinder.
+Fix: EGT probes on each cylinder. If a rear EGT runs 30–50°C hotter at idle, fuel trim that cylinder.
 
 ---
 

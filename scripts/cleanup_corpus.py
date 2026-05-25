@@ -19,15 +19,19 @@ CORPUS = Path("corpus")
 # ── how_to_tune: InDesign artefact removal ─────────────────────────────────────
 
 # Lines like: 001-177_30412.indd 38  4/4/13  9:06 AM
-INDESIGN_FILE = re.compile(r"^\d{3}-\d{3}_\d+\.indd\b", re.IGNORECASE)
+INDESIGN_FILE = re.compile(r"^\d{3}-\d{3}_[A-Z0-9]+\.indd\b", re.IGNORECASE)
 
 # Doubled-char metadata blocks, e.g.:
 #   ((FFooggrraa 3399))JJoobb::0033--3300441122 TTiittllee::MMBBII--...
 #   ##117755 DDttpp::222255 PPaaggee::3388
 DOUBLED_CHAR = re.compile(r"(\(\([A-Za-z]{4,})|##\d{4,}|JJoobb::|DDttpp::|TTiittllee::")
 
-# Print shop colophon lines
-COLOPHON = re.compile(r"\b(Dtp|Fogrra|Job|Title|Ray|Canale|Text)\b.*::\s*\d", re.IGNORECASE)
+# Print shop colophon lines (single-colon variants)
+#   (Fogra 39)Job:03-30412 Title:MBI-...
+#   #175 Dtp:225 Page:4
+FOGRA_LINE = re.compile(r"\(Fogra\s+\d+\)Job:", re.IGNORECASE)
+DTP_LINE   = re.compile(r"#\d+\s+Dtp:\d+\s+Page:\d+")
+COLOPHON   = re.compile(r"\b(Dtp|Fogrra|Job|Title|Ray|Canale|Text)\b.*::\s*\d", re.IGNORECASE)
 
 def clean_how_to_tune(text: str) -> str:
     cleaned = []
@@ -39,7 +43,12 @@ def clean_how_to_tune(text: str) -> str:
         # Drop doubled-char artifact lines
         if DOUBLED_CHAR.search(stripped):
             continue
-        # Drop colophon lines
+        # Drop Fogra/Dtp print-shop colophon lines
+        if FOGRA_LINE.search(stripped):
+            continue
+        if DTP_LINE.search(stripped):
+            continue
+        # Drop colophon lines (double-colon variant)
         if COLOPHON.search(stripped):
             continue
         cleaned.append(line)

@@ -3,5 +3,5 @@ books/
 corpus/
 
 # Logs are large — keep locally, don't commit unless small
-logs/*.csv
-!logs/.gitkeep
+supra/logs/*.csv
+!supra/logs/.gitkeep

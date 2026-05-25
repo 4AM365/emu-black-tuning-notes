@@ -64,7 +64,7 @@ EGT Exhaust Gas Temperature
 
 - By now, you get the idea. Bigger cams, lower pressure, and cooler fuels mean more timing.
 
-- MBT for a 2jz in boost will be generally in the low 20s. Again, 5 degree spread for ethanol vs pump gas.
+- MBT for a typical inline-6 / 4-valve DOHC engine in boost is generally in the low 20s° BTDC. Approximate ~5° spread for ethanol vs pump gas at the same load.
 
 - A good indicator of MBT is CA50 at 8° ATDC.
 
@@ -189,30 +189,23 @@ Subtract knock retard separately per fuel/CR/charge temp when calibrating.
 - **Do not adjust blend table shape to dial in timing.** When the tune needs more timing, advance Table 2 values — the blend table multiplies the delta.
 - The blend scalar at E60 is approximately 0.86×. A 4° advance in Table 2 delivers ~3.4° at the wheel. Account for this when stepping values.
 
-## E60 Timing Targets (10:1 CR, WOT)
+## Timing Target Methodology
 
-Walk up in 1° steps while monitoring per-cylinder knock channels. E60 has headroom but knock onset is still possible, especially if ethanol content is lower than expected.
+Walk up in 1° steps while monitoring per-cylinder knock channels and EGTs. Ethanol blends have headroom but knock onset is still possible, especially if ethanol content is lower than expected (partial fill, supplier variation).
 
-| Boost (psi) | E60 Target (°BTDC) | vs. 93 octane |
-|---|---|---|
-| 0 (VE cells) | 32–38° | +4–6° |
-| 10 | 20–24° | +4–5° |
-| 14 | 19–23° | +4–5° |
-| 18 | 17–21° | +4–5° |
-| 22 | 14–17° | +3–4° |
+General relationships for a turbocharged build:
+- WOT cells run substantially less advance than VE-region cells due to increased cylinder pressure
+- Each ~4 psi of boost typically demands ~2–3° less advance on a given fuel
+- Ethanol vs pump gas: ~4–5° more advance available on E60 across boosted cells, more in VE cells
+- Knock margin compresses quickly with reduced ethanol content — a flex fuel sensor plus a conservative fallback blend table is mandatory insurance
 
-## Safe Boost Ceiling
-
-- 93 octane, 10:1 CR, good intercooling: 14–15 psi conservative; 16–18 psi with active knock monitoring.
-- E60, 10:1 CR: aggressive ceiling 22–24 psi.
-- Target for 500 ft-lb flat curve: ~19–22 psi / 17–21° timing at peak boost on E60.
-- 10° below MBT at 10 psi on pump gas ≈ 290–300 ft-lb (MBT at that point ≈ 360 ft-lb).
+Specific targets are inherently build-dependent (CR, intercooler, cam, fuel system, charge temp). Calibrate on a dyno or with careful per-cylinder knock + EGT monitoring on the street.
 
 ## Ethanol Characteristics
 
 - E60 ≈ 100–105 RON vs. 91–95 for pump premium.
 - High heat of vaporization creates a charge cooling effect that is largest at high load — exactly when knock risk is highest.
-- At 10:1 CR the knock margin on ethanol is genuine. 10:1 at 24+ psi is problematic on pump gas; on E60 there is real headroom.
+- At ~10:1 CR the knock margin on ethanol is genuine. 10:1 at 24+ psi is problematic on pump gas; on E60 there is real headroom.
 - Watch for ethanol content variation (partial fill, supplier variation) — knock margin compresses quickly. A flex fuel sensor plus a conservative fallback blend table is mandatory insurance.
 
 ---
