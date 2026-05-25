@@ -15,22 +15,17 @@
 
 ### Cranking airflow target principle (2026-05-24)
 
-**Cranking airflow should match the post-start idle airflow demand at the target RPM, not be metered to the cranking RPM itself.** The engine takes the air it wants regardless of throttle opening at cranking speed; the cranking airflow target is really pre-positioning the throttle plate so the idle PID inherits a stable starting point when it takes over post-start. If cranking airflow is far from idle airflow demand, the PID has to make a large step correction the moment it engages — visible as RPM dip or overshoot.
+**EMU Black control state architecture:** `idleCrankingDC` is an independent open-loop table active below 400 RPM (cranking state). It has no relationship to the active state airflow table — that table is the feed-forward base the idle PID runs on top of, and it only applies once RPM crosses 400 RPM. The two tables are separate control paths with a hard handoff at the 400 RPM threshold.
 
-Concretely: at hot start with 50% cranking airflow on this build, the handoff to idle PID is smooth because idle airflow demand at 1200 RPM is ~42–46%. The 4–8% positive offset means PID's first move is a gentle pull-down, the more stable direction.
+**Cranking airflow goal:** pre-position the throttle so that when RPM crosses 400 RPM and the active state feed-forward takes over, the transition involves no step change. The reference value is what the active state feed-forward will command at just above 400 RPM for that CLT — not because the tables share values, but because a matched handoff avoids the RPM disturbance that a step change would cause.
 
-The cranking fuel enrichment exists to bridge the gap between "engine spinning slowly with poor mixture formation" and "engine running and metering its own charge" — it pays the wall-film tax until surfaces warm up. It is NOT compensating for air starvation; air is plentiful at near-atmospheric cranking MAP.
+**Practical implication:** for each CLT bin, set `idleCrankingDC` to the active state airflow value at the post-start RPM target for that temperature. At 0°C targeting 1500 RPM post-start: look up active state airflow at 0°C / 1500 RPM, use that as the cranking DC. At hot idle targeting 1200 RPM: use active state airflow at 90°C+ / 1200 RPM.
 
-#### First-principles basis (Kiencke & Nielsen, §3.2.6 and §5.2)
+Concretely: at hot start with 50% cranking airflow on this build, the handoff is smooth because active state feed-forward at 1200 RPM is ~42–46%. The 4–8% positive offset means the first correction is a gentle pull-down, the more stable direction.
 
-Two physical facts from K&N explain why pre-positioning matters:
+The cranking fuel enrichment exists to bridge the gap between "engine spinning slowly with poor mixture formation" and "engine running and metering its own charge" — it pays the wall-film tax until surfaces warm up. It is NOT compensating for air starvation.
 
-- **Manifold time constant at idle is ~740ms** (§3.2.6, p.68). At idle MAP (~0.35 bar) and idle airflow (~6 kg/h), any throttle correction takes ~740ms to show up as changed cylinder charge. A large initial error means multiple slow correction cycles before RPM stabilises — the same lag that makes overrun-exit dangerous.
-- **Integrator wind-up is the documented stall mechanism** (§5.2.2, p.120): "If in a next step the driver would release the gas pedal, the control actuation takes some time to adapt to this. With an improper design, the engine might stall in such situations." K&N's fix: detect the transition and interrupt integration — i.e., use a feedforward value (cranking airflow) to initialise the integrator near its steady-state value rather than letting it wind up from zero.
-
-Bosch (Gasoline Engine Management, p.235) adds the OEM mechanism: the idle RPM setpoint is elevated post-start, which causes the airflow PID to naturally demand more throttle to satisfy the higher target. This means even a cold start with mismatch between cranking airflow and idle demand is partially bridged by the elevated setpoint — the PID climbs toward the setpoint rather than overshooting from a wound-up state.
-
-**Practical implication:** cold cranking airflow target = active-state airflow at the post-start RPM target for that CLT bin. Hot cranking airflow target = active-state airflow at nominal hot idle RPM (1200 RPM on this build). The specific numbers come from the active state airflow table, not from theory.
+The manifold time constant at idle is ~740ms (Kiencke & Nielsen §3.2.6). A step change at the 400 RPM handoff takes multiple manifold time constants to settle — matched `idleCrankingDC` eliminates the step and the associated RPM disturbance.
 
 ## Establishing Sync Quickly
 
