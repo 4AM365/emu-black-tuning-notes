@@ -1,0 +1,39 @@
+rows 29860 duration 1204.9s
+ECU State: {4: np.int64(26308), 1: np.int64(2012), 3: np.int64(1495), 2: np.int64(45)}
+Lambda valid: {1: np.int64(26864), 0: np.int64(2996)}
+
+=== EGT channel activity ===
+CAN EGT 1: mean 0 max 0 nonzero 0
+CAN EGT 2: mean 0 max 0 nonzero 0
+CAN EGT 3: mean 0 max 0 nonzero 0
+CAN EGT 4: mean 0 max 0 nonzero 0
+CAN EGT 5: mean 0 max 0 nonzero 0
+CAN EGT 6: mean 0 max 0 nonzero 0
+CAN EGT 7: mean 0 max 0 nonzero 0
+CAN EGT 8: mean 0 max 0 nonzero 0
+EGT 1: mean 514 max 749 nonzero 29860
+EGT 2: mean 517 max 750 nonzero 29860
+active EGT: ['EGT 1', 'EGT 2']
+
+=== Warm running rows: 0 ===
+rows with all EGT>300: 0
+
+=== EGT evenness (warm, all firing) ===
+EGT 1: mean nan median nan p95 nan
+EGT 2: mean nan median nan p95 nan
+spread mean-to-mean: nan C  (min nan / max nan)
+
+=== Lambda tracking (warm, valid) ===
+Lambda target mean 0.932
+Lambda target from table mean 0.930
+Lambda 1 mean 0.802
+Lambda 2 mean 0.000
+Lambda1 - target: mean -0.130  std 0.063  absmean 0.135
+Lambda2 - target: mean -0.932  std 0.003  absmean 0.932
+Short term trim: mean 0.00 std 0.00
+
+=== Injector trims (warm running) ===
+
+=== Lambda error by MAP band (warm valid) ===
+MAP(0, 50]: n 512 tgt 0.932 L1 0.792 L2 0.000 err1 -0.140 err2 -0.932
+MAP(50, 100]: n 44 tgt 0.932 L1 0.917 L2 0.000 err1 -0.016 err2 -0.932

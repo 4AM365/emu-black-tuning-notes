@@ -38,6 +38,7 @@ Look at the 4 seconds **before** the stall, not just the moment it dies.
 | Idle hunts then dies | Noisy VVT-i or CLT sensor | [E] |
 | Idle PID never engages | Brake switch stuck active | [F] |
 | Idle slowly falls, integrator can't recover | PID integrator windup | [G] |
+| RPM craters then wobbles on a rolling return to idle | Rich low-RPM VE bog + fan-off airflow loss | [H] |
 
 ---
 
@@ -208,6 +209,63 @@ Integrator accumulates error over time but its limit is set too high. It chases 
 - Keep integrator limits **lower than proportional limits**. The proportional term responds instantly; the integrator is slow by design.
 - Set the integrator so corrections take ~5 seconds to reach steady state — fast enough to eliminate steady-state error, slow enough not to fight the proportional term.
 - Starting baseline: P: 3.0 | I: 1.0 | D: 0.2. Tune P-only first, add I to eliminate droop, add D only if overshoot is a problem.
+
+---
+
+## [H] Rolling Return-to-Idle Wobble ("drive wobble")
+
+**Distinct from [A]:** this is a *recoverable* oscillation, not a clean stall. RPM craters well below idle target (observed: ~1800 → **525 rpm** at a 1200 target) then limit-cycles (525↔1390) during a **neutral coast-down to idle while the car is still rolling**. The driver always neutral-shifts toward a stop, so the engine is decoupled and free-falls toward idle (confirmed: RPM/VSS ratio swings 8×, impossible in a fixed gear). Two compounding faults — both must be addressed.
+
+### 1. Fuel: rich bog at low RPM (the violent part)
+
+As RPM craters and MAP rises toward 60+ kPa (low-rpm pumping loss), the speed-density fuel calc over-fuels. Measured `Lambda 1` dives to **0.68 (AFR 9.9)** against a 0.93 target — the low-rpm VE is **~17–19% rich** at MAP 35–64 kPa. Rich misfire → erratic torque → the dip goes deep and oscillates. This is exactly the "unstable lambda the airflow PID cannot compensate for" case the EMU idle help warns about.
+
+> **⚠ Baseline caveat — do not lean off these numbers blindly.** The −17–19 % figure is from the *pre-correction* logs, recorded at **E25** (not the usual E60). A global **−18 % pump (`veTable`) / +10 % ethanol (`veTable2`)** correction was applied afterward (the v2 export). Because the correction is split by fuel and blended through `tblsVEBlend`, its net effect is **fuel-dependent**: ~**0 %** at E60 (~38 % pump weight — the −18/+10 nearly cancels) but ~**−11 %** at E25 (73.5 % pump). So on the v2 calibration the dip residual is *still ~−18 % rich at E60* but only ~**−9 %** at E25. A lean computed from the E25 log is roughly right **only** for E60; at E25 it over-leans by ~9 % and risks a lean stumble. **Always re-measure lambda on a v2-calibration dip log at the fuel you actually run before leaning the 500/842 rows.**
+
+> **⚠ The 500 rpm VE channel must be tuned for dips.** `rpmBins` now starts at 500 (`1F4`), and the 500-rpm VE row governs fueling *precisely when RPM craters into a dip*. If it is left as a verbatim copy of the 842 row (its initial state) it is ~17% too rich there and bogs the engine. Lean it toward λ0.93. The 842 row and the 1184 idle row (~9% rich at steady idle, λ0.844) want the same treatment — **richness increases as RPM drops**, so the lean deepens toward the 500 row.
+
+**Fuel is closed-loop down here — but do NOT tune VE from the trims.** The lambda trim is intentionally **slow and low-authority** (`Short term trim` clamped to ~±2–3 %, slow integration) so it does not jerk idle around. It therefore (a) cannot correct a fast dip in real time, and (b) will never reveal the true VE requirement. Set VE from **measured lambda error** — `VE_new = VE_old × (Lambda 1 / Lambda target)` — as a deliberate, gentle change, then verify on the next drive. Account for WBO transport lag: during a fast dip the reading trails the actual rpm/MAP, so treat per-cell numbers as a starting point and iterate. Per the conservative feed-forward principle below, apply ~80 % of the computed lean first. Lean **both** `veTable` (pump) and `veTable2` (ethanol) by the same ratio — the E60 blend uses both.
+
+### 2. Airflow: fan-gated air drops out at speed (the depth)
+
+The +13 % `idleCoolantFanCorr` is VSS-gated **off above ~56 km/h**. On a return from above ~56 km/h the base idle airflow is the bare ~26.5 % table value instead of ~39 % (fan-on), and the airflow PID is clamped at +12 — not enough to hold. Below ~56 km/h the fan is on and returns catch cleanly. Fixes that do **not** add idle variation: more airflow-PID authority (`idleAirPIDOutMax`/`idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval` (200 ms → ~50 ms). The fan +13 % itself is correct load-comp — leave it.
+
+### What does NOT work
+
+- **Raising the Active airflow table's 1000/1100 rows.** `idleActiveAirflow` is indexed by idle **target**, and the target floors at 1200 (`idleRPM` bottoms at 1200), so those rows are never read regardless of actual RPM. *Contrast:* the VE table **is** indexed by actual rpm × MAP, so its 500-rpm row **is** used when RPM craters — that is why the VE 500 channel is the right lever and the airflow 1100 row is dead.
+- **VSS-scheduled idle-target bump** (`idleIncreaseTargetAboveVSS`): mechanically would work, but it adds a target step — rejected to keep low-speed heat-soak idle free of extra variables.
+
+---
+
+## Design principle: feed-forward should be conservative, PID does the rest
+
+When calibrating any open-loop / feed-forward idle-air correction — `idleCustomCorrection`, fan/AC compensation, DSG creep correction, custom-output feed-forward — bias toward **under-correction**, not full correction. A useful default is to **apply roughly half the airflow change the engine actually needs** at the operating point and let the closed-loop PID ease in the rest.
+
+**Why the asymmetry matters:**
+
+| Failure mode | Cause | Severity |
+|---|---|---|
+| Feed-forward **under-corrects** | Engine briefly runs higher RPM than target while PID trims back down | Safe — PID has full negative authority, no combustion risk |
+| Feed-forward **over-corrects** | Engine commanded toward less air than it needs; combined with transient lags (manifold fill, wall film, sensor lead/lag) can hit the actuator floor before PID can recover | Stall — engine off, restart required |
+
+The cost of being too small is a temporary high-idle blip the closed-loop quickly resolves. The cost of being too aggressive is a stall — which interrupts driving, may strand the vehicle, and on a build with idle ignition retard can produce a hot-side cough.
+
+**When this principle especially applies:**
+
+- Feed-forwards keyed on **sensor proxies for the real physical state** (e.g. CAT used as proxy for throttle-body body temp — the sensor lags the body during transients; aggressive correction based on the sensor will over-correct during the lag window)
+- Loads that arrive as **step changes** with their own time lag (cooling fan engagement, AC clutch, alternator step) — the airflow change must trail the load by less than the lag of the load's effect, or you over-compensate before the load is felt
+- Any correction that crosses **stall margin**: at idle the throttle is already near the actuator floor; any feed-forward that closes the plate further has limited headroom before the floor
+
+**Practical guideline for sizing:**
+
+1. Determine the steady-state correction needed (from logging — what trim does PID converge on with no feed-forward?).
+2. Halve it for the feed-forward table.
+3. Verify in a log that PID's residual is now ~half of what it was, and not saturated.
+4. Iterate: if PID still works hard in one direction, the feed-forward can grow toward the steady-state value — but never past it, and never aggressively at sensor edges (e.g. extrapolated cells).
+
+**Where this changes calibration behavior:**
+
+Before this principle was applied on this build, the `idleCustomCorrection` table was sized close to "full" steady-state compensation at the operating CAT band. PID sat at -9.75 % (saturated negative) at the worst log point (t=178.64, [supra/logs/20260526_1644.csv](../supra/logs/20260526_1644.csv)) with TPS only 1.1 % above the actuator floor. After converting to scalar mode and halving the corrections at the operating points, PID will have authority both directions and the worst-case stall margin grows.
 
 ---
 

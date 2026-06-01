@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="customTemp1CalBins" storage="ubyte" width="10" height="1" data="0 17 28 33 4A 58 7E 97 D1 FE "/>
+    <symbol name="customTemp1Cal" storage="ubyte" width="10" height="1" data="79 5B 47 3E 31 2A 1B 12 -5 -27 "/>
+  </tables>
+</project>

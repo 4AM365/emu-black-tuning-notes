@@ -11,7 +11,9 @@
       "Skill(anthropic-skills:emu-black-log)",
       "Skill(anthropic-skills:emu-black-log:*)",
       "Bash(grep -n \"^[^;]*;[0-9]\\\\{4,\\\\};\" \"C:\\\\Code\\\\car-projects\\\\emu-black-tuning-notes\\\\cranks_failed.csv\")",
-      "Bash(dir \"C:\\\\Users\\\\WTCra\\\\Documents\\\\GitHub\\\\supra-tune\\\\books\")"
+      "Bash(dir \"C:\\\\Users\\\\WTCra\\\\Documents\\\\GitHub\\\\supra-tune\\\\books\")",
+      "Bash(python -)",
+      "Bash(python supra/scripts/smooth_ve1.py)"
     ]
   }
 }
