@@ -5,3 +5,13 @@ corpus/
 # Logs are large — keep locally, don't commit unless small
 supra/logs/*.csv
 !supra/logs/.gitkeep
+
+# Raw OCR page cache — large intermediate files, regenerate with ocr_extract.py
+maximum-boost/_raw_ocr/
+
+# Never commit source PDFs
+*.pdf
+
+# Python cache
+__pycache__/
+*.pyc
