@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="tblsFFLambdaBlend" storage="ubyte" width="9" height="1" data="C8 B8 A7 93 7C 64 47 26 0 "/>
+  </tables>
+</project>

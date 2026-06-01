@@ -138,14 +138,15 @@ protection = df[df['Engine protection code'] != 0]
 | Channel | Notes |
 |---|---|
 | `Idle target` | RPM target |
-| `Idle state` | 0=off, 2=active PID, 4=recovery mode |
-| `Idle air %` | requested airflow; if maxed and RPM still low = not enough base air |
-| `DBW Out. DC` | throttle drive %; negative = closing, positive = opening |
-| `DBW target` | requested throttle % |
-| `DBW target source` | enum; who is commanding the throttle target — see enumerations table |
-| `Idle PID air % correction` | PID output; large correction = system fighting hard |
-| `Idle ignition correction` | timing bump for idle recovery |
-| `Idle effective DC` | final output to IAC/throttle |
+| `Idle state` | enum (0=INACTIVE/driver, 1=ARMED, 2=ACTIVE/PID, 4=DBW BLEND — see enumerations) |
+| `Idle air %` | final commanded airflow %; in `ACTIVE` = base + custom corr + PID; in `BLEND`/`ARMED` = base only (custom corr is logged but not applied per EMU help) |
+| `Idle airflow custom corr.` | CAT-based feedforward correction value from `idleCustomCorrection` table; per EMU help only **applied** in `ACTIVE` state |
+| `DBW Out. DC` | motor drive %; negative = closing actuator force, positive = opening (NOT throttle position) |
+| `DBW target` | requested throttle position % |
+| `DBW Target source` | who is commanding the throttle — see enumerations |
+| `Idle PID air % correction` | PID output; **operates on idle-ignition-angle error, not RPM error** (per EMU help) — coupled to ignition PID |
+| `Idle ignition correction` | idle ignition PID/table output relative to `Target ign. angle` |
+| `Idle effective DC` | final output to actuator (stepper/PWM); not used on DBW builds |
 
 ### Tier 5: boost
 
@@ -298,16 +299,32 @@ print(knock_summary[knock_summary > 0])
 |---|---|---|
 | `ECU State` | 1 | Stopped / pre-start |
 | `ECU State` | 3 | Running |
-| `Idle state` | 0 | Idle control off |
-| `Idle state` | 2 | PID active |
-| `Idle state` | 4 | Recovery/forced open loop |
+| `Idle state` | 0 | INACTIVE — PPS above activation threshold (driver in control) or engine off. Airflow = Armed-state table (engine running) or 0 (engine off) |
+| `Idle state` | 1 | ARMED — PPS released, RPM above `Target + Ramp down offset`. Airflow taken from `idleArmedAirFlow` table. PID disabled, custom corr NOT applied. Ramp-down-offset decays toward 0 at `Ramp down decay rate` |
+| `Idle state` | 2 | ACTIVE — closed-loop PID idle. Airflow = `idleActiveAirflow` + custom corr + PID. Airflow PID tracks ignition-angle error (not RPM error) |
+| `Idle state` | 3 | AFTERSTART DELAY or CRANKING (verify per build — Idle help lists both as discrete states between INACTIVE and ACTIVE) |
+| `Idle state` | 4 | DBW BLEND — blending between idle-commanded TPS and driver-commanded TPS via `idleDBWBlendPoint` (single value) or `idleDBWBlendPointTbl` (RPM-indexed). Custom corr NOT applied |
+| `Idle state` | 5 | CYCLING IDLE — cyclic RPM increase for cooling (alternative strategy) |
+| `Idle state` | 6 | DC OVERRIDDEN — diagnostic override (do not use while vehicle is moving) |
 | `Lambda is valid` | 0 | WBO not ready (no trim) |
 | `Lambda is valid` | 1 | WBO validated (trim active) |
 | `Overrun status` | 1 | Overrun condition met (check `Overrun fuel corr.` for actual cut) |
-| `DBW target source` | 0 | Driver / pedal (PPS characteristic map) |
-| `DBW target source` | 1 | Idle control (armed state or PID airflow) |
-| `DBW target source` | 2 | Traction control |
-| `DBW target source` | 3 | Launch control |
+| `DBW Target source` | 0 | **Target table** — driver pedal via `dbwCharacteristic1/2` (paired with Idle state 0) |
+| `DBW Target source` | 1 | **Override** — diagnostic override DC/target (do not use while moving) |
+| `DBW Target source` | 2 | **Idle** — idle controller commanding throttle (paired with Idle state 1, 2, or 5) |
+| `DBW Target source` | 3 | **Idle blend** — DBW Blend state (paired with Idle state 4) |
+| `DBW Target source` | 4 | **DSG blip** |
+| `DBW Target source` | 5 | **CAN control** — via CAN message |
+| `DBW Target source` | 6 | **Launch control** |
+| `DBW Target source` | 7 | **Cruise control** |
+| `DBW Target source` | 8 | **Rev limiter** |
+| `DBW Target source` | 9 | **Overrun** |
+| `DBW Target source` | 10 | **Flat shift** |
+| `DBW Target source` | 11 | **Rev matching** |
+| `DBW Target source` | 12 | **Pit limiter** |
+| `DBW Target source` | 13 | **ALS** |
+| `DBW Target source` | 14 | **Rolling start** |
+| `DBW Target source` | 15 | **Gear shift** |
 | `VVT CAM1 status` | 0 | OK |
 | `VVT CAM1 status` | 1 | Error — cam not reaching target |
 | `VVT CAM1 status` | 2 | Error — cam moving in wrong direction |

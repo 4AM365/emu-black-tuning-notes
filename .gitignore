@@ -1,5 +1,5 @@
 # Source material — not for tracking
-books/
+# (source books moved to shared ../../agentic-library/engine-dynamics/)
 corpus/
 
 # Logs are large — keep locally, don't commit unless small

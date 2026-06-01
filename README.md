@@ -12,7 +12,8 @@ Practitioner notes and analysis tooling for tuning engines with the ECUMaster EM
 │                  Symlink or copy into ~/.claude/skills/ to use them.
 ├── scripts/      Generic analysis utilities (corpus prep, etc.).
 ├── corpus/       Extracted text from academic engine-tuning books (gitignored).
-├── books/        Source PDFs / EPUBs of those books (gitignored).
+│                  Source PDFs/EPUBs now live in the shared
+│                  ../../agentic-library/engine-dynamics/ repo.
 └── supra/        Build-specific data and notes for one particular car
                    (1994 MKIV Supra, 2JZ-GE + VVT-i, 10:1, 264° cams, BorgWarner 61.44).
                    Excluded if you want only generic context.
@@ -27,6 +28,10 @@ Practitioner notes and analysis tooling for tuning engines with the ECUMaster EM
 
 - **Generic context only:** include `notes/`, `scripts/`, optionally `corpus/`. Exclude `supra/`.
 - **Build-specific work:** include everything, or specifically `supra/` plus the relevant generic notes.
+- **Theoretical questions:** search the Academic sources below in `corpus/` before relying on
+  model memory. Source books live in the shared
+  [`agentic-library/engine-dynamics/`](../../agentic-library/engine-dynamics/) repo
+  (private source material); `corpus/` is the local retrieval surface.
 
 The `notes/` directory is deliberately scrubbed of vehicle-specific values, calibration snapshots, and per-build calibration targets. Cross-cutting principles (e.g. "set idle base ignition below MBT for reserve-of-torque headroom") live there; specific numbers ("this car runs 16.5° base at warm idle") live in `supra/notes/`.
 

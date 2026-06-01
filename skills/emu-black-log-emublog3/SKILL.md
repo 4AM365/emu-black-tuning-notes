@@ -84,7 +84,7 @@ df = read_emublog3('log.emublog3', schema='schemas/supra_v1.json')
 For unknown files where you want to see what's there before bootstrapping:
 
 ```bash
-python scripts/inspect.py path/to/log.emublog3
+python scripts/inspect_emublog3.py path/to/log.emublog3
 ```
 
 Prints decompressed size, first 256 bytes hex, and reports any obvious
@@ -98,6 +98,51 @@ candidate record sizes based on simple periodicity tests.
   pairs the first time you use it for a particular EMU setup.
 - **Not done**: directly decoding the leading file header to extract the schema without a CSV pair.
   If/when that's reverse-engineered, the bootstrap step becomes optional.
+
+### Empirical finding (2026-05-31, Supra test-run pair, 565-channel CSV)
+
+Full-channel bootstrap attempted (test-run.emublog3 vs all-channel-reference.csv, 16025 records,
+record = **504 bytes, data starts at byte 0** — the ~12 trailing bytes are pad, NOT a leading
+header). Read before trusting `discover_schema` at scale:
+
+- "matched 505/565" is **massively inflated**: only ~**55 unique byte offsets** exist in a 504-byte
+  record, so ~450 "matches" are aliases (constant/zero columns + derived channels on the same
+  offsets). **~480 of 565 CSV columns are constant/zero export padding — nothing to decode.**
+- The tool's `correlation` is **scale-invariant** — high corr only means the field tracks the
+  channel's shape; scale/offset are fit separately and are often wrong (EGT 2 fit as `i16 × 0.0039`,
+  which can't reach 742 °C). **Always linear-refit `y=a*raw+b` vs CSV and check R²; never trust the
+  reported scale.**
+- **Fast, high-dynamic-range channels decode reliably** (~30–40: RPM, MAP, TPS, PPS, Boost, Boost
+  Target, Vehicle Speed, Ignition Angle, VE, Injectors PW, Short term trim …).
+- **Slow/monotonic channels do NOT reliably auto-decode from one log — including EGT 1 and EGT 2**
+  (and IAT, Charge temp, Battery). They track the warmup/time ramp, so the search latches onto a
+  monotonic timer field. Proof: brute force placed EGT1/EGT2 at *overlapping* u32 offsets both
+  sharing the **TIME scale** (1.52e-05); the field at off=104 is 84% monotonic (a runtime counter),
+  not EGT. **Do not trust binary-decoded EGT — use the CSV.**
+- A correctly-gated re-discovery (dynamic-only, R²>0.9995) swung between 1 and 11 channels depending
+  on thresholds — that instability shows single-log value-correlation is not a sound basis for a
+  full schema.
+
+**Takeaway:** format is structurally solved and fast channels are easy; a *complete, safe* schema
+(esp. EGT/temps) needs the **deterministic** route — read channel order/type/scale from the EMU
+project's logger config — not value-correlation. No auto-schema is committed because none was
+trustworthy enough.
+
+### Deterministic route WORKS — EGT pinned via channel order (2026-05-31)
+
+The EMU **"Select logged parameters"** dialog gives the logger channel ORDER (Channel #0..#N).
+For test-run: #0 RPM, #1 MAP, #2 Boost, #3 Boost Target, #4 Boost DC, #5 PPS, #6 Vehicle Speed,
+#7 Knock voltage peak cyl 6, #8 Back pressure, #9 Turboshaft speed, #10 Estimated airflow,
+#11 (blank), **#12 EGT 1, #13 EGT 2**, ...
+
+Using the **adjacency constraint** (EGT1 immediately followed by EGT2, same dtype, sensible shared
+scale, non-monotonic) the EGT pair was pinned **deterministically** where correlation had failed:
+**EGT 1 @ offset 106 u16, EGT 2 @ offset 108 u16, scale = 1.0 (raw u16 = degC direct)**, R²=0.9995/
+0.9998, decoded values match the CSV exactly. This is the proof that the logger-config ORDER + a
+per-channel CSV fit (for width/scale) cracks the channels that single-log value-correlation can't.
+**To finish the full schema: capture the COMPLETE ordered channel list from that dialog** (the
+504-byte record holds ~55 real channels, far more than the 16 first visible), then walk them in
+order assigning offsets and fitting width/scale against the CSV. EGT stored as u16 degC, scale 1.
 
 ## Safety / caveats
 

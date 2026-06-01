@@ -50,3 +50,8 @@
 | Compressor mass flow @ 5500 RPM / 107 kPa / 95% VE / 31°C CAT | ~293 g/s |
 | Compressor PR @ 107 kPa boost | ~2.06 |
 | Compressor PR @ 135 kPa boost | ~2.34 |
+
+# Powerband / Resonance Notes
+
+- This Supra shows a resonance-sensitive region around 5500 RPM. Be cautious adding load, ignition advance, or aggressive lambda changes through that area.
+- Above the 5500 RPM resonance region, power can generally be added more confidently, assuming logs confirm stable lambda, knock margin, EGT/thermal behavior, and drivetrain response.

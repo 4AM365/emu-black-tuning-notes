@@ -30,6 +30,42 @@ airflow tables when the actuator range changes.
 
 For a build-specific edit you will often use this skill **with** the matching specs skill.
 
+## Table rendering convention (when displaying tables in chat)
+
+When you render a 2D tune table in markdown for the user to read, the **presentation orientation** is independent of the raw byte order in storage:
+
+- **Y-axis high values at the top.** Highest RPM (or whatever Y-axis quantity) is the first data row in the markdown table, lowest at the bottom. Matches the EMU software UI and standard chart convention. The underlying `data` byte order (row 0 = lowest Y bin) is for editing the file, not for display.
+- **Multiplicative / scalar correction tables**: present cells as percent deltas (`+2%`, `0%`, `-8%`) the way EMU shows them in scalar mode. Do not render the raw multiplier (`1.02`, `0.92`) in chat.
+- **Additive correction tables**: present cells in their native displayed unit (e.g. `+1.0 %`, `-5.0 %` of airflow), not the raw signed byte.
+
+Internal calculations may keep the natural raw orientation; flip before printing the final table.
+
+## Ingesting a table from a screenshot (paste-a-map workflow)
+
+The user can **paste a screenshot of a map** straight from the EMU software instead of
+(or before) sending the tune file. Read the grid directly from the image and, critically,
+**read the little tabs in the bottom-right corner of the table editor** — those tabs
+identify *which table* the screenshot is (the table-set / table selector, e.g. VE table 1
+vs VE table 2, or table Set 1/2/3). Recognizing them is what lets you map the picture to
+the correct tune **symbol** and edit the right thing.
+
+Workflow:
+
+1. **Read the bottom-right tabs** to identify the table and its set. That tells you the
+   target symbol (e.g. `veTable` vs `veTable2`, or which table set's instance) — do not
+   guess from the values alone; the tabs are the ground truth for *which* table this is.
+2. **OCR the grid** into a 2D array, plus the axis bins (RPM along one edge, load/MAP along
+   the other). Confirm orientation against the rendering convention above (Y-axis high at
+   top in the EMU UI; remember `data` byte order is row 0 = lowest Y bin when you write back).
+3. **Map to the symbol** and apply the scaling for that table family (see the scaling table
+   below) before computing any edit.
+4. **Edit the tune to fit** — alter that symbol's `data`, fix the checksums, and export.
+
+This is the same recognition step that previously let a pasted VE-map screenshot (identified
+by its bottom-right tabs) be matched to the right symbol and written back into the tune. For
+*smoothing* a pasted map rather than transcribing it, hand off to **emu-black-ve-smooth**
+(which also accepts a pasted/screenshotted grid).
+
 ## File anatomy
 
 ```xml
@@ -71,6 +107,7 @@ Signed values appear in hex with a leading `-` in the export (e.g. `sbyte` `-4B`
 | TPS / pedal % | word | 0.1 | `tpsBins` 0x3E8=1000 → 100.0% |
 | Airflow % axis (bins) | word | 0.1 | `airflowBins4` 0x44C=1100 → 110.0% |
 | **Airflow-% target tables** | **ubyte** | **0.5** | idle/armed/cranking DBW targets. `idleActiveAirflow` 0x5A=90 → 45% (matches ~45% warm idle) |
+| **Airflow-% scalar corrections** (single value, not table) | **ubyte** | **1** (direct %) | `idleCoolantFanCorr` raw 13 → +13 % airflow when fan output active. Despite being in the airflow domain, single-value scalars often use scale=1 rather than the 0.5/count convention of the multi-cell target tables. **Verify per symbol — do not assume 0.5 just because the symbol is in the airflow %  family.** |
 | RPM | word | 1 | `rpmBins` 0x3E8=1000 → 1000 rpm |
 | MAP / boost (kPa) | word | 1 | `mapBins` 0x14=20 → 20 kPa |
 | Coolant/IAT (°C) | sword | 1 | `cltBins8` may be offset; verify |
@@ -147,6 +184,45 @@ the offset becomes `A/0.5`: `new_raw = A/0.5 + B × old_raw`.
 **A value you deliberately want at a specific TPS** (e.g. cranking) is *not*
 preserved — set it directly: `new% = (TPS_target − f_new)/(c − f_new) × 100`.
 
+### Converting an additive correction table to a multiplicative (scalar) one
+
+**RULE: NO GUESSING.** When the user asks you to convert a table from additive to scalar (or any other table transformation that requires per-cell math), do the per-cell calculation explicitly and show the back-calculated table FIRST before proposing any trim or simplification. Do not anchor the multiplier to a single reference base and eyeball the rest of the rows. The right output is two tables: (1) the faithful back-calculation, (2) optionally the trimmed/safer version with the trim shown as a deliberate edit on top of the faithful values.
+
+### Custom correction — what the scalar actually scales (per EMU help)
+
+EMU's help for the "Custom correction" `Correction type` parameter:
+> **Scale** — The value from the Custom air flow correction table scales the **calculated DC value**.
+> **Add** — The value from the Custom air flow correction table is added to the calculated DC value.
+
+"Calculated DC value" = the **already-summed open-loop airflow command** before PID. This includes the base airflow PLUS any other additive corrections that have been folded in (fan compensation, DSG torque comp, etc.) — not just the base. On a DBW build, the EMU vocabulary "DC" is historical (from PWM solenoid days); on DBW it's the airflow-% command that then maps to a TPS target via the actuator floor/ceiling.
+
+The full effective formula on a DBW build in scalar mode:
+
+```
+Idle air %  =  ( idleActiveAirflow[CLT, idle_target]
+                + idleCoolantFanCorr  (when fan output active)
+                + idleDSGTorqueCorr[load]
+                + ... other open-loop corrections
+              )  × idleCustomCorrection_mult[X, Y]
+              + idleAirFlowPID
+```
+
+**Practical consequence:** the custom-corr scalar shrinks (or grows) every layered open-loop correction at the same proportion as the base. A fan correction of +6.5 % airflow at a CAT 70 / mult-0.72 cell delivers only +4.7 % effective. If you size additive corrections (like `idleCoolantFanCorr`) without remembering they'll be scaled by the custom-corr multiplier, you'll under-deliver at the cells where the multiplier is most negative.
+
+**Lesson learned (2026-05-26):** initial reading missed this — I assumed the scalar only multiplied the base and that fan was added after. The EMU help "scales the calculated DC value" makes it clear the scalar applies to the sum. Re-read EMU help precisely before assuming a calculation order.
+
+When EMU's custom correction table is switched from additive (sbyte, direct % delta) to scalar (multiplier displayed as % delta from 1.00), the **storage scaling changes**. Do not assume the raw bytes carry the same meaning across modes. To convert faithfully:
+
+1. **Look up the base airflow** at each correction cell. For `idleCustomCorrection` the base is `idleActiveAirflow[CLT_warm, idle_target_RPM]` — the warm-CLT row of the active-airflow table at the idle-target-RPM that the correction cell is keyed to. **Use a single reference CLT (typically the operating CLT, e.g. 96 °C)** so the conversion is well-defined.
+2. **Apply the additive correction** to get effective absolute airflow: `effective = base + additive_corr_%`.
+3. **Back-calculate the multiplier**: `mult = effective / base`. Express as % delta for the EMU UI: `mult_%_delta = (mult − 1) × 100`.
+4. **Verify the corner cells make physical sense.** If a multiplier comes out near 0 (or negative), the original additive table was already commanding stall conditions in that cell; the new scalar should be sized for safety (e.g. floor at -50 % delta = mult 0.5), not faithfully reproduced. Note the change.
+5. **Then apply any intentional trim** (e.g. halve depth per the [conservative feed-forward principle](C:\Code\car-projects\emu-black-tuning-notes\notes\idle_stall.md)) on top of the faithful conversion, not in place of it.
+
+**Why this matters:** the conversion is non-linear across the table because each cell's reference base is different. A -10 % additive correction means a *-22 % multiplier* at a 45 % base row (1500 rpm warm CLT) but a *-61 % multiplier* at a 16.5 % base row (1000 rpm warm CLT). Designing the scalar table by eye against a single reference base — instead of cell-by-cell — silently flattens the correction curve and misses the stall-margin cells.
+
+**Lesson learned (2026-05-26 conversion of `idleCustomCorrection`)**: the first-pass scalar proposal was anchored to one reference RPM and the other rows were eyeballed. The faithful back-calc showed the original additive table was commanding ≤0 % absolute airflow in two low-RPM × high-CAT cells (idle target 1000-1100 rpm × CAT 70). The scalar conversion is the right opportunity to fix that, but only if you run the per-cell math first and *then* decide how aggressively to trim.
+
 **Additive / delta tables scale differently — no offset.** An *additive* airflow-%
 correction (e.g. `idleCustomCorrection`, "Custom air flow correction [%]") is added
 to the target before the airflow→TPS conversion, so its real effect is
@@ -186,9 +262,9 @@ Names are stable across exports. `*Bins` = axis for the table of the same root.
 
 | symbol | meaning |
 |--------|---------|
-| `idleActiveAirflow` | EMU "Airflow - Active state air flow [%]". Closed-loop idle airflow target, ubyte 8×5 = CLT (X) × idle-target RPM (Y); data rows run **low→high RPM** (row 0 = lowest) |
+| `idleActiveAirflow` | EMU "Airflow - Active state air flow [%]". Closed-loop idle airflow target. **8 cols × 5 rows = 40 cells**. X = "Coolant Temp. (°C)" (`cltBins8` = 0/15/30/45/60/75/96/105 on this build). Y = "Idle target (RPM)" (1000/1100/1200/1375/1500 on this build) — keyed on idle TARGET, not actual engine RPM. ubyte ×0.5/count. Raw `data` rows run low→high RPM (row 0 = 1000 rpm); EMU UI shows high RPM at top — flip when rendering. |
 | `idleArmedAirFlow` | EMU "Airflow - Armed state air flow [%]". Armed-state airflow target (pedal released, pre-PID), ubyte 8×1 vs RPM |
-| `idleCustomCorrection` | EMU "Airflow - Custom air flow correction [%]". sbyte 5×5 (signed). Was an **additive** correction on this build; being converted to a scalar/multiplier — confirm its mode before rescaling |
+| `idleCustomCorrection` | EMU "Airflow - Custom air flow correction [%]". **5 cols × 5 rows = 25 cells**. **X axis is IAT/CAT (charge-air temp), NOT CLT** — `idleCustomCorrX` bins on this build are 20/30/40/50/70 °C — used for heat-soak airflow compensation. **Y axis is "Idle target (RPM)"** (`idleCustomCorrY` = 1000/1100/1200/1375/1500 rpm) — lookup is on the current idle-target value, NOT actual engine RPM. As of 05/26/2026 build was switched from **additive** (sbyte direct %) to **scalar/multiplicative** mode (displayed as % delta in EMU UI; +2 % = mult 1.02, -28 % = mult 0.72). Confirm mode before rescaling — additive and scalar use different storage scales. |
 | `idleCrankingDC` | EMU title "Cranking airflow [%]". Airflow-% target vs CLT, 4 bins on `cltBins4` = `0/33/67/100 °C`, so **bin 0 = coldest**. (Despite "DC" in the name it is airflow-%, not a duty cycle, on a DBW setup.) |
 | `cyclingIdleAirflow` | airflow target during cycling-idle (anti-stall) mode |
 | `idleDBWTargetMin/Max` | **the Airflow-Actuator range** (TPS %, word @ 0.1/count). `idleDBWTargetMin=35`→3.5% floor, `idleDBWTargetMax=80`→8.0% ceiling. This is the `[floor, ceiling]` that all airflow-% values map into — the symbols to read to learn the CURRENT range, and to edit when changing it (floor 2.4% = `24`). Do **not** assume the ceiling from history; read it here. |
@@ -209,6 +285,83 @@ the next ring out adds `overrunDBW`/`overrunDBW2`; the broadest set adds the
 launch/ALS/pit/rolling-AL/boost-limit DBW targets. Confirm scope with the user —
 limit tables (e.g. `dbwBoostTargetLimit`, `dbwCLTLimitTable`) are caps, not idle
 targets, and may not want the same remap.
+
+## Cold start fuel parameters
+
+### File format gotcha: binary vs. XML `.emub3`
+
+`.emub3` files come in two flavours. Check before grepping:
+- **Binary (ZIP)** — starts with `PK` bytes. Not human-readable. These are the EMU software project files (e.g. `Supra Tune 05242026.emub3`, `supra ai corrected 05242026.emub3`).
+- **XML export** — readable text. Filename usually contains `.xml.emub3` (e.g. `supra tune export 05242026.xml.emub3`). Use these for grepping.
+
+Always check modification timestamps to identify the most recent XML export before extracting values.
+
+### Grep pattern to extract cold start symbols
+
+```bash
+grep -i "cranking\|afterStart\|warmUp\|postStart\|startEnrich\|cltBins4\|aseTbl\|aseRev\|aseClt" tune.xml.emub3
+```
+
+This captures all fuel enrichment tables and their axis bins in one pass. Key symbols returned:
+
+| Symbol | Storage | Dims | Axes | Scale | Description |
+|--------|---------|------|------|-------|-------------|
+| `crankingCorrTbl` | u12 | 8 CLT × 5 TPS | `cltBinsCranking` × `tpsCrankingBins` | 1 (direct %) | Cranking fuel correction, pump gas |
+| `crankingCorrTbl2` | u12 | 8 CLT × 5 TPS | same | 1 (direct %) | Cranking fuel correction, ethanol |
+| `tblsFFCrankingBlend` | ubyte | 9×1 | ethanol content % | **0.5** | Pump gas weight in cranking blend (100%=E0, 0%=E100) |
+| `aseTbl` | ubyte | 6 rev × 6 CLT | `aseCltBins` (rows) × revolutions (cols, bins not in XML) | 1 (direct %) | Afterstart enrichment, pump gas |
+| `aseTbl2` | ubyte | 6 rev × 6 CLT | same | 1 (direct %) | Afterstart enrichment, ethanol |
+| `warmupTbl` | ubyte | 10 CLT × 4 MAP | `cltBinsWarmup` × `mapBinsWarmup` | 1 (direct %) | Ongoing warmup enrichment, pump gas |
+| `warmupTbl2` | ubyte | 10 CLT × 4 MAP | same | 1 (direct %) | Ongoing warmup enrichment, ethanol |
+| `tblsFFWarmupBlend` | ubyte | 9×1 | ethanol content % | **0.5** | Pump gas weight in warmup blend |
+| `cltBinsCranking` | sword | 8×1 | — | 1 (°C) | CLT axis for crankingCorrTbl |
+| `tpsCrankingBins` | word | 6×1 | — | 0.1 (%) | TPS axis for crankingCorrTbl (note: 6 bins for 5-row table — may have one unused entry) |
+| `aseCltBins` | sword | 6×1 | — | 1 (°C) | CLT axis for aseTbl |
+| `cltBinsWarmup` | sword | 10×1 | — | 1 (°C) | CLT axis for warmupTbl |
+| `mapBinsWarmup` | word | 4×1 | — | 1 (kPa) | MAP axis for warmupTbl |
+
+**Scale note:** Fuel correction tables (`crankingCorrTbl`, `aseTbl`, `warmupTbl`) use scale=1 (raw = displayed %). This is **different** from airflow-% tables (ubyte, scale=0.5). Do not mix the two.
+
+### Table layout
+
+**`crankingCorrTbl` / `crankingCorrTbl2`** — `height=5` rows are TPS bins (closed throttle = row 0, WOT = row 4). `width=8` columns are CLT bins (cold = col 0). Active during cranking state only (< `crankingThreshold` RPM, typically 400 RPM). Values = % extra fuel on top of base pulse width.
+
+**`aseTbl` / `aseTbl2`** — `height=6` rows are CLT bins (`aseCltBins`). `width=6` columns are revolution counts since start (bins not stored in XML — hardcoded in firmware). Values decay left→right to 0 over the first N revolutions. Active immediately after engine fires until all values reach 0.
+
+**`warmupTbl` / `warmupTbl2`** — `height=4` rows are MAP bins, `width=10` columns are CLT bins. Ongoing correction applied until engine reaches operating temperature. Values = % extra fuel.
+
+### Flex-fuel blending
+
+At any ethanol content, the effective cranking correction is:
+```
+effective% = crankingCorrTbl[clt][tps] × (blend/100) + crankingCorrTbl2[clt][tps] × (1 − blend/100)
+```
+where `blend` is the pump-gas weight from `tblsFFCrankingBlend` for the current ethanol content (scale 0.5, so raw 0x6C=108 → 54% pump gas weight).
+
+At E60 on this build, the pump gas weight is approximately 37%, giving ~63% weight to the ethanol table.
+
+### Scalars related to cold start
+
+| Symbol | Scale | Description |
+|--------|-------|-------------|
+| `crankingThreshold` | word, 1 RPM | RPM below which cranking state is active (400 on this build) |
+| `crankingIgnAngle` | sbyte, 1° | Fixed ignition advance during cranking |
+| `crankingLambdaTarget` | ubyte, /100 | Lambda target during cranking (100 = λ1.00) |
+| `afterstartIgnitionLockAngle` | sbyte, 1° | Ignition angle held for post-start lock period |
+| `afterstartIgnitionLockTime` | ubyte, 1 (units TBD) | Duration of post-start ignition lock |
+| `afterstartIgnRestoreRate` | sbyte, 1°/cycle | Rate at which timing restores to base after lock |
+| `afterstartEnableIgnLock` | ubyte, bool | 1 = post-start ignition lock active |
+| `idleControlAfterstartDelay` | ubyte, 1 (cycles?) | Idle PID engagement delay after start |
+| `idleAfterstartRPMincrease` | u12, 4×4 | Post-start RPM elevation table (CLT × time/rev bins) |
+
+### Benchmark reference (port injection, pump gas)
+
+From HP Academy and Banish (*Engine Management: Advanced Tuning*):
+- **ASE at 20°C, first revolution**: ~39% (HP Academy empirical)
+- **ASE at −10°C, first revolution**: ~60% (Banish)
+- **Cranking correction at 0°C, closed throttle**: ~100–150% for port injection (first principles: ~50–60% of injected fuel lost to wall film at 0°C)
+
+On this build (`supra tune export 05242026.xml.emub3`): ASE 39% at 23°C (exact HP Academy match), cranking correction 88% at 0°C pump gas / 158% ethanol / ~132% effective at E60. Hot ASE (92°C) is 12% first revolution — slightly high for a hot soak restart where wall film is minimal; 2–5% would be more appropriate.
 
 ## Safety before any edit
 

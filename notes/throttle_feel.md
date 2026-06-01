@@ -71,3 +71,35 @@ Abrupt lift-off causes the powertrain to rock and the driveshaft to unwind — a
 ## Decelerate Fuel Correction
 
 The decelerate fuel correction table can fire negative acceleration enrichment during recovery phases — trimming fuel in the wrong direction at low RPM. Review the RPM floor for decelerate correction; it may need to be raised to avoid activating during idle recovery.
+
+## Idle-to-Driving Handoff Smoothness
+
+When the idle strategy exits (PPS crosses `idleOffIfTPSOver`, or clutch releases at a non-zero PPS), three things release simultaneously:
+
+1. The airflow PID I-term (`Idle PID air % correction` snaps to 0)
+2. The idle ignition correction (timing returns to base — felt as a torque pulse independent of airflow)
+3. The source switches from idle-influenced (state 2 or transitional state 3) to characteristic (source 0)
+
+If PID has accumulated meaningful negative correction at the moment of release, the open-loop airflow it had been suppressing returns instantly, producing a small TPS step *and* a timing-advance step on top of whatever the pedal was already commanding. The driver feels a bump even with a gradual pedal input.
+
+### The 1500 RPM row of `idleActiveAirflow` is the lever
+
+The 1500 RPM (and adjacent high-target) row of the active airflow table is what's in play during the clutch-in cruise-decel handoff — as the idle target ramps down from a high value (cruise RPM) toward the warm idle target, it passes through the 1500 cell briefly. **If this row is over-prescribed, PID winds negative each transit, and that wound-negative PID is what releases when idle finally exits.** The 1500 RPM region of the idle ref table needs to be accurate (PID near 0 in steady armed/active conditions at that target) to prevent the bump during idle handoff. Validate by logging `Idle PID air % correction` while sweeping through the 1500 target band; PID should sit within ±3% in that band, not pegged.
+
+### DBW blend point should track the idle ref table + a fixed driver-preference offset
+
+`idleDBWBlendPointTbl` defines the TPS value at which the idle strategy is fully exited (the upper end of the idle-to-characteristic blend region). For the handoff to feel consistent across CLT, the blend point at each CLT bin should be set as:
+
+```
+blend_point[CLT] ≈ idle_TPS_at_CLT + Δ
+```
+
+where `idle_TPS_at_CLT` is the TPS that the idle controller is actually commanding at that CLT (derived from `idleActiveAirflow` mapped through the actuator range), and **Δ is a fixed driver-preference offset** — typically 4–8% TPS — that sets how wide the blend window feels.
+
+This matters because:
+
+- Idle's commanded TPS varies massively across CLT (~3.9% TPS at CLT 96 vs ~6.9% TPS at CLT 0 for target 1200). A fixed blend-point value would mean a much narrower handoff window when cold than when warm, making cold-start handoff feel abrupt and warm handoff feel mushy.
+- Using a fixed Δ above idle's TPS keeps the blend window's *perceived width* constant. The driver always gets the same amount of pedal travel between "idle is letting go" and "characteristic fully in charge."
+- If `idleActiveAirflow` is rescaled (e.g., the 1500 or 1375 rows are dropped to fix PID accumulation), the blend point table **must be re-derived** off the new active values. Otherwise the blend window grows or shrinks unintentionally at the cells you just changed.
+
+Practical method: after any change to `idleActiveAirflow`, compute the idle-TPS for each CLT bin from the warm-idle-target row used at that CLT, then write `blend_point = idle_TPS + Δ` into `idleDBWBlendPointTbl`. Test with a clutch-in cruise-decel and a steady pedal tip-in — the bump should be uniform across CLT.
