@@ -1,5 +1,7 @@
 # Flex-fuel blend curve with ethanol pulse compensation
 
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`my_car.md`](../supra/notes/my_car.md) and [`timing_targets.md`](../supra/notes/timing_targets.md) (boost/lambda targets). This note is intentionally car-agnostic.
+
 When EMU's ethanol fuel-scale table is responsible for the stoichiometric fuel
 mass change, the table-switching blend curves should not re-create the old
 ethanol fuel-mass curve by intuition. Use the fuel-scale table itself as the
@@ -11,41 +13,16 @@ For a blend from table 1 at E0 to table 2 at E100:
 table_1_weight(E) = 1 - ethanolFuelScale(E) / ethanolFuelScale(100)
 ```
 
-This works in raw counts because the scale factor cancels. On the 2026-05-29
-Supra export:
+This works in raw counts because the scale factor cancels. Read this car's
+`ethanolFuelScale` (against the `ethanol10Bins` axis) from the live export,
+then interpolate it onto the table-switching ethanol blend axis to get the
+table-1 weight at each blend bin. Round the result to EMU's 0.5% blend-table
+resolution and encode as `ubyte` for the blend symbol.
 
-```
-ethanol10Bins raw:    0 14 28 3C 50 64 78 8C A0 B4 C8
-ethanol bins display: 0 10 20 30 40 50 60 70 80 90 100 %
-ethanolFuelScale raw: 0  D 1A 29 3A 4C 5F 76 8E AA C9
-```
-
-Interpolating that fuel-scale table onto the table-switching ethanol bins
-`0, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100` gives this table-1 weight:
-
-| Ethanol % | Fuel-scale raw | Table 1 weight |
-|---:|---:|---:|
-| 0.0 | 0.00 | 100.0% |
-| 12.5 | 16.25 | 91.9% |
-| 25.0 | 33.50 | 83.3% |
-| 37.5 | 53.75 | 73.3% |
-| 50.0 | 76.00 | 62.2% |
-| 62.5 | 100.75 | 49.9% |
-| 75.0 | 130.00 | 35.3% |
-| 87.5 | 163.00 | 18.9% |
-| 100.0 | 201.00 | 0.0% |
-
-Rounded to EMU's 0.5% blend-table resolution:
-
-```
-100 92 83.5 73.5 62 50 35.5 19 0
-```
-
-Raw `ubyte` values:
-
-```
-C8 B8 A7 93 7C 64 47 26 0
-```
+The curve is nonlinear (the fuel-scale table itself is nonlinear), so the
+table-1 weight falls faster than ethanol % rises — re-derive it from the actual
+fuel-scale table rather than assuming a straight line. The worked numbers for
+this build live in `supra/notes/`.
 
 Use this for `tblsFFLambdaBlend` when the lambda target endpoint should advance
 with the same nonlinear ethanol compensation curve. Use it for `tblsVEBlend`
@@ -72,10 +49,12 @@ logs.
 
 ## Full-boost lambda endpoint principle
 
-For this turbo build, treating approximately lambda `0.78` as the E0 full-boost
-endpoint and approximately lambda `0.82` as the E100 full-boost endpoint is a
-reasonable starting point. The ethanol endpoint can generally be leaner in lambda
-because ethanol provides more knock resistance and charge cooling than gasoline.
+Set two full-boost lambda endpoints — an E0 (pump) endpoint and an E100
+(ethanol) endpoint — and let the flex blend interpolate between them by ethanol
+content. The ethanol endpoint can generally be set leaner in lambda than the
+pump endpoint because ethanol provides more knock resistance and charge cooling
+than gasoline; both land inside the forced-induction best-torque/protection band
+cited below. This build's actual endpoint values are in `supra/notes/`.
 
 Reference basis:
 
@@ -93,8 +72,8 @@ Reference basis:
 - Heywood (`corpus/ice_fundamentals.md`, pages 821 and 1516) explains why
   ethanol/high-octane/charge-cooling reduces knock pressure compared with pump
   gasoline. That supports using the leaner side of the best-torque band for the
-  E100 endpoint, but it is an inference, not a direct Heywood prescription of
-  "E100 full boost equals lambda 0.82."
+  E100 endpoint, but it is an inference, not a direct Heywood prescription of a
+  specific E100 full-boost lambda.
 
 Do not confuse the full-boost endpoint with the boost-entry ramp. A safe
 full-boost target at high MAP does not imply that the 80-100 kPa transition

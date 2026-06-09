@@ -1,3 +1,7 @@
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`timing_targets.md`](../supra/notes/timing_targets.md) (timing/boost), [`my_car.md`](../supra/notes/my_car.md), and [`airflow_actuator.md`](../supra/notes/airflow_actuator.md). This note is intentionally car-agnostic.
+
+> **This is the deep ignition reference** (vocabulary, theoretical MBT tables, cruise/boost/VVT methodology). For the EMU-table-by-table hub — which setting to change and why — see [ignition.md](ignition.md).
+
 # Vocabulary
 KLSA Knock Limited Spark Advance
 
@@ -187,7 +191,7 @@ Subtract knock retard separately per fuel/CR/charge temp when calibrating.
   - At 62.5% ethanol: ~14% Table 1 / 86% Table 2
   - At 75%+: 0% Table 1
 - **Do not adjust blend table shape to dial in timing.** When the tune needs more timing, advance Table 2 values — the blend table multiplies the delta.
-- The blend scalar at E60 is approximately 0.86×. A 4° advance in Table 2 delivers ~3.4° at the wheel. Account for this when stepping values.
+- The blend scalar is < 1 at any partial ethanol content, so a given advance in Table 2 delivers proportionally less at the wheel (multiply the Table 2 delta by the blend fraction at your working ethanol %). Account for this when stepping values.
 
 ## Timing Target Methodology
 
@@ -195,17 +199,17 @@ Walk up in 1° steps while monitoring per-cylinder knock channels and EGTs. Etha
 
 General relationships for a turbocharged build:
 - WOT cells run substantially less advance than VE-region cells due to increased cylinder pressure
-- Each ~4 psi of boost typically demands ~2–3° less advance on a given fuel
-- Ethanol vs pump gas: ~4–5° more advance available on E60 across boosted cells, more in VE cells
+- Each increment of boost demands less advance on a given fuel (cylinder pressure rises → knock-limited timing falls)
+- Ethanol carries more advance than pump gas across boosted cells, with the largest gain in the lighter-load VE cells
 - Knock margin compresses quickly with reduced ethanol content — a flex fuel sensor plus a conservative fallback blend table is mandatory insurance
 
 Specific targets are inherently build-dependent (CR, intercooler, cam, fuel system, charge temp). Calibrate on a dyno or with careful per-cylinder knock + EGT monitoring on the street.
 
 ## Ethanol Characteristics
 
-- E60 ≈ 100–105 RON vs. 91–95 for pump premium.
+- Mid-level ethanol blends (around E60, peak anti-knock by mixture) carry meaningfully higher effective octane than pump premium.
 - High heat of vaporization creates a charge cooling effect that is largest at high load — exactly when knock risk is highest.
-- At ~10:1 CR the knock margin on ethanol is genuine. 10:1 at 24+ psi is problematic on pump gas; on E60 there is real headroom.
+- The knock-margin benefit of ethanol grows with compression ratio and boost: a load/CR combination that is knock-limited on pump gas can have real headroom on a high-ethanol blend. See the build doc for this engine's safe boost ceiling per fuel.
 - Watch for ethanol content variation (partial fill, supplier variation) — knock margin compresses quickly. A flex fuel sensor plus a conservative fallback blend table is mandatory insurance.
 
 ---
@@ -214,16 +218,16 @@ Specific targets are inherently build-dependent (CR, intercooler, cam, fuel syst
 
 ## Finding MBT at Cruise
 
-- Cruise region (2400–3500 RPM, 40–80 kPa): MBT is typically 30–36° on pump gas, 34–40° on E60.
-- Use EGT reduction as the primary proxy for timing gain — advancing toward MBT drops EGTs. Target ~730 °C EGT baseline; meaningful reduction confirms you are approaching MBT.
+- In the cruise region (light-load, part-throttle RPM band), MBT runs more advance on ethanol than on pump gas. See the build doc for this engine's cruise targets.
+- Use EGT reduction as the primary proxy for timing gain — advancing toward MBT drops EGTs. Establish an EGT baseline for the cell, then look for a meaningful reduction to confirm you are approaching MBT.
 - Also watch MAP: as combustion efficiency improves, the same pedal position produces higher MAP (more torque → less vacuum needed). MAP increase at constant throttle confirms timing gain.
 - Lambda stability is the smoothness indicator. If closed-loop hunting increases after a timing change, combustion consistency is degrading.
 
 ## Creating a Timing Plateau
 
-- Cruise oscillates between 40–60 kPa MAP at constant PPS. If timing changes across that band, small MAP variations translate to small torque variations → slight roughness.
-- Flatten timing across 40–79 kPa into a shallow plateau (1° total variation instead of 4–5°). Use gradual transitions, not cliff edges. Anchor the flat value near the 50 kPa MBT.
-- At very light loads (28–35 kPa), charge density is low and combustion stability competes with MBT as the binding constraint. Step timing in 2° increments and watch for RPM/lambda oscillation, not just knock.
+- Cruise oscillates across a narrow MAP band at constant PPS. If timing changes across that band, small MAP variations translate to small torque variations → slight roughness.
+- Flatten timing across the cruise MAP band into a shallow plateau (roughly 1° total variation instead of several degrees). Use gradual transitions, not cliff edges. Anchor the flat value near the MBT at the center of the band.
+- At very light loads, charge density is low and combustion stability competes with MBT as the binding constraint. Step timing in small increments and watch for RPM/lambda oscillation, not just knock.
 
 ## VVT and the VE/Timing Tables
 
@@ -235,11 +239,11 @@ Specific targets are inherently build-dependent (CR, intercooler, cam, fuel syst
   - **Boost**: intake pressure > exhaust pressure during overlap → more advance scavenges residuals out → less dilution → faster burn → **MBT moves toward less advance**.
   - At any load, advancing the intake cam also closes the intake valve earlier, raising effective compression at low RPM → faster burn → **MBT moves toward less advance**.
 - Plan to re-verify ignition at any cells where you change cam advance. The two tables are coupled.
-- See `notes/vvti.md` for the full mechanism breakdown.
+- See `notes/vvt.md` for the full mechanism breakdown.
 
 ## Lambda at Cruise
 
-Lambda 1.0 (stoichiometric) is the practical cruise target without a catalyst. Lean of stoich on a port-injected engine with 264° cams risks combustion instability due to high overlap, high residual dilution, and no charge stratification. There is no meaningful economy gain to justify it.
+Lambda 1.0 (stoichiometric) is the practical cruise target without a catalyst. Lean of stoich on a port-injected engine — especially a high-overlap cammed one — risks combustion instability due to high residual dilution and no charge stratification. There is no meaningful economy gain to justify it.
 
 ---
 

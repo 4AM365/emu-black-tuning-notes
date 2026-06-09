@@ -1,69 +1,68 @@
-# Per-cylinder fuel trim distribution on the 2JZ FFIM (4 tables, 6 cylinders)
+# Per-cylinder fuel trim distribution on a front-feed intake manifold (FFIM)
+
+> **Car-specific values live in the build working docs**, not here. For the reference build's measured trim profiles, EGT anchors, and table values see [`supra/notes/per_cylinder_trim_results.md`](../supra/notes/per_cylinder_trim_results.md). This note is intentionally car-agnostic.
 
 ## EMU mechanism
-- 4 trim tables: `fuelTrim1..4Table`, each **sbyte 5x5** (% direct), axes `fuelTrimRPM`
-  [1000,2000,4000,6000,8000] x `fuelTrimLoad` [20,75,130,185,240] kPa.
+- 4 trim tables: `fuelTrim1..4Table`, each **sbyte 5x5** (% direct), with `fuelTrimRPM` ×
+  `fuelTrimLoad` (kPa) axes. Set the axis bins to bracket this engine's idle/cruise/boost.
 - Assignment scalars `fuelCylNTrimTableIdx`: 0 = no table (0% / reference), 1..4 = that
   table. One table can serve multiple cylinders (set two cyls to the same idx).
-- Supra uses 6 injector channels (injCyl1..6 = 1..6).
+- Use one injector channel (`injCylN`) per cylinder.
 
 ## Distribution model (front-feed intake manifold)
-Throttle body at the FRONT (cyl1 end); air travels down the log plenum, so front cylinders
-fill richest and the lean trend accelerates toward the rear (cyl 5/6). Literature: per-cyl
-spread ~15% richest-to-leanest typical; mid-rear (4,5) often HOTTEST (~100C, 920-950C), not
-always 6. EGT also moved by ignition trims + sensor placement, so read EGT as a guide not gospel.
+With the throttle body at the FRONT, air travels down the log plenum, so front cylinders
+fill richest and the lean trend accelerates toward the rear. Literature: per-cyl spread
+~15% richest-to-leanest typical; the mid-rear cylinders are often the HOTTEST (not always
+the last one). EGT is also moved by ignition trims + sensor placement, so read EGT as a
+guide not gospel.
 
-Anchoring with only cyl3 + cyl6 EGT (no EGT-to-CAN module yet to multiplex the other probes):
-- cyl1 = 0% (richest, reference; matches existing convention of trimming UP to the rich cyls)
-- cyl3 = measured anchor
-- cyl6 = cyl3 + 10% (Will's requirement for equal charge temp between 3 and 6)
-- cyls 2,4,5 = extrapolated along the front-to-rear curve, **biasing 4 & 5 RICH** because
-  (a) they're unmeasured and (b) literature flags them as the hottest. Treat cyl5 ~= cyl6.
+Anchoring method when only a subset of cylinders has EGT probes:
+- Front cylinder = 0% (richest, reference; trim UP toward the rich cyl convention).
+- Each measured cylinder = its own anchor from EGT.
+- Hold a fixed charge-temp delta between a front measured cyl and a rear measured cyl
+  (the build's chosen target delta) and let it set the rear trim.
+- Unmeasured cylinders = extrapolated along the front-to-rear curve, **biasing the
+  unmeasured mid-rear cyls RICH** because (a) they're unmeasured and (b) literature flags
+  them as the hottest.
 
-Worked profile (2026-05-31): cyl1 0, cyl2 0, cyl3 +2, cyl4 +7, cyl5 +12, cyl6 +12.
-The +10% cyl6-vs-cyl3 relationship holds at EVERY load cell because all tables share one
-load shape.
+A constant front-to-rear trim delta holds at EVERY load cell because all tables share one
+load shape. This build's actual per-cylinder trim percentages and worked profile are in
+`supra/notes/`.
 
 ## Load shape (per table)
-`M + [-1,+1,0,0,-1]` across load = small **cruise bump** (peak at 75 kPa), tapering -1 at
-idle (20) and full boost (240). Rationale: FFIM maldistribution is worst at cruise (inertia/
-resonance dominated) and eases under boost (boost forces even filling). Kept mild (+/-1) and
-RPM-flat to match existing tables. Future refinement: add RPM dependence (maldistribution
-worsens with airflow) once more EGT data exists.
+Apply a per-table load shape of the form `M + [-1,+1,0,0,-1]`: a small **cruise bump**
+(peak at the cruise load bin), tapering -1 at idle and at full boost. Rationale: FFIM
+maldistribution is worst at cruise (inertia/resonance dominated) and eases under boost
+(boost forces even filling). Keep it mild (+/-1) and RPM-flat unless data supports more.
+Future refinement: add RPM dependence (maldistribution worsens with airflow) once more EGT
+data exists.
 
 ## Output / assignment
-File `cyl_trim_FFIM_extrapolated.emubt` (4 symbols). **No idx changes needed** - keep
-cyl1,2 -> idx0; cyl3->1, cyl4->2, cyl5->3, cyl6->4. Only the table VALUES change:
-- fuelTrim1Table (cyl3): [1,3,2,2,1]
-- fuelTrim2Table (cyl4): [6,8,7,7,6]
-- fuelTrim3Table (cyl5): [11,13,12,12,11]
-- fuelTrim4Table (cyl6): [11,13,12,12,11]   (cyl5 & cyl6 identical now; kept separate tables
-  so cyl5 can be split off once it has its own EGT)
+Export one `.emubt` with the 4 `fuelTrimNTable` symbols. Assign each cylinder to a table
+index via `fuelCylNTrimTableIdx`; only the table VALUES change between revisions, not the
+index map. Keep two rear cyls on separate tables (even if identical values) so one can be
+split off once it gets its own EGT probe.
 
-## CURRENT STATE = NEAR PARITY (test-run-2.csv, post-trim, the truth)
-With Will's 2% cyl3 / 9% cyl6 trim ACTIVE, cyl6-cyl3 (EGT2-EGT1) per region:
-idle -7, light -3, cruise -14, transition -10, boost(130-176, n=316) -20 C. All within
-+/-20C and cyl6 now slightly COLDER (mildly over-trimmed, most at boost ~ -1%). **Will's
-2%/9% choice is validated.** => The rich-biased export (cyl6 +13 cruise, cyl4/5 +7/+12) is
-TOO RICH; revert cyl6 to ~9% (his [7,9,8,8,7], maybe shave boost cell -1) and use
-proportionate cyl4/5 (~+5/+7, at most +1 safety bias), NOT +7/+12.
+## Validating against post-trim EGT
+After applying trims, log EGT and compute the rear-minus-front EGT delta per load region. A
+result inside a tight band (e.g. ±20 °C) with the trimmed cyl slightly COLDER means mildly
+over-trimmed — back the rich bias off toward the measured-correct values rather than the
+safety-biased extrapolation. The build's actual measured deltas live in `supra/notes/`.
 
-## PRE-TRIM reference (drive_home_today.csv) - historical, NOT current
-Before the cyl6 trim, EGT delta was load-dependent, shrinking as load rises:
-light/cruise +44C -> cruise +32 -> transition +19 -> boost(130-160) +12C. This validates
-the cruise-peaked / boost-tapered load shape: FFIM maldistribution is inertia/resonance
-driven (worst light load) and boost forces even filling (gap closes). 
-**Key inference: because the delta SHRINKS with load instead of staying flat, most of it is
-real airflow maldistribution, NOT a fixed sensor offset** (an offset would be load-constant).
-Caveats: boost segment was ~2s/36 samples = thermally unsettled (EGT lag), so boost parity
-is unconfirmed - needs a sustained pull; idle/overrun includes fuel-cut decel artifacts.
-Residual ~+30-44C at cruise = either cyl6 still slightly lean (9% a hair light) OR ~15-20C
-probe offset; a one-time 3<->6 probe swap is the only way to separate them. Could NOT read
-active trim % from the log (Injector N trim channel = 100 = flow scaling, not cyl-trim output).
+## Diagnosing offset vs real maldistribution (pre-trim)
+Before trimming, if the front-to-rear EGT delta is **load-dependent and shrinks as load
+rises**, most of it is real airflow maldistribution, NOT a fixed sensor offset (an offset
+would be load-constant). This also validates the cruise-peaked / boost-tapered load shape.
+Caveats: short boost segments are thermally unsettled (EGT lag) so boost parity needs a
+sustained pull; idle/overrun includes fuel-cut decel artifacts. A residual constant delta at
+cruise is either a still-slightly-lean rear cyl OR a probe offset; a one-time probe swap is
+the only way to separate them. Note the `Injector N trim` channel reports flow scaling, not
+cyl-trim output, so it can't be used to read back active trim %.
 
 ## Caveat / next step
-cyls 2,4,5 are EXTRAPOLATED, not measured. The biggest risk is cyl4/cyl5 running leaner than
-estimated (lit. says they can be the hottest) with no EGT to catch it. **Priority: get the
-EGT-to-CAN module so probes on 4 and 5 can be read; then replace the extrapolated mid-rear
-values with measured trims.** Per-cyl trims correct distribution so the GLOBAL lambda/VE
-target must NOT be over-enriched for the lean cylinder (see project_supra_per_cylinder_trim).
+Unmeasured cylinders are EXTRAPOLATED, not measured. The biggest risk is an unmeasured
+mid-rear cyl running leaner than estimated (lit. says they can be the hottest) with no EGT
+to catch it. **Priority: get enough EGT channels (e.g. an EGT-to-CAN module) to read every
+mid-rear cyl, then replace the extrapolated values with measured trims.** Per-cyl trims
+correct distribution, so the GLOBAL lambda/VE target must NOT be over-enriched for the lean
+cylinder.

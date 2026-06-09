@@ -2,6 +2,8 @@
 
 Bog/stumble (and sometimes stall) as the engine drops back toward idle after lift-off — coming off throttle at speed, neutral coast-down, or a clutch-in roll to a stop. This page is the consolidated entry point; the full diagnostic trees live in [idle_stall.md](idle_stall.md) sections [A] and [H], which this note links into rather than duplicates.
 
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`airflow_actuator.md`](../supra/notes/airflow_actuator.md) and [`idle_session_05242026.md`](../supra/notes/idle_session_05242026.md). This note is intentionally car-agnostic.
+
 ---
 
 ## First: which return-to-idle failure is it?
@@ -18,29 +20,29 @@ Always start from a log that captures the event (see [idle_stall.md Step 0](idle
 
 ## The two root causes, in one place
 
-Return-to-idle bog on this build is almost always one (or both) of:
+Return-to-idle bog is almost always one (or both) of:
 
 ### 1. Airflow falls out from under the idle controller
 
-- **Overrun (§A):** armed-state airflow resolves too low (0–4%) at decel RPM bins, so the DBW plate fights its return spring with no useful air column. Fuel cut exits into near-zero air → rich spike → bog. Fix: populate the armed-state airflow table with **60–80% at 1800–2200 RPM (PPS=0)**, tapering to your idle airflow (~38%) at 1100–1300 RPM, no step at the bottom.
-- **Rolling wobble (§H):** the +13% `idleCoolantFanCorr` is VSS-gated **off above ~56 km/h**, so a return from speed runs the bare ~26.5% base airflow instead of ~39%, and the airflow PID (clamped +12) can't hold the depth. Fix without adding idle variation: more PID authority (`idleAirPIDOutMax` / `idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval` (200 ms → ~50 ms). Leave the fan +13% — it's correct load-comp.
+- **Overrun (§A):** `idleArmedAirFlow` resolves too low at the decel RPM bins, so the DBW plate fights its return spring with no useful air column. Fuel cut exits into near-zero air → rich spike → bog. Fix: populate `idleArmedAirFlow` with enough air across the higher decel RPM bins (PPS=0) to hold the plate off its spring, tapering smoothly into your steady idle airflow at the idle-approach bins, no step at the bottom.
+- **Rolling wobble (§H):** `idleCoolantFanCorr` (a positive idle-air bump while the fan loads the engine) is VSS-gated **off above a speed threshold**, so a return from speed runs the bare base airflow instead of the higher fan-on value, and the airflow PID is clamped too low to hold the depth. Fix without adding idle variation: more PID authority (`idleAirPIDOutMax` / `idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval`. Leave the fan correction — it's correct load-comp.
 
 ### 2. Low-RPM VE over-fuels into the dip
 
-As RPM craters and MAP rises toward 60+ kPa (low-rpm pumping loss), speed-density over-fuels. Rich misfire → erratic torque → the dip deepens and oscillates.
+As RPM craters and MAP rises toward the low-RPM pumping-loss region, speed-density over-fuels. Rich misfire → erratic torque → the dip deepens and oscillates.
 
-- The **500-rpm VE row** governs fueling *exactly when RPM craters into a dip*. If it's a verbatim copy of the 842 row it's ~17% too rich there — lean it toward λ0.93. Richness should **increase as RPM drops**, so the lean deepens 1184 → 842 → 500.
-- **Set VE from measured lambda, not from the trims.** The lambda trim is deliberately slow/low-authority (~±2–3%) so it won't reveal the true VE requirement and can't catch a fast dip. Use `VE_new = VE_old × (Lambda 1 / Lambda target)`, apply ~80% of the computed lean first, then re-verify. Lean **both** `veTable` (pump) and `veTable2` (ethanol) by the same ratio.
+- The **lowest-RPM VE row** (the dip row, the bottom of `rpmBins`) governs fueling *exactly when RPM craters into a dip*. If it's a verbatim copy of the row above it it's too rich there — lean it toward the idle lambda target. Richness should **increase as RPM drops**, so the lean deepens from the idle row down toward the dip row.
+- **Set VE from measured lambda, not from the trims.** The lambda trim is deliberately slow/low-authority (a few percent) so it won't reveal the true VE requirement and can't catch a fast dip. Use `VE_new = VE_old × (Lambda 1 / Lambda target)`, apply most (not all) of the computed lean first, then re-verify. Lean **both** `veTable` (pump) and `veTable2` (ethanol) by the same ratio.
 
-> **⚠ Re-measure at the fuel you actually run.** The −17–19% rich figure is from pre-correction E25 logs. After the v2 global −18% pump / +10% ethanol correction, the residual is fuel-dependent (~−18% rich still at E60, only ~−9% at E25). A lean computed from an E25 log over-leans by ~9% at E25 and risks a lean stumble. See [idle_stall.md §H](idle_stall.md) for the full blend math.
+> **⚠ Re-measure at the fuel you actually run.** If a global pump/ethanol VE correction has been applied since the dip was logged, the residual richness is fuel-dependent (the pump and ethanol corrections can nearly cancel at one ethanol blend and not at another), so a lean computed at one fuel can over-lean at another and risk a lean stumble. See [idle_stall.md §H](idle_stall.md) and the build's working doc for the full blend math.
 
 ---
 
 ## What does NOT work (return-to-idle specific dead ends)
 
-- **Raising the Active airflow table's 1000/1100 rows.** `idleActiveAirflow` is indexed by idle *target*, which floors at 1200, so those rows are never read. The VE table **is** indexed by actual rpm × MAP, so its 500-rpm row *is* the live lever when RPM craters.
+- **Raising the Active airflow table's sub-idle rows.** `idleActiveAirflow` is indexed by idle *target*, which floors at the idle setpoint, so rows below it are never read. The VE table **is** indexed by actual rpm × MAP, so its dip-RPM row *is* the live lever when RPM craters.
 - **VSS-scheduled idle-target bump** (`idleIncreaseTargetAboveVSS`): would mechanically work but adds a target step — rejected to keep low-speed heat-soak idle clean.
-- **Big overrun exit enrichment.** A +20–25% pulse fired into a barely-cracked throttle makes the stumble worse. Prefer raising the exit RPM threshold (~2500) or a stepped exit.
+- **Big overrun exit enrichment.** A large pulse fired into a barely-cracked throttle makes the stumble worse. Prefer raising the overrun-exit RPM threshold or a stepped exit.
 - **Decel fuel correction firing during recovery.** The decelerate-fuel-correction table can trim fuel the wrong way at low RPM during the return — raise its RPM floor so it doesn't activate in idle recovery. See [throttle_feel.md](throttle_feel.md).
 
 ---
@@ -55,5 +57,5 @@ Before touching calibration, run the [Universal Pre-Diagnosis Checklist](idle_st
 
 - [idle_stall.md](idle_stall.md) — full diagnostic trees (this page's source for §A and §H)
 - [throttle_feel.md](throttle_feel.md) — DBW blend point, decel fuel correction, tip-in feel
-- [cranking_and_idle.md](cranking_and_idle.md) — cold-start and post-start idle
+- [engine_start.md](engine_start.md) — cold-start and post-start idle
 - [idle_hot_drift_pid_windup.md](idle_hot_drift_pid_windup.md) — PID integrator windup on slow hot droop

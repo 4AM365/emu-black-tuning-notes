@@ -1,8 +1,10 @@
 # EMU VE tables are fuel-dose proxies — pump vs ethanol divergence is NOT a pure-air-VE question
 
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`my_car.md`](../supra/notes/my_car.md) and [`mass_flow_estimator_quirk.md`](../supra/notes/mass_flow_estimator_quirk.md). This note is intentionally car-agnostic.
+
 ## Correction to an earlier wrong call (2026-05)
 
-I initially flagged `veTable2` (ethanol) reading ~2% LOWER than `veTable` (pump) at
+A common mistake is to flag `veTable2` (ethanol) reading LOWER than `veTable` (pump) at
 high load as a charge-cooling "physics violation," arguing that ethanol's evaporative
 cooling should make its *air* VE higher. **That reasoning is wrong for EMU.**
 
@@ -24,8 +26,7 @@ Therefore `veTable2 < veTable` at high load is expected behavior, not a defect.
 
 ## Still worth a real check (for the right reason)
 
-The high-load ethanol table was never validated on a high-ethanol fill (the log was at
-24.5% ethanol, where the flex blend weights pump ~83% and the ethanol table had little
-authority under boost). So its high-load *dose* is unverified — confirm it against
-delivered lambda on an E70-E100 boost pull, and let the measured mixture (not air
-theory) set the values.
+If the available logs were captured at low ethanol content, the flex blend weights the
+pump table heavily and the ethanol table carries little authority under boost — so its
+high-load `veTable2` *dose* stays unverified. Confirm it against delivered lambda on a
+high-ethanol boost pull, and let the measured mixture (not air theory) set the values.

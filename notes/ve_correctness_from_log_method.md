@@ -1,5 +1,7 @@
 # Judging VE / fuel-table correctness from an EMU log
 
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`my_car.md`](../supra/notes/my_car.md) and [`mass_flow_estimator_quirk.md`](../supra/notes/mass_flow_estimator_quirk.md). This note is intentionally car-agnostic.
+
 A complete "are the fuel tables correct?" assessment needs three passes, because a
 VE error manifests differently depending on whether closed loop is active.
 
@@ -21,9 +23,9 @@ error. So:
 During rising RPM / fast transients, closed loop can't keep up, so the VE error
 appears **directly as lambda error** (`Lambda 1 − Lambda target`). Filter to
 rising-RPM + TPS>10% and bin onto the real veTable axes. This is the only place the
-base dose is exposed without closed-loop masking. (On this build the log is
-`lambdaDelay`-corrected, so cell attribution under accel is trustworthy — see the
-lambda-delay memory.) The lean region typically forms a **diagonal band** climbing
+base dose is exposed without closed-loop masking. (Cell attribution under accel is
+only trustworthy if the log is `lambdaDelay`-corrected so the wideband reading is
+realigned to the cell that produced it.) The lean region typically forms a **diagonal band** climbing
 up-and-right (lean load shifts to higher MAP as RPM rises).
 
 ## 3. Coverage → you can only vouch for cells you have data in

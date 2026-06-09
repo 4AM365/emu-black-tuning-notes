@@ -1,0 +1,16 @@
+# Sport — settings reference
+
+> **Software page:** *Sport*. Full symbol catalog: [tune_feature_tree.md → Sport](tune_feature_tree.md).
+
+Motorsport features: launch control, rolling launch, pit limiter, flat-shift / sequential / paddle-shift control, trans-brake, and drag-race timing. Mostly unused on this build.
+
+This is largely **configuration**, not tuning-principle territory — the exhaustive symbol list is in the catalog. This page is the home for any tuning notes that arise for this feature; the sub-nodes below mirror the software tree.
+
+## Sub-nodes
+
+- **Sequential / flat-shift** (95) — `downshiftBlipLevel`, `downshiftBlipRPMBin`, `downshiftTimeout`, `psDownShiftLimits`, `psDownShiftPreload` …
+- **Launch control** (25) — `lcDBWTargetRPMBins`, `lcDBWTargetTable`, `lcFuelEnrichment`, `lcRPMTarget`, `lcActivateOverPPS` …
+- **Pit limiter** (10) — `pitLimitError`, `pitLimitTorqReduction`, `pitLimiterSpeedTarget`, `pitLimitEnabled`, `pitLimitInput` …
+- **Rolling launch** (10) — `ralDBWTarget`, `ralFuelCorr`, `ralVSSBins`, `ralCutType`, `ralInput` …
+- **Trans-brake / line-lock** (7) — `tBrakeActivationSwitch`, `tBrakeBumpbutton`, `tBrakeBumptime`, `tBrakeCreepDC`, `tBrakeCreepFrequency` …
+- **Drag race** (1) — `dragRaceTimerActSwitch`
