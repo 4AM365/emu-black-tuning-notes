@@ -74,7 +74,7 @@ against it.** See [supra/notes/mass_flow_estimator_quirk.md](../supra/notes/mass
 `lambdaDelay` models the transport/measurement lag so the logged Lambda is realigned to the cell that
 produced it. With it active, same-row measured-vs-target is valid even under acceleration — which is
 what makes accel-bin VE attribution and lambda-tracking analysis trustworthy
-([fueling.md](fueling.md), [lambda_tracking_map_smoothing.md](lambda_tracking_map_smoothing.md)).
+([fueling.md](fueling.md), [lambda_tracking_map_smoothing.md](../ai-analysis-skills/lambda_tracking_map_smoothing.md)).
 
 ## P4. EGT is the cheap truth sensor
 

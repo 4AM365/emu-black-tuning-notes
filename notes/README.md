@@ -31,17 +31,22 @@ is [tune_feature_tree.md](tune_feature_tree.md).
 22. [Log](log.md) — logging config, virtual dyno
 23. [Gauges](gauges.md)
 
+## AI / data-analysis skills → [`../ai-analysis-skills/`](../ai-analysis-skills/)
+
+The log/data-analysis *methods* (VE-from-log correction, delta-overlay smoothing, VE-vs-MAP
+shaping, lambda-tracking scoring, knock-CoV and idle-RPM-CoV) live in their own sibling folder,
+[`../ai-analysis-skills/`](../ai-analysis-skills/). They're techniques, not EMU software pages.
+
 ## Cross-cutting reference notes
 
-These are physics/method deep-dives the pages link into (not software pages):
+Physics/principle deep-dives the pages link into (not software pages):
 
 - [cammed_idle_instability.md](cammed_idle_instability.md) — why a diluted idle charge is unstable
 - [idle_hot_drift_pid_windup.md](idle_hot_drift_pid_windup.md) — two-PID idle architecture + windup fix
-- [idle_rpm_cov_stability.md](idle_rpm_cov_stability.md) · [idle_stall.md](idle_stall.md) · [return_to_idle_bog.md](return_to_idle_bog.md) — idle quality + diagnostics
+- [idle_stall.md](idle_stall.md) · [return_to_idle_bog.md](return_to_idle_bog.md) — idle diagnostics
 - [timing.md](timing.md) — MBT tables + cruise/boost/VVT methodology
-- [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) · [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md)
-- VE method notes: [ve_correction_from_log.md](ve_correction_from_log.md) · [ve_correctness_from_log_method.md](ve_correctness_from_log_method.md) · [ve_vs_map_at_constant_rpm.md](ve_vs_map_at_constant_rpm.md) · [ve_idle_region_nonlinearity.md](ve_idle_region_nonlinearity.md) · [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md)
-- [lambda_target_vs_load.md](lambda_target_vs_load.md) · [lambda_tracking_map_smoothing.md](lambda_tracking_map_smoothing.md) · [flex_fuel_ethanol_compensation_blend.md](flex_fuel_ethanol_compensation_blend.md) · [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md)
+- [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — knock variance as a uniformity proxy
+- [lambda_target_vs_load.md](lambda_target_vs_load.md) · [flex_fuel_ethanol_compensation_blend.md](flex_fuel_ethanol_compensation_blend.md) · [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md) · [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md)
 - [throttle_feel.md](throttle_feel.md) · [throttle_body_thermal_growth.md](throttle_body_thermal_growth.md) · [stuck_throttle_protection_brake_boost.md](stuck_throttle_protection_brake_boost.md)
 - [hood_removal_charge_temps.md](hood_removal_charge_temps.md) · [denso-coils.md](denso-coils.md)
 

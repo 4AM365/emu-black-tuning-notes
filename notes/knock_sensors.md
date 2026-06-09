@@ -53,7 +53,7 @@ transducer. Two traps, **both** must be handled:
 
 No-knock cycles only (`Knocking cylinders == 0` AND cyl-N retard == 0); express as CoV (std/mean),
 not raw std (the signal is heteroscedastic). It's a qualitative ranking tool, not a calibrated
-CoV-of-IMEP. Full method: [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md).
+CoV-of-IMEP. Full method: [knock_voltage_cov_combustion_stability.md](../ai-analysis-skills/knock_voltage_cov_combustion_stability.md).
 
 ## K2. Knock-band *variance* is a cylinder-uniformity proxy
 
@@ -77,7 +77,7 @@ torque/EGT, not knock. Charge cooling + knock-suppression benefit from enrichmen
 
 ## Related documents
 
-- [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md) — CoV-from-knock method (K1)
+- [knock_voltage_cov_combustion_stability.md](../ai-analysis-skills/knock_voltage_cov_combustion_stability.md) — CoV-from-knock method (K1)
 - [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — variance as uniformity proxy (K2)
 - [ignition.md](ignition.md) — the timing tables knock constrains
 - [fueling.md](fueling.md) — per-cylinder trim (removes the maldistribution that walks the baseline)

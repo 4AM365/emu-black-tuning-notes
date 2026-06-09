@@ -155,7 +155,7 @@ ignition at any cell where you change cam advance. Full breakdown: [vvt.md](vvt.
 
 - [timing.md](timing.md) — full ignition reference: MBT tables, cruise/boost/VVT methodology (I1–I3, I5)
 - [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — knock variance as uniformity proxy (I4)
-- [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md) — knock-chatter CoV method
+- [knock_voltage_cov_combustion_stability.md](../ai-analysis-skills/knock_voltage_cov_combustion_stability.md) — knock-chatter CoV method
 - [vvt.md](vvt.md) — VVT mechanism + timing coupling (I5)
 - [idle.md](idle.md) — idle/decel ignition (the fast PID lever)
 - [fueling.md](fueling.md) — λ targets, charge cooling, per-cyl trim (sets what timing each cell can take)
