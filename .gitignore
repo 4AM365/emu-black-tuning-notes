@@ -15,3 +15,9 @@ maximum-boost/_raw_ocr/
 # Python cache
 __pycache__/
 *.pyc
+
+# Script scratch / regenerable outputs (don't scatter at repo root)
+_tmp/
+/err.txt
+/out.txt
+/egt_results.txt

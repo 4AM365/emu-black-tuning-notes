@@ -37,5 +37,6 @@ VE smoothing:     emu-black-log  (corrections)  →  emu-black-ve-smooth  →  e
 | `supra/tunes/*.csv` | Log snapshots associated with a tune session |
 | `notes/` | First-principles derivations, tuning principles, build observations |
 | `supra/notes/` | Supra-specific notes (mass-flow estimator quirks, etc.) |
-| `scripts/` | Standalone repo-level utility scripts (OCR, corpus cleanup, etc.) |
+| `scripts/` | Standalone repo-level utility scripts (OCR, corpus cleanup, etc.) — NOT tune/log analysis |
+| `supra/scripts/` | **Supra reference-build analysis scripts** — EMU log/charge-temp/Pre-IC analysis, VE/lambda/knock/idle pipelines, tune decode. Build-specific (hardcoded Supra log paths), not generalized skills. New one-off Supra analyses go here, not at the repo root. |
 | `C:\Code\car-projects\emubt_breakout\` | CSV round-trip tools for editing existing `.emubt` files in a spreadsheet |
