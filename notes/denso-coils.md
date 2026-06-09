@@ -1,5 +1,7 @@
 # Coil Setup
 
+This is reusable coil/hardware reference (part numbers, dwell behavior), not a per-car calibration. The specific coil a given build runs lives in that build's working doc (e.g. [`supra/notes/my_car.md`](../supra/notes/my_car.md)).
+
 ## D585
 
 The GM D585 is a common aftermarket coil used with standalone ECUs. It is not a plug-in replacement for Toyota coils but is a reliable, widely available option.

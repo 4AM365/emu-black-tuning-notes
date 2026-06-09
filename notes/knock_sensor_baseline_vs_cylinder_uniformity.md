@@ -1,7 +1,9 @@
 # Knock-sensor baseline "grumble" is a proxy for cylinder-to-cylinder combustion uniformity
 
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`timing_targets.md`](../supra/notes/timing_targets.md) and [`my_car.md`](../supra/notes/my_car.md). This note is intentionally car-agnostic.
+
 ## Observation that prompted this
-After improving per-cylinder fuel trims (FFIM maldistribution correction) on the Supra,
+After improving per-cylinder fuel trims (FFIM maldistribution correction),
 the knock-sensor signal went "dead smooth" under full boost — even with more timing.
 There were never knock *spikes* before or after; what changed was that the baseline
 noise level stopped "walking around." This is expected and is a sign of health.

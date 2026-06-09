@@ -2,6 +2,8 @@
 
 Idle stalls on EMU Black builds nearly always have a specific, diagnosable root cause. Log the stall, identify which pattern matches, and fix that one thing. Do not tune blind.
 
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`airflow_actuator.md`](../supra/notes/airflow_actuator.md), [`idle_session_05242026.md`](../supra/notes/idle_session_05242026.md), and (for the §H rolling-wobble specifics) [`idle_drive_wobble.md`](../supra/notes/idle_drive_wobble.md). This note is intentionally car-agnostic: it tells you which variable to change and which direction, not the literal number for any one car.
+
 ---
 
 ## Step 0: Get a Log
@@ -58,20 +60,20 @@ Look at the 4 seconds **before** the stall, not just the moment it dies.
 
 ### Root cause
 
-Armed state airflow resolves too low (0–4% Airflow) at the decel RPM bins. Below 2.0% Airflow the DBW motor is actively working against the return spring with no useful airflow result.
+`idleArmedAirFlow` resolves too low (only a few % Airflow) at the decel RPM bins. Below the minimum useful airflow the DBW motor is actively working against the return spring with no useful airflow result.
 
 ### Fix
 
-Populate the armed state airflow table with **60–80% Airflow at 1800–2200 RPM** (PPS = 0). Taper down to match your idle airflow value (~38%) at the 1100–1300 RPM bins. Do not create a step at the bottom — the transition into idle PID should be seamless.
+Populate `idleArmedAirFlow` with enough airflow across the higher decel RPM bins to hold the plate off its return spring (PPS = 0), then taper smoothly down to match your steady idle airflow value at the idle-approach RPM bins. Do not create a step at the bottom — the transition into idle PID should be seamless. See the build's working doc ([`airflow_actuator.md`](../supra/notes/airflow_actuator.md)) for this car's numbers.
 
 The rich spike and stall both disappear once the throttle stops fighting itself.
 
 ### Secondary check
 
 If overrun fuel cut exits harshly, consider:
-- Raising the exit RPM threshold to 2500 RPM (gives idle controller a running start)
-- Stepped exit: −50% fuel at 2500 RPM, full fuel at ~1800 RPM
-- Reducing overrun exit enrichment — a large pulse (+20–25%) fired into a barely-cracked throttle makes the stumble worse, not better
+- Raising the overrun-exit RPM threshold (gives the idle controller a running start)
+- A stepped exit: partial fuel cut at an intermediate RPM band, full fuel restored at the lower bound
+- Reducing overrun exit enrichment — a large pulse fired into a barely-cracked throttle makes the stumble worse, not better
 
 ---
 
@@ -79,7 +81,7 @@ If overrun fuel cut exits harshly, consider:
 
 ### Pattern 1: Throttle slams shut after cranking
 
-The throttle body is at cranking position (~14% TPS) during crank, then snaps to idle position (~3% TPS) as soon as the engine fires. This air deficit is too large for ASE to compensate.
+The throttle body is at its (higher) cranking position during crank, then snaps to its (lower) idle position as soon as the engine fires. This air deficit is too large for ASE to compensate.
 
 **Fix:** Use a post-start idle RPM target that stays elevated for 5–10 seconds after start, then tapers. This keeps the throttle open long enough for the transition to be smooth. Do not reduce ASE to compensate — ASE is not the cause.
 
@@ -87,14 +89,7 @@ The throttle body is at cranking position (~14% TPS) during crank, then snaps to
 
 If ASE drops to zero before the wideband validates (Lambda is valid = 0), the ECU runs open-loop with no trim correction. If base VE is even slightly lean, the engine stalls as wall-wetting fuel evaporates and ASE runs out simultaneously.
 
-**Fix:** Configure ASE as a 2D table: CLT vs. **engine revolutions** (not time). The revolution axis tracks wall-wetting decay better than time. Reference values:
-
-| CLT | Revolutions | ASE % |
-|-----|-------------|-------|
-| −10°C | 1 | ~60% |
-| 20°C | 5 | ~30% |
-| 60°C | 10 | ~10% |
-| 110°C | 20 | 0% |
+**Fix:** Configure ASE as a 2D table: CLT vs. **engine revolutions** (not time). The revolution axis tracks wall-wetting decay better than time — more enrichment at cold/low-revolution cells, decaying to zero as the engine warms and the count climbs. See the build's working doc for this car's ASE values.
 
 Also confirm `Lambda is valid` goes to 1 before ASE reaches 0. If the wideband validates after ASE runs out, you have no safety net.
 
@@ -112,7 +107,7 @@ Fix: get the wideband hot and validated before diagnosing anything else. If it t
 **2. Is ASE masking a lean VE table?**
 `Afterstart Enrichment` decaying toward 0 while RPM is slowly falling is the signature. The engine is fine on ASE, then runs out and stalls.
 
-Fix: add fuel to idle VE cells (MAP 30–40 kPa, RPM 800–1200) at the operating CLT.
+Fix: add fuel to the idle VE cells (the low-MAP, idle-RPM region of `veTable`) at the operating CLT.
 
 **3. Is the idle PID even active?**
 Check `Idle state`. A value of 0 throughout means the idle PID is completely disabled. See **[F]** (brake switch).
@@ -125,7 +120,7 @@ Fix: set the actuator floor just below steady hot-idle TPS. Set DBW min position
 **5. Fuel trim maldistribution (front-feed intake manifolds)**
 Front-feed intake manifolds distribute fuel unevenly under air mass inertia. The rearmost cylinder consistently runs lean at cruise — visible as rear EGT hotter than the others, and that cylinder knocking first. At idle this is less severe, but a poorly trimmed FFIM can cause a cylinder to misfire, dropping RPM enough to stall.
 
-Fix: add ~9–10% fuel trim to the lean cylinder at idle MAP/RPM. Taper to ~5% under boost (manifold distribution improves with pressure).
+Fix: add fuel trim to the lean cylinder at idle MAP/RPM (typically several percent on a front-feed manifold), tapering it down under boost (manifold distribution improves with pressure). See the build's working doc for this car's per-cylinder trim values.
 
 ---
 
@@ -208,31 +203,31 @@ Integrator accumulates error over time but its limit is set too high. It chases 
 
 - Keep integrator limits **lower than proportional limits**. The proportional term responds instantly; the integrator is slow by design.
 - Set the integrator so corrections take ~5 seconds to reach steady state — fast enough to eliminate steady-state error, slow enough not to fight the proportional term.
-- Starting baseline: P: 3.0 | I: 1.0 | D: 0.2. Tune P-only first, add I to eliminate droop, add D only if overshoot is a problem.
+- Tune P-only first, add I to eliminate droop, add D only if overshoot is a problem. See the build's working doc for this car's P/I/D starting values.
 
 ---
 
 ## [H] Rolling Return-to-Idle Wobble ("drive wobble")
 
-**Distinct from [A]:** this is a *recoverable* oscillation, not a clean stall. RPM craters well below idle target (observed: ~1800 → **525 rpm** at a 1200 target) then limit-cycles (525↔1390) during a **neutral coast-down to idle while the car is still rolling**. The driver always neutral-shifts toward a stop, so the engine is decoupled and free-falls toward idle (confirmed: RPM/VSS ratio swings 8×, impossible in a fixed gear). Two compounding faults — both must be addressed.
+**Distinct from [A]:** this is a *recoverable* oscillation, not a clean stall. RPM craters well below idle target then limit-cycles during a **neutral coast-down to idle while the car is still rolling**. The driver neutral-shifts toward a stop, so the engine is decoupled and free-falls toward idle (confirm with the RPM/VSS ratio: it swings widely, which is impossible in a fixed gear). Two compounding faults — both must be addressed. See the build's working doc ([`airflow_actuator.md`](../supra/notes/airflow_actuator.md)) for this car's measured numbers.
 
 ### 1. Fuel: rich bog at low RPM (the violent part)
 
-As RPM craters and MAP rises toward 60+ kPa (low-rpm pumping loss), the speed-density fuel calc over-fuels. Measured `Lambda 1` dives to **0.68 (AFR 9.9)** against a 0.93 target — the low-rpm VE is **~17–19% rich** at MAP 35–64 kPa. Rich misfire → erratic torque → the dip goes deep and oscillates. This is exactly the "unstable lambda the airflow PID cannot compensate for" case the EMU idle help warns about.
+As RPM craters and MAP rises toward the low-RPM pumping-loss region, the speed-density fuel calc over-fuels. Measured `Lambda 1` dives well rich of the idle target — the low-RPM VE is too rich across the dip's MAP band. Rich misfire → erratic torque → the dip goes deep and oscillates. This is exactly the "unstable lambda the airflow PID cannot compensate for" case the EMU idle help warns about.
 
-> **⚠ Baseline caveat — do not lean off these numbers blindly.** The −17–19 % figure is from the *pre-correction* logs, recorded at **E25** (not the usual E60). A global **−18 % pump (`veTable`) / +10 % ethanol (`veTable2`)** correction was applied afterward (the v2 export). Because the correction is split by fuel and blended through `tblsVEBlend`, its net effect is **fuel-dependent**: ~**0 %** at E60 (~38 % pump weight — the −18/+10 nearly cancels) but ~**−11 %** at E25 (73.5 % pump). So on the v2 calibration the dip residual is *still ~−18 % rich at E60* but only ~**−9 %** at E25. A lean computed from the E25 log is roughly right **only** for E60; at E25 it over-leans by ~9 % and risks a lean stumble. **Always re-measure lambda on a v2-calibration dip log at the fuel you actually run before leaning the 500/842 rows.**
+> **⚠ Baseline caveat — do not lean off raw log numbers blindly.** If a global pump (`veTable`) / ethanol (`veTable2`) VE correction has been applied since the dip was logged, the residual richness is **fuel-dependent**: because the correction is split by fuel and blended through `tblsVEBlend`, a pump-heavy and an ethanol-heavy correction can nearly cancel at one blend and not at another. A lean computed from a log at one ethanol content can over-lean at a different content and risk a lean stumble. **Always re-measure lambda on a current-calibration dip log at the fuel you actually run before leaning the low-RPM VE rows.** See the build's working doc for this car's blend math and measured residuals.
 
-> **⚠ The 500 rpm VE channel must be tuned for dips.** `rpmBins` now starts at 500 (`1F4`), and the 500-rpm VE row governs fueling *precisely when RPM craters into a dip*. If it is left as a verbatim copy of the 842 row (its initial state) it is ~17% too rich there and bogs the engine. Lean it toward λ0.93. The 842 row and the 1184 idle row (~9% rich at steady idle, λ0.844) want the same treatment — **richness increases as RPM drops**, so the lean deepens toward the 500 row.
+> **⚠ The lowest-RPM VE row must be tuned for dips.** The bottom of `rpmBins` (the dip row) governs fueling *precisely when RPM craters into a dip*. If it is left as a verbatim copy of the row above it (a common initial state) it is too rich there and bogs the engine. Lean it toward the idle lambda target. The next row up and the idle row want the same treatment — **richness increases as RPM drops**, so the lean deepens toward the dip row.
 
-**Fuel is closed-loop down here — but do NOT tune VE from the trims.** The lambda trim is intentionally **slow and low-authority** (`Short term trim` clamped to ~±2–3 %, slow integration) so it does not jerk idle around. It therefore (a) cannot correct a fast dip in real time, and (b) will never reveal the true VE requirement. Set VE from **measured lambda error** — `VE_new = VE_old × (Lambda 1 / Lambda target)` — as a deliberate, gentle change, then verify on the next drive. Account for WBO transport lag: during a fast dip the reading trails the actual rpm/MAP, so treat per-cell numbers as a starting point and iterate. Per the conservative feed-forward principle below, apply ~80 % of the computed lean first. Lean **both** `veTable` (pump) and `veTable2` (ethanol) by the same ratio — the E60 blend uses both.
+**Fuel is closed-loop down here — but do NOT tune VE from the trims.** The lambda trim is intentionally **slow and low-authority** (`Short term trim` clamped to a few percent, slow integration) so it does not jerk idle around. It therefore (a) cannot correct a fast dip in real time, and (b) will never reveal the true VE requirement. Set VE from **measured lambda error** — `VE_new = VE_old × (Lambda 1 / Lambda target)` — as a deliberate, gentle change, then verify on the next drive. Account for WBO transport lag: during a fast dip the reading trails the actual rpm/MAP, so treat per-cell numbers as a starting point and iterate. Per the conservative feed-forward principle below, apply most (not all) of the computed lean first. Lean **both** `veTable` (pump) and `veTable2` (ethanol) by the same ratio — the blend uses both.
 
 ### 2. Airflow: fan-gated air drops out at speed (the depth)
 
-The +13 % `idleCoolantFanCorr` is VSS-gated **off above ~56 km/h**. On a return from above ~56 km/h the base idle airflow is the bare ~26.5 % table value instead of ~39 % (fan-on), and the airflow PID is clamped at +12 — not enough to hold. Below ~56 km/h the fan is on and returns catch cleanly. Fixes that do **not** add idle variation: more airflow-PID authority (`idleAirPIDOutMax`/`idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval` (200 ms → ~50 ms). The fan +13 % itself is correct load-comp — leave it.
+`idleCoolantFanCorr` (a positive idle-air bump while the cooling fan loads the engine) is VSS-gated **off above a speed threshold**. On a return from above that speed the base idle airflow is the bare table value instead of the higher fan-on value, and the airflow PID is clamped too low to hold. Below the speed threshold the fan is on and returns catch cleanly. Fixes that do **not** add idle variation: more airflow-PID authority (`idleAirPIDOutMax`/`idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval`. The fan correction itself is correct load-comp — leave it. See the build's working doc for this car's speed gate and PID clamp values.
 
 ### What does NOT work
 
-- **Raising the Active airflow table's 1000/1100 rows.** `idleActiveAirflow` is indexed by idle **target**, and the target floors at 1200 (`idleRPM` bottoms at 1200), so those rows are never read regardless of actual RPM. *Contrast:* the VE table **is** indexed by actual rpm × MAP, so its 500-rpm row **is** used when RPM craters — that is why the VE 500 channel is the right lever and the airflow 1100 row is dead.
+- **Raising the Active airflow table's low-RPM rows.** `idleActiveAirflow` is indexed by idle **target**, and the target floors at the idle setpoint (`idleRPM` bottoms there), so rows below that setpoint are never read regardless of actual RPM. *Contrast:* the VE table **is** indexed by actual rpm × MAP, so its dip-RPM row **is** used when RPM craters — that is why the low-RPM VE row is the right lever and the sub-idle `idleActiveAirflow` rows are dead.
 - **VSS-scheduled idle-target bump** (`idleIncreaseTargetAboveVSS`): mechanically would work, but it adds a target step — rejected to keep low-speed heat-soak idle free of extra variables.
 
 ---
@@ -265,7 +260,7 @@ The cost of being too small is a temporary high-idle blip the closed-loop quickl
 
 **Where this changes calibration behavior:**
 
-Before this principle was applied on this build, the `idleCustomCorrection` table was sized close to "full" steady-state compensation at the operating CAT band. PID sat at -9.75 % (saturated negative) at the worst log point (t=178.64, [supra/logs/20260526_1644.csv](../supra/logs/20260526_1644.csv)) with TPS only 1.1 % above the actuator floor. After converting to scalar mode and halving the corrections at the operating points, PID will have authority both directions and the worst-case stall margin grows.
+When `idleCustomCorrection` is sized close to "full" steady-state compensation at the operating temperature band, the airflow PID can sit saturated against its negative clamp with TPS only just above the actuator floor — no headroom left to pull the throttle further closed, and a stall risk if any further load drops off. Halving the corrections at the operating points gives the PID authority in both directions and grows the worst-case stall margin. See the build's working doc for this car's measured saturation point and correction values.
 
 ---
 

@@ -5,8 +5,10 @@ A cammed engine doesn't idle poorly because the tune is wrong. It idles poorly b
 barely stable** — and big cams make that dilution worse. The tune's job is to manage a
 combustion process that is inherently close to the misfire limit, not to "fix" it. This
 note explains the chain from cam geometry to RPM wobble, so the calibration choices in
-[cranking_and_idle.md](cranking_and_idle.md) and [idle_stall.md](idle_stall.md) read as
+[engine_start.md](engine_start.md) and [idle_stall.md](idle_stall.md) read as
 consequences rather than rules.
+
+> **Car-specific values live in the build working docs**, not here. For the reference build see [`supra/notes/`](../supra/notes/) — esp. [`idle_session_05242026.md`](../supra/notes/idle_session_05242026.md) and [`my_car.md`](../supra/notes/my_car.md). This note is intentionally car-agnostic: it explains the physics and the levers, not the literal targets for any one cam package.
 
 ---
 
@@ -97,7 +99,7 @@ which is why the lever is *raise the idle target* (below).
 **Slow flame, so it wants more timing — but that steals controller authority.** A diluted
 charge has a lower flame speed (the inert gas gets in the way of the flame front), so the
 burn needs to start earlier to still center near the MBT crank angle. Cammed builds therefore
-idle with more advance than stock (see the timing table in `cranking_and_idle.md`). But
+idle with more advance than stock (see the timing table in `engine_start.md`). But
 ignition is also the *fast* idle-stability lever — the controller swings timing to catch RPM
 dips. If you've spent your advance just getting a clean burn, you have less headroom to swing
 into. Dilution simultaneously demands more base timing and shrinks the reserve.
@@ -123,8 +125,8 @@ edge and give the controllers something stable to work with.
 
 | Lever | Why it works against dilution |
 |---|---|
-| **Raise the idle RPM target** (e.g. 1100 cold-season → 1200 hot) | More intake momentum to fight reversion → lower residual; more flywheel energy (∝RPM²) to ride through weak cycles |
-| **Run idle lambda slightly rich (λ≈0.93)** | A rich charge tolerates dilution better — faster flame, wider misfire margin. EMU help says it outright: "Lambda < 1 usually results in more stable idle" |
+| **Raise the idle RPM target** (often a bit higher in summer than winter) | More intake momentum to fight reversion → lower residual; more flywheel energy (∝RPM²) to ride through weak cycles |
+| **Run idle lambda slightly rich** (λ a little below 1) | A rich charge tolerates dilution better — faster flame, wider misfire margin. EMU help says it outright: "Lambda < 1 usually results in more stable idle" |
 | **More base timing at idle** | Compensates the slow diluted-charge flame so peak pressure still lands near MBT |
 | **Nail per-cylinder fuel trim first** | Removes the worst chronic-misfire cylinder before asking the PID to hold a stable speed |
 | **Stable lambda above all** | EMU help: "lambda instability will cause RPM fluctuations" the airflow PID cannot fix — see below |
