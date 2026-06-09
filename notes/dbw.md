@@ -58,7 +58,7 @@ The dedicated drive-by-wire / throttle document, organized like [idle.md](idle.m
 - **How to set it.** Run **WGDC off pedal position** so power is commanded by the pedal with the
   plate already open (T1), and reference boost **pre-throttle** so the pressure is "ready to go" in
   the charge pipes per power demand. Boost target X-axis on `ppsBoostBins` with the closed-throttle
-  column at zero boost, rising monotonically with pedal (cross-check: [ve_vs_map_at_constant_rpm.md](ve_vs_map_at_constant_rpm.md)).
+  column at zero boost, rising monotonically with pedal (cross-check: [ve_vs_map_at_constant_rpm.md](../ai-analysis-skills/ve_vs_map_at_constant_rpm.md)).
 - **Live values / boost detail:** [boost.md](boost.md), build doc.
 
 ### Stuck-throttle protection → moved to Engine protection

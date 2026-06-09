@@ -323,7 +323,7 @@ detection works). Two caveats:
   down into the hunting band. Even 100 Hz only just touches the fundamental. RPM-hold CoV = idle
   *quality* (valid, use it); it is not a COV-of-IMEP number.
 
-Full method, metric definitions, and the sample-rate wall: [idle_rpm_cov_stability.md](idle_rpm_cov_stability.md).
+Full method, metric definitions, and the sample-rate wall: [idle_rpm_cov_stability.md](../ai-analysis-skills/idle_rpm_cov_stability.md).
 
 ## P5. Cranking → active handoff: the manifold time constant
 
@@ -341,7 +341,7 @@ settings blocks below.
 
 - [cammed_idle_instability.md](cammed_idle_instability.md) — full dilution/combustion physics (P1)
 - [idle_hot_drift_pid_windup.md](idle_hot_drift_pid_windup.md) — two-PID architecture + windup fix (P2)
-- [idle_rpm_cov_stability.md](idle_rpm_cov_stability.md) — RPM-CoV metric and method (P4)
+- [idle_rpm_cov_stability.md](../ai-analysis-skills/idle_rpm_cov_stability.md) — RPM-CoV metric and method (P4)
 - [idle_stall.md](idle_stall.md) — symptom-first stall decision trees (§A–§H)
 - [return_to_idle_bog.md](return_to_idle_bog.md) — consolidated return-to-idle entry point
 - [engine_start.md](engine_start.md) — cold-start, cranking, ASE, idle-timing-by-fuel table

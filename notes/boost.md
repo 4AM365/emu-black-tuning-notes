@@ -35,7 +35,7 @@ The dedicated boost-control document, organized like [idle.md](idle.md):
   protection chase.
 - **How to set it.** Reference on **`ppsBoostBins`** (pedal), closed-throttle column at zero boost,
   rising monotonically to a top-right peak (B2; cross-check [dbw.md → Boost-vs-PPS](dbw.md)
-  and [ve_vs_map_at_constant_rpm.md](ve_vs_map_at_constant_rpm.md)). For **spool retention**, set
+  and [ve_vs_map_at_constant_rpm.md](../ai-analysis-skills/ve_vs_map_at_constant_rpm.md)). For **spool retention**, set
   the **0% PPS / high RPM** cells **non-zero** (~60–80 kPa) so WGDC stays up and the gate stays
   closed through a shift (B3) — gate the aggressive version behind VSS.
 - **Failure mode.** Zero target at 0% PPS / high RPM → gate opens during the shift, boost falls

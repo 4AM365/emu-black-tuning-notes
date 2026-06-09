@@ -154,7 +154,7 @@ elsewhere in this repo:
 
 This is also why idle quality on a cammed build should be measured as **crank-speed
 fluctuation (RPM CoV)**, not knock voltage — see
-[supra/notes/idle_rpm_cov_stability.md](../supra/notes/idle_rpm_cov_stability.md).
+[idle_rpm_cov_stability.md](../ai-analysis-skills/idle_rpm_cov_stability.md).
 
 ---
 

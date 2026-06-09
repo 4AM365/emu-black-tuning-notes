@@ -12,7 +12,7 @@ This is largely **configuration**, not tuning-principle territory — the exhaus
 
 ## Log-analysis methods (in other notes)
 
-- [idle_rpm_cov_stability.md](idle_rpm_cov_stability.md) — idle quality as RPM fluctuation
-- [lambda_tracking_map_smoothing.md](lambda_tracking_map_smoothing.md) — map-quality metric
-- [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md) — combustion CoV from knock
+- [idle_rpm_cov_stability.md](../ai-analysis-skills/idle_rpm_cov_stability.md) — idle quality as RPM fluctuation
+- [lambda_tracking_map_smoothing.md](../ai-analysis-skills/lambda_tracking_map_smoothing.md) — map-quality metric
+- [knock_voltage_cov_combustion_stability.md](../ai-analysis-skills/knock_voltage_cov_combustion_stability.md) — combustion CoV from knock
 

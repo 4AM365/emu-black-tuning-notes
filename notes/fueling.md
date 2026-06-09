@@ -51,20 +51,20 @@ The dedicated fueling document, organized like [idle.md](idle.md):
   accel cells: read **lambda error directly** (rising-RPM + TPS>10%); the lean region forms a
   diagonal band climbing up-and-right. **Apply the same factor to BOTH tables** to preserve their
   relative offset and keep `veTable2` valid for future ethanol fills.
-  Full method: [ve_correction_from_log.md](ve_correction_from_log.md), [ve_correctness_from_log_method.md](ve_correctness_from_log_method.md).
+  Full method: [ve_correction_from_log.md](../ai-analysis-skills/ve_correction_from_log.md), [ve_correctness_from_log_method.md](../ai-analysis-skills/ve_correctness_from_log_method.md).
 - **Shaping with no log data.** The cam-resonance VE peak is an **RPM** phenomenon — stamp a
   known-good MAP column's RPM shape onto unmapped high-boost columns rather than interpolating
   *through* the peak. VE at higher MAP (same RPM) trends **flat-to-down** (EMAP backpressure,
   charge heating), so an upward dose offset into boost is the *safe* placeholder direction but not
   physics-derived — back the real offset out of measured lambda. Check the whole table with the
   `veTable × λ_target` air-VE proxy (must be smooth, no kink at the boost knee). Full model:
-  [ve_vs_map_at_constant_rpm.md](ve_vs_map_at_constant_rpm.md).
+  [ve_vs_map_at_constant_rpm.md](../ai-analysis-skills/ve_vs_map_at_constant_rpm.md).
 - **Smoothing — preserve the idle knee.** The idle/low-MAP corner has a **real nonlinear feature**
   (residual-gas knee on MAP + cam-inflection on RPM). A global low-order polynomial rounds it off
   and invites idle surge / tip-in hesitation. Use **delta-overlay**: smooth the *correction*
   (`final = base + smooth(autotune_delta)`), not absolute VE, so untouched cells stay at base.
   Extrapolate corrections **up** the RPM axis to the VE peak so you don't create a false double
-  hump. Full method: [ve_idle_region_nonlinearity.md](ve_idle_region_nonlinearity.md).
+  hump. Full method: [ve_idle_region_nonlinearity.md](../ai-analysis-skills/ve_idle_region_nonlinearity.md).
 - **Failure modes.** Single-table autotune leaves `veTable2` stale (logs at low ethanol weight the
   pump table). Over-smoothing kills the idle knee. Don't validate idle VE against the mass-flow
   estimator (it overstates idle airflow ~10× — [idle.md → P1](idle.md)).
@@ -246,7 +246,7 @@ lambda + mixture intent set it. Full correction: [ve_ethanol_table_charge_coolin
   hand-built map; cruise is a wash (closed-loop deadband masks feedforward smoothness). Read the
   **high-MAP bins** for the map-quality signal. A uniform lean bias is a one-number global
   fuel-scale fix (e.g. map not re-scaled after per-cyl trims), not a tracking fault — re-center,
-  then compare spread. Full method + metric: [lambda_tracking_map_smoothing.md](lambda_tracking_map_smoothing.md).
+  then compare spread. Full method + metric: [lambda_tracking_map_smoothing.md](../ai-analysis-skills/lambda_tracking_map_smoothing.md).
 - **Map generations:** handmade → hand-smoothed (inferior) → machine-smoothed (newest/best).
 - **`lambdaDelay`** is active and logged Lambda is time-aligned to its cell, so same-row
   measured-vs-target attribution is valid even under accel.
@@ -257,8 +257,8 @@ lambda + mixture intent set it. Full correction: [ve_ethanol_table_charge_coolin
 - [flex_fuel_ethanol_compensation_blend.md](flex_fuel_ethanol_compensation_blend.md) — flex blend curve, cold-enrichment blends, ethanol idle (F3)
 - [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md) — FFIM per-cylinder trim (F4)
 - [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md) — VE as dose proxy (F5)
-- [ve_correction_from_log.md](ve_correction_from_log.md) / [ve_correctness_from_log_method.md](ve_correctness_from_log_method.md) — correct VE from a log
-- [ve_vs_map_at_constant_rpm.md](ve_vs_map_at_constant_rpm.md) — VE shaping into boost
-- [ve_idle_region_nonlinearity.md](ve_idle_region_nonlinearity.md) — idle knee + delta-overlay smoothing
-- [lambda_tracking_map_smoothing.md](lambda_tracking_map_smoothing.md) — map-quality metric
+- [ve_correction_from_log.md](../ai-analysis-skills/ve_correction_from_log.md) / [ve_correctness_from_log_method.md](../ai-analysis-skills/ve_correctness_from_log_method.md) — correct VE from a log
+- [ve_vs_map_at_constant_rpm.md](../ai-analysis-skills/ve_vs_map_at_constant_rpm.md) — VE shaping into boost
+- [ve_idle_region_nonlinearity.md](../ai-analysis-skills/ve_idle_region_nonlinearity.md) — idle knee + delta-overlay smoothing
+- [lambda_tracking_map_smoothing.md](../ai-analysis-skills/lambda_tracking_map_smoothing.md) — map-quality metric
 - [idle.md](idle.md) — idle λ/VE for stability; cranking/ASE enrichment in [engine_start.md](engine_start.md)
