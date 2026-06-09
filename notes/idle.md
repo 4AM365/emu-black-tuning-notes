@@ -121,12 +121,21 @@ one cell empirically first.
 
 ### Cranking airflow — `idleCrankingDC`
 
-- **What it is.** An independent open-loop DC table, active **below 400 rpm** (cranking state),
-  indexed by CLT (cold → hot). No relationship to the active table — separate control path.
-- **How to set it.** Pre-position the throttle for a **stepless handoff** at 400 rpm: for each CLT
-  bin, set it to the active-airflow value the engine will want just above 400 rpm at that CLT/post-
-  start target, then bias it a few percent **above** that matched value so the first idle
-  correction is a gentle *pull-down* (the stable direction). Target ~60–80 kPa MAP during cranking;
+- **What it is.** An independent open-loop **DBW duty-cycle** table, active **below 400 rpm**
+  (cranking state), indexed by CLT (cold → hot). It commands the plate directly (the airflow→TPS
+  actuator mapping is a running-state function) — no relationship to the active table.
+- **How to set it.** Pre-position the throttle for a **stepless handoff** at 400 rpm by targeting the
+  **TPS the idle controller will land on for that start**, then backing out the DC that hits it. Per
+  CLT bin: (1) read `idleActiveAirflow` % at the RPM you actually catch into — the **idle target
+  *plus* the afterstart RPM increase** at that temperature (the engine fires into the
+  afterstart-elevated state, not steady idle): a hot start → hot idle target + its small afterstart
+  bump; a cold start → cold idle target + afterstart bump (the **top of the active-airflow target
+  range**, e.g. 1500 rpm); (2) translate to TPS,
+  `TPS% = idleDBWTargetMin + airflow%/100 × (idleDBWTargetMax − idleDBWTargetMin)`; (3) set the
+  cranking **DC** to the duty that produces that TPS (from the DC↔angle relationship characterized at
+  setup), **plus a couple % DC** so the first idle correction is a gentle *pull-down* (the stable
+  direction). The chain is **airflow %(idle target + afterstart increase, per CLT) → TPS → DC % + a
+  couple DC**, not a direct airflow-value copy. Target ~60–80 kPa MAP during cranking;
   cold wants lower MAP (more vacuum → lower fuel boiling point, better vaporization). Don't restrict
   the throttle to build MAP on a big cam — defer to the airflow targets. Cranking *fuel* enrichment
   is a separate wall-film tax, **not** an air-starvation compensator.
@@ -331,9 +340,14 @@ Full method, metric definitions, and the sample-rate wall: [idle_rpm_cov_stabili
 are **separate control paths with a hard handoff at 400 rpm**. The manifold time constant at
 idle is ~740 ms (Kiencke & Nielsen §3.2.6), so a *step* in commanded air at the handoff takes
 multiple time constants to settle and shows up as an RPM disturbance. The fix is to pre-position
-the throttle during cranking so the handoff is **stepless** — set `idleCrankingDC` to the active
-airflow the engine will want just above 400 rpm at that CLT. See the cranking and active-airflow
-settings blocks below.
+the throttle during cranking so the handoff is **stepless** — match the **TPS the idle controller
+will land on for that start**. The engine catches into the **afterstart-elevated** RPM, not steady
+idle, so take the active-airflow % at `idle target + afterstart RPM increase` for that temperature
+(hot start → hot idle target + small bump; cold start → cold idle target + bump, the top of the
+active-airflow range, e.g. 1500 rpm), translate it to TPS through the actuator range, and set the
+cranking **DC** to the duty that produces that TPS plus a couple DC (`airflow % → TPS → DC %`).
+`idleCrankingDC` is a DBW duty cycle, so it
+can't take the airflow % directly. See the cranking and active-airflow settings blocks below.
 
 ---
 
