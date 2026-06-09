@@ -37,10 +37,28 @@ throttle so the handoff *into* the idle system is stepless.
 
 `idleCrankingDC` is an independent open-loop table active **below 400 rpm**; the active airflow
 table only applies once RPM crosses 400 rpm. They are separate control paths with a hard handoff.
-Pre-position the throttle during cranking so the handoff is **stepless** — set `idleCrankingDC`
-for each CLT bin to the active airflow value the engine will want just above 400 rpm at that CLT,
-biased a few percent **above** it so the first idle correction is a gentle pull-down. Full method
-and the manifold-time-constant rationale: [idle.md → Cranking airflow / P5](idle.md).
+Pre-position the throttle during cranking so the handoff is **stepless** — but `idleCrankingDC`
+commands a **DBW duty cycle**, not an airflow %, so you target the **TPS the idle controller will
+land on for that start** and back out the DC that produces it. Three steps, per CLT bin:
+
+1. **Read the active-airflow % at the RPM you actually catch into — the idle target *plus* the
+   afterstart RPM increase.** When the engine fires it doesn't drop to steady idle; the afterstart
+   ramp holds it elevated for the first seconds — and that elevated state *is* the handoff window.
+   So the target is `idle target + afterstart increase` at that temperature: a **cold** start →
+   cold idle target + afterstart bump (the **top of the active-airflow target range**, e.g. 1500
+   rpm); a **hot** start → hot idle target + its (smaller) afterstart bump. Each cranking CLT bin
+   matches the elevated target it hands into — not one fixed anchor, not the steady idle target, and
+   not "anything just above 400 rpm" (the active table is indexed by idle **target**).
+2. **Translate airflow % → TPS** through the actuator range:
+   `TPS% = idleDBWTargetMin + airflow% / 100 × (idleDBWTargetMax − idleDBWTargetMin)`.
+3. **Set the cranking DC to hit that TPS, plus a couple % DC extra.** Use the DBW DC ↔ throttle-angle
+   relationship you characterized at setup (override DC, read TPS) to pick the duty that lands the
+   plate on that TPS, then add a couple DC so the first idle correction is a gentle pull-down (the
+   stable direction).
+
+So the chain is **airflow %(idle target + afterstart increase, per CLT) → TPS → cranking DC % + a
+couple DC**, not a direct airflow-value copy. Full method and the manifold-time-constant rationale:
+[idle.md → Cranking airflow / P5](idle.md).
 
 ## Establishing Sync Quickly
 
