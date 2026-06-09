@@ -12,7 +12,8 @@ Build-specific results behind the generic note [`notes/hood_removal_charge_temps
   cal 1") instead of the real IAT sensor curve — it's the same sensor type. This made
   it read ~30 °C too COLD (e.g. logged 17 °C → true 45 °C; logged 31 °C → true 56 °C).
   To correct a logged value: invert the wrong curve (T→V), then apply the correct IAT
-  curve (V→T). Script: `../scripts/correct_preic.py` (curves embedded).
+  curve (V→T). Skill: `emu-black-temp-sensor-recal` (rebuild the cal + emit `.emubt`); the
+  Supra wrong/correct curve values are below.
   - WRONG curve V→T: 0.00→92, 0.55→55, 0.57→54, 1.67→15, 2.22→3, 2.76→-5, 3.31→-15,
     3.88→-24, 4.43→-33, 4.98→-40
   - CORRECT (IAT) V→T: 0.00→121, 0.24→115, 0.31→104, 0.45→91, 0.78→71, 1.00→62,
@@ -62,6 +63,6 @@ Charge − Pre-IC gap (heating from turbo inlet to manifold), idle:
   resets CreationTime (all May logs got stamped 5/31). Only intact stamps survived on
   drive_home/more_tip_in (Apr 8). To keep this method usable, preserve original file
   timestamps or name logs `YYYYMMDD_HHMM`.
-- Scripts (in `../scripts/`): `analyze_hood_hot.py` (matched hot-day compare),
-  `charge_temp_distribution.py` (Pre-IC/charge-temp distribution + dropout check;
-  generalized from the old `analyze_apr8.py` — pass log paths as args).
+- Skills (pass these logs as args): `emu-black-intercooler-heatsoak` (ambient-normalized
+  hood-on vs hood-off / hot-day compare) and `emu-black-charge-temp-analysis` (Pre-IC /
+  charge-temp distribution + dropout check).

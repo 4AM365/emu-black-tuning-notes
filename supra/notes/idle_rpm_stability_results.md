@@ -1,6 +1,6 @@
 # Idle RPM-hold stability — Supra measured results
 
-Build-specific results behind [`notes/idle_rpm_cov_stability.md`](../../notes/idle_rpm_cov_stability.md). The generic note holds the method (use RPM fluctuation not knock voltage; the sample-rate wall; metric definitions). Script: `supra/scripts/idle_stability.py`.
+Build-specific results behind [`notes/idle_rpm_cov_stability.md`](../../ai-analysis-skills/idle_rpm_cov_stability.md). The generic note holds the method (use RPM fluctuation not knock voltage; the sample-rate wall; metric definitions). Script: `supra/scripts/idle_stability.py`.
 
 ## Detection thresholds used here
 

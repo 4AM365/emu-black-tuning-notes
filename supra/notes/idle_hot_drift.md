@@ -1,6 +1,6 @@
 # Hot-idle drift (windup/purge/stall) — Supra measured specifics
 
-Build-specific numbers behind [`notes/idle_hot_drift_pid_windup.md`](../../notes/idle_hot_drift_pid_windup.md). The generic note holds the two-PID architecture and the windup/purge/stall mechanism; this file holds the measured values. Diagnosed on `new_fuel_strategy` (machine-smoothed / v3), hot idle CLT ≥ 95 °C. Scripts: `supra/scripts/idle_drift_attribution.py`, `supra/scripts/idle_tracking.py`.
+Build-specific numbers behind [`notes/idle_hot_drift_pid_windup.md`](../../notes/idle_hot_drift_pid_windup.md). The generic note holds the two-PID architecture and the windup/purge/stall mechanism; this file holds the measured values. Diagnosed on `new_fuel_strategy` (machine-smoothed / v3), hot idle CLT ≥ 95 °C. Skills (run on the build's idle logs): `emu-black-idle-drift`, `emu-black-idle-stability`.
 
 ## Observed behaviour
 

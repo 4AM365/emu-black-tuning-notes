@@ -1,6 +1,6 @@
 # Knock-chatter CoV — Supra results (hand-made vs machine-smoothed map)
 
-Build-specific results behind the generic method note [`notes/knock_voltage_cov_combustion_stability.md`](../../notes/knock_voltage_cov_combustion_stability.md). Script: `supra/scripts/knock_chatter_cov.py`.
+Build-specific results behind the generic method note [`notes/knock_voltage_cov_combustion_stability.md`](../../ai-analysis-skills/knock_voltage_cov_combustion_stability.md). Script: `supra/scripts/knock_chatter_cov.py`.
 
 ## This dataset's transition-gate note
 
