@@ -17,13 +17,23 @@ table without destroying real features, and how to score one map against another
 | [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md) | Combustion-CoV proxy from knock-voltage scatter on no-knock cycles — detrend within fine cells, restrict to transients. |
 | [idle_rpm_cov_stability.md](idle_rpm_cov_stability.md) | Idle quality from crank-speed fluctuation (tracking vs target + hunt/jitter); the sample-rate wall that blocks true per-cycle CoV. |
 
-## Related scripts & skills (not moved here)
+## Implementing skills
 
-The executable implementations live with the tooling, not in this notes folder:
+These method notes now have generalized **skills** (CSV/tune in as arguments) under
+[`../skills/`](../skills/) — the note is the *why*, the skill is the *runnable how*:
 
-- Skill [`emu-black-ve-smooth`](../skills/emu-black-ve-smooth/SKILL.md) — anchor-weighted VE smoothing
-- Skill [`emu-black-tune-review`](../skills/emu-black-tune-review/SKILL.md) — literature-cited tune audit
-- Skill [`emu-black-vvti-street-tune`](../skills/emu-black-vvti-street-tune/SKILL.md) — MAP-proxy VVT sweep analysis
-- Reference-build pipelines: `../supra/scripts/` and `../supra/tunes/ve_*.py`
+| Method note | Skill |
+|---|---|
+| [ve_correction_from_log.md](ve_correction_from_log.md) / [ve_correctness_from_log_method.md](ve_correctness_from_log_method.md) | `emu-black-ve-from-log`, `emu-black-ve-smooth` |
+| [ve_idle_region_nonlinearity.md](ve_idle_region_nonlinearity.md) | `emu-black-ve-smooth` |
+| [ve_vs_map_at_constant_rpm.md](ve_vs_map_at_constant_rpm.md) | `emu-black-ve-lambda-verify`, `emu-black-ve-delta-map` |
+| [lambda_tracking_map_smoothing.md](lambda_tracking_map_smoothing.md) | `emu-black-lambda-tracking` |
+| [knock_voltage_cov_combustion_stability.md](knock_voltage_cov_combustion_stability.md) | `emu-black-knock-cov` |
+| [idle_rpm_cov_stability.md](idle_rpm_cov_stability.md) | `emu-black-idle-stability`, `emu-black-idle-drift` |
+
+Other related skills: `emu-black-tune-review` (literature-cited audit),
+`emu-black-vvti-street-tune` (MAP-proxy VVT sweep), `emu-black-egt-analysis`,
+`emu-black-charge-temp-analysis`, `emu-black-temp-sensor-recal`. See
+[`../skills/INDEX.md`](../skills/INDEX.md).
 
 Car-specific measured results live in [`../supra/notes/`](../supra/notes/) (e.g. `lambda_tracking_results.md`, `knock_chatter_cov_results.md`, `idle_rpm_stability_results.md`).

@@ -1,6 +1,6 @@
 # Lambda tracking: hand-made vs machine-smoothed — Supra results
 
-Build-specific results behind the generic method note [`notes/lambda_tracking_map_smoothing.md`](../../notes/lambda_tracking_map_smoothing.md). Script: `supra/scripts/lambda_tracking.py`.
+Build-specific results behind the generic method note [`notes/lambda_tracking_map_smoothing.md`](../../ai-analysis-skills/lambda_tracking_map_smoothing.md). Script: `supra/scripts/lambda_tracking.py`.
 
 ## Result (hand-made = all human-map logs; machine-smoothed = `machine-smoothed.csv`)
 
