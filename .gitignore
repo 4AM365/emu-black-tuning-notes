@@ -21,3 +21,9 @@ _tmp/
 /err.txt
 /out.txt
 /egt_results.txt
+
+# Nested standalone tools — organizational nesting, not a merge. Keep out of this repo.
+# emubt_breakout keeps its own git history + remote (github.com/4AM365/emubt_breakout).
+# emub_analysis is local-only (Flask app + venv), kept for local LLM tooling.
+tools/emubt_breakout/
+tools/emub_analysis/

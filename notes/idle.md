@@ -121,28 +121,32 @@ one cell empirically first.
 
 ### Cranking airflow — `idleCrankingDC`
 
-- **What it is.** An independent open-loop **DBW duty-cycle** table, active **below 400 rpm**
-  (cranking state), indexed by CLT (cold → hot). It commands the plate directly (the airflow→TPS
-  actuator mapping is a running-state function) — no relationship to the active table.
-- **How to set it.** Pre-position the throttle for a **stepless handoff** at 400 rpm by targeting the
-  **TPS the idle controller will land on for that start**, then backing out the DC that hits it. Per
-  CLT bin: (1) read `idleActiveAirflow` % at the RPM you actually catch into — the **idle target
-  *plus* the afterstart RPM increase** at that temperature (the engine fires into the
-  afterstart-elevated state, not steady idle): a hot start → hot idle target + its small afterstart
-  bump; a cold start → cold idle target + afterstart bump (the **top of the active-airflow target
-  range**, e.g. 1500 rpm); (2) translate to TPS,
-  `TPS% = idleDBWTargetMin + airflow%/100 × (idleDBWTargetMax − idleDBWTargetMin)`; (3) set the
-  cranking **DC** to the duty that produces that TPS (from the DC↔angle relationship characterized at
-  setup), **plus a couple % DC** so the first idle correction is a gentle *pull-down* (the stable
-  direction). The chain is **airflow %(idle target + afterstart increase, per CLT) → TPS → DC % + a
-  couple DC**, not a direct airflow-value copy. Target ~60–80 kPa MAP during cranking;
-  cold wants lower MAP (more vacuum → lower fuel boiling point, better vaporization). Don't restrict
-  the throttle to build MAP on a big cam — defer to the airflow targets. Cranking *fuel* enrichment
-  is a separate wall-film tax, **not** an air-starvation compensator.
-- **Failure modes.** A step at the 400 rpm handoff → multi-time-constant RPM disturbance after
-  start. Throttle slamming from cranking TPS to a lower idle TPS post-start → air deficit ASE can't
-  cover → post-start stall ([idle_stall.md §B](idle_stall.md)); fix with an elevated post-start
-  target, not by reducing ASE.
+- **What it is.** An independent open-loop table active **below 400 rpm** (cranking state), indexed
+  by CLT (cold → hot). **Units: airflow %, NOT a duty cycle** — confirmed on fw v59 (decodes ubyte
+  ×0.5; UI title "Cranking airflow [%]"; shows up directly in the `Idle air %` log channel during
+  cranking, e.g. raw 74 → 37.0%). The "DC" in the symbol name is historical. *(An earlier version of
+  this note called it a duty cycle and described a TPS→DC back-calc — that was wrong; it's the same
+  unit as the active table.)*
+- **How to set it.** Pre-position for a **stepless handoff** at 400 rpm: per CLT bin, set it to the
+  `idleActiveAirflow` % at the RPM you actually catch into — the **idle target *plus* the afterstart
+  RPM increase** at that temperature (the engine fires into the afterstart-elevated state, not steady
+  idle): a hot start → hot idle target + its small afterstart bump; a cold start → cold idle target +
+  afterstart bump (the **top of the active range**, e.g. 1500 rpm). Add a **small margin** so the
+  first idle correction is a gentle *pull-down* (the stable direction). It's a **direct airflow-%
+  match** — no DC back-calc — though you can translate to TPS
+  (`TPS% = idleDBWTargetMin + airflow%/100 × (idleDBWTargetMax − idleDBWTargetMin)`) to sanity-check
+  the plate angle. Target ~60–80 kPa MAP during cranking; cold wants lower MAP (more vacuum → lower
+  fuel boiling point, better vaporization). Don't restrict the throttle to build MAP on a big cam —
+  defer to the airflow targets. Cranking *fuel* enrichment is a separate wall-film tax, **not** an
+  air-starvation compensator.
+- **Failure modes.** A step at the 400 rpm handoff → multi-time-constant RPM disturbance after start.
+  Two opposite ways the cranking-airflow setting bites post-start, both fixed *here*, not with ASE:
+  - **Too low / throttle slams to a lower idle TPS** → air deficit ASE can't cover → post-start
+    **stall** ([idle_stall.md §B](idle_stall.md)); fix with an elevated post-start target.
+  - **Too high (esp. hot)** → because the cranking airflow is **held open-loop through catch** (the
+    PID is gated off for `idleControlAfterstartDelay`), it becomes the **flare setpoint** and the
+    engine over-revs then under-damps into a sag. Lower the hot bins. Full root cause + lever order:
+    [engine_start.md → Hot-restart flare → sag](engine_start.md#hot-restart-flare--sag-root-cause--levers).
 - **Live values:** [airflow_actuator.md → Cranking airflow](../supra/notes/airflow_actuator.md).
 - **Principle:** [P5](#p5-cranking--active-handoff-the-manifold-time-constant).
 
@@ -219,7 +223,10 @@ one cell empirically first.
   forced shut, next load step can't refill fast enough → stall (hot-soak version:
   [idle_hot_drift_pid_windup.md](idle_hot_drift_pid_windup.md); slow-droop version:
   [idle_stall.md §G](idle_stall.md)). PID clamped too low → can't hold a return-to-idle dip
-  ([idle_stall.md §H](idle_stall.md)). Remember the PID **cannot** fix combustion instability
+  ([idle_stall.md §H](idle_stall.md)). **`KD`=0 + the ~750 ms DBW lag → an under-damped single swing
+  on any large transient** (e.g. the post-start flare→sag:
+  [engine_start.md → Hot-restart flare → sag](engine_start.md#hot-restart-flare--sag-root-cause--levers));
+  a small KD is the derivative brake. Remember the PID **cannot** fix combustion instability
   (P1) — unstable λ reads as RPM noise no airflow authority can smooth.
 - **Live values:** [airflow_actuator.md → Airflow PID](../supra/notes/airflow_actuator.md).
 - **Principle:** [P2](#p2-the-emu-black-two-pid-idle-architecture), [P3](#p3-feed-forward-should-be-conservative-the-pid-does-the-rest).
@@ -342,12 +349,15 @@ idle is ~740 ms (Kiencke & Nielsen §3.2.6), so a *step* in commanded air at the
 multiple time constants to settle and shows up as an RPM disturbance. The fix is to pre-position
 the throttle during cranking so the handoff is **stepless** — match the **TPS the idle controller
 will land on for that start**. The engine catches into the **afterstart-elevated** RPM, not steady
-idle, so take the active-airflow % at `idle target + afterstart RPM increase` for that temperature
-(hot start → hot idle target + small bump; cold start → cold idle target + bump, the top of the
-active-airflow range, e.g. 1500 rpm), translate it to TPS through the actuator range, and set the
-cranking **DC** to the duty that produces that TPS plus a couple DC (`airflow % → TPS → DC %`).
-`idleCrankingDC` is a DBW duty cycle, so it
-can't take the airflow % directly. See the cranking and active-airflow settings blocks below.
+idle, so set `idleCrankingDC` to the active-airflow % at `idle target + afterstart RPM increase`
+for that temperature (hot start → hot idle target + small bump; cold start → cold idle target +
+bump, the top of the active-airflow range, e.g. 1500 rpm), plus a small margin so the first idle
+correction is a gentle pull-down. `idleCrankingDC` is itself an **airflow %** (same unit as the
+active table — confirmed fw v59; the "DC" name is historical), so it's a **direct match**, no
+TPS/duty back-calc. **Caveat:** that margin is *held open-loop* through catch (PID gated for
+`idleControlAfterstartDelay`), so an over-high hot value becomes the flare setpoint — see
+[engine_start.md → Hot-restart flare → sag](engine_start.md#hot-restart-flare--sag-root-cause--levers).
+See the cranking and active-airflow settings blocks below.
 
 ---
 
