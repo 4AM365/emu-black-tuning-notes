@@ -128,7 +128,7 @@ protection = df[df['Engine protection code'] != 0]
 | `Ignition Angle` | degrees BTDC; sudden advance = idle recovery attempt |
 | `Ignition From Table` | base table value; compare to `Ignition Angle` to see corrections |
 | `I.Idle` | idle ignition correction; ECU retards/advances to hold target RPM |
-| `Knock Level Peak` | V; compare against `Knock Engine Noise` to assess S/N |
+| `Knock Level Peak` | V; **may read 0 in every row on this build (fw v59) — channel not populated.** When it does, get the real knock energy from the per-cylinder `Knock voltage peak cyl 1..N` channels instead (live and per-cyl); `Knock Engine Noise` is the gain/floor reference. |
 | `Knock ign retard cyl 1–8` | per-cylinder retard in degrees; non-zero = knock detected |
 | `Knock count` | cumulative; rising = knock protection active |
 | `Spark cut percent` | non-zero = active spark cut (rev limiter, TC, etc.) |
@@ -165,13 +165,21 @@ protection = df[df['Engine protection code'] != 0]
 | `VVT CAM1 angle` | intake cam position degrees |
 | `VVT CAM1 angle target` | requested position |
 | `VVT CAM1 solenoid DC` | oil pressure solenoid duty cycle |
-| `VVT CAM1 status` | 0=OK, 1=error (cam not reaching target), 2=moving wrong direction, 3=disabled/locked out |
+| `VVT CAM1 status` | **State enum (firmware), NOT a simple OK/error flag.** Empirically on this build (fw v59): `1`=start/cranking, `2`=transitioning, `3`=below the closed-loop CLT threshold (`vvtCam1MinCoolantTemp`=88 °C → open-loop/inhibited), `5`=closed-loop active, `0`=not configured (e.g. `VVT CAM 2 status`). A nonzero value is **NORMAL**, not a fault. Judge cam health by `\|VVT CAM1 angle − VVT CAM1 angle target\|` tracking (≈1.4° mean when CLT>88 on this build), never by this channel alone. |
 
 ### Tier 7: sensor validation (status channels)
 
-Most sensor channels have a paired `*status` field: 0 = OK, 1 = fault.
-Check: `CLT status`, `IAT status`, `MAP status`, `Fuel press. status`,
-`Engine oil pressure status`, `TPS main status`, `PPS main status`.
+**Polarity is the OPPOSITE of the obvious reading — verified empirically on fw v59, 2026-06-13.**
+A `*status` field reads `1` in **every** sample for sensors that are installed and valid,
+and `0` for sensors not present/configured. So **`1` = present & valid (OK), `0` = absent/not
+configured** — NOT "0=OK, 1=fault." On the Supra log, all of `CLT status`, `IAT status`,
+`MAP status`, `TPS main status`, `PPS main status`, `Fuel press. status`,
+`Engine oil pressure status`, `Fuel temp. status`, `Pre IC temp. status`, `Back press. status`,
+`FF status` read `1` for all 17,298 rows during a clean 692 s drive (they are NOT all faulted).
+Channels reading `0` (AC, diff/gearbox/PS temps, crankcase, BARO-internal, CAM2…) are simply
+not on the car. Some status channels carry a **richer state enum** (`VVT CAM1 status`,
+`Knock action status`, `Overrun status`, `Pre throttle boost sensor status`) — treat any
+nonzero as a STATE, and confirm a fault against the actual sensor value before flagging it.
 
 ---
 
