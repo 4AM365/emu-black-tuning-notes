@@ -29,13 +29,47 @@ A constant front-to-rear trim delta holds at EVERY load cell because all tables 
 load shape. This build's actual per-cylinder trim percentages and worked profile are in
 `supra/notes/`.
 
-## Load shape (per table)
-Apply a per-table load shape of the form `M + [-1,+1,0,0,-1]`: a small **cruise bump**
-(peak at the cruise load bin), tapering -1 at idle and at full boost. Rationale: FFIM
-maldistribution is worst at cruise (inertia/resonance dominated) and eases under boost
-(boost forces even filling). Keep it mild (+/-1) and RPM-flat unless data supports more.
-Future refinement: add RPM dependence (maldistribution worsens with airflow) once more EGT
-data exists.
+## Load/RPM shape — the harmonic (acoustic) reinterpretation
+The per-cylinder modulation (the small **bump** on top of the geometric DC bias) is an
+intake **acoustic resonance** effect, and resonance lives on the **RPM axis**, not the load
+axis. Grounding: Heywood (VE is set by intake gas dynamics, `corpus/ice_fundamentals.md`
+§2.10/6.2); Bell runner-length-vs-speed + symmetry→equal distribution
+(`maximum-boost/chapter-06-intake-manifold.md` L67–82); Bell wave/inertia tuning is
+RPM-tuned and sharp near resonance (`corpus/four_stroke_performance.md` L4602–4612). The
+per-cylinder *synthesis* below is reasoned from those blocks (model knowledge), not quoted.
+
+Two gas-dynamic mechanisms make VE — and the cylinder-to-cylinder SPREAD — speed-dependent:
+- **Inertial ram:** broadband, grows with port velocity; rams charge past the valve after BDC.
+- **Acoustic / Helmholtz tuning:** narrowband, RPM-selective. The runner+plenum resonator
+  returns a pressure wave to the valve near IVC, peaking VE at a discrete resonance RPM
+  (`f ≈ a/4L` organ-pipe; `f_H = (a/2π)√(A/(V·L))` Helmholtz). One intake event per cyl per
+  two crank revs sets the engine-order link from acoustic frequency to RPM.
+
+On a **shared-plenum inline-6** (central throttle, log plenum — the FFIM case) each runner
+taps the plenum at a different axial station, so each intake valve sees a different
+phase/amplitude of the plenum standing wave at IVC → different trapped mass per cylinder.
+That difference IS the maldistribution; it **peaks at the plenum/runner resonance RPM** and
+can change sign across resonances. End cylinders sit near pressure antinodes, center near nodes.
+
+Consequences for the trim tables:
+- **Geometric DC bias** (mean front-to-rear split, fuel fall-out, heat) is ~RPM- and
+  ~MAP-independent → hold it CONSTANT across the whole table.
+- **Modulation** is RPM-resonant: it belongs **down the RPM axis**, peaking in the resonant
+  band and tapering above it — NOT spread across the load axis, and NOT a monotonic
+  "worsens with airflow" ramp (this supersedes the earlier future-refinement guess).
+- **~Flat across MAP at fixed RPM:** resonance RPM is set by geometry and sound speed
+  `a=√(γRT)` — by charge *temperature*, not manifold *pressure*. Higher MAP raises wave
+  amplitude slightly (stronger effect) but barely moves the resonance RPM; charge-temp
+  (heat-soak, un-intercooled boost) nudges it UP a little (∝√T).
+- **Load is the wrong axis for it, especially in boost:** above ~4500 rpm a turbo can hold
+  any MAP at any RPM, so MAP stops proxying RPM. A resonance encoded on the load axis smears
+  across unrelated RPMs. Encode it on RPM.
+
+Net: the genuinely-3D-correct table is approximately the **transpose** of a load-swept
+build — near-constant in MAP, varying down RPM with a resonant hump. **Locate the hump
+empirically** from per-cylinder lambda (or EGT) spread vs RPM in a steady log; do not infer
+it from where a load-line build happened to place the bump. Until then, RPM-flat (DC only)
+is the honest default — a wrong-axis ramp is worse than none.
 
 ## Output / assignment
 Export one `.emubt` with the 4 `fuelTrimNTable` symbols. Assign each cylinder to a table
