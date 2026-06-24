@@ -45,9 +45,12 @@ Physics/principle deep-dives the pages link into (not software pages):
 - [idle_hot_drift_pid_windup.md](idle_hot_drift_pid_windup.md) — two-PID idle architecture + windup fix
 - [idle_stall.md](idle_stall.md) · [return_to_idle_bog.md](return_to_idle_bog.md) — idle diagnostics
 - [timing.md](timing.md) — MBT tables + cruise/boost/VVT methodology
+- [knock_frequency.md](knock_frequency.md) — bore → knock band; the `900` constant; Bessel-root modes (1.66×/2.08×, not integer harmonics); fuel/CR sensitivity
 - [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — knock variance as a uniformity proxy
 - [lambda_target_vs_load.md](lambda_target_vs_load.md) · [flex_fuel_ethanol_compensation_blend.md](flex_fuel_ethanol_compensation_blend.md) · [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md) · [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md)
 - [throttle_feel.md](throttle_feel.md) · [throttle_body_thermal_growth.md](throttle_body_thermal_growth.md) · [stuck_throttle_protection_brake_boost.md](stuck_throttle_protection_brake_boost.md)
+- [exhaust_noise_tuning.md](exhaust_noise_tuning.md) — what sets the exhaust note (source × filter); material/bore/cam/resonator levers
+- [piston_valve_clearance_cam_advance.md](piston_valve_clearance_cam_advance.md) — V-P clearance geometry; stock 2JZ-GTE ~9.5mm (non-interference); GSC S2 full-lift exposure & cam-advance tolerance
 - [hood_removal_charge_temps.md](hood_removal_charge_temps.md) · [denso-coils.md](denso-coils.md)
 
 Car-specific live values live in [`../supra/notes/`](../supra/notes/).
