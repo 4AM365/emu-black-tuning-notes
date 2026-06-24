@@ -70,21 +70,32 @@ move up a mode, multiply the fundamental by **1.66** (2nd) or **2.08** (3rd).
 
 ## 4. Knock-frequency table — common bores × modes
 
-`F₁ = 900/(π·R)`, then `F₂ = F₁ × 1.66`, `F₃ = F₁ × 2.08` (using exact Bessel ratios 1.6589 / 2.0811).
+`F₁ = 900/(π·R) = 572.96 / bore(mm)`, then `F₂ = F₁ × 1.66`, `F₃ = F₁ × 2.08` (exact Bessel ratios
+1.6589 / 2.0811). Sorted by bore; all values in **kHz**.
 
-| Engine | Bore (mm) | Mode 1 (×1.00) | Mode 2 (×1.66) | Mode 3 (×2.08) |
-|--------|-----------|----------------|----------------|----------------|
-| Honda K20 (K-series) | 86.0 | 6.66 kHz | 11.05 kHz | 13.86 kHz |
-| Honda K24 (K-series) | 87.0 | 6.59 kHz | 10.93 kHz | 13.71 kHz |
-| Toyota 2JZ-GTE | 86.0 | 6.66 kHz | 11.05 kHz | 13.86 kHz |
-| Toyota 1JZ-GTE | 86.0 | 6.66 kHz | 11.05 kHz | 13.86 kHz |
-| Nissan RB25DET | 86.0 | 6.66 kHz | 11.05 kHz | 13.86 kHz |
-| Nissan RB26DETT | 86.0 | 6.66 kHz | 11.05 kHz | 13.86 kHz |
-| Chevy SBC 350 (4.00″) | 101.6 | 5.64 kHz | 9.36 kHz | 11.74 kHz |
+| Engine | Bore (mm) | Mode 1 ×1.00 | Mode 2 ×1.66 | Mode 3 ×2.08 |
+|--------|-----------|--------------|--------------|--------------|
+| Honda Goldwing GL1800 (flat-6) | 74.0 | 7.74 | 12.85 | 16.11 |
+| Honda B-series (B16 / B18C) | 81.0 | 7.07 | 11.73 | 14.72 |
+| Mitsubishi 4G63 (Evo / DSM) | 85.0 | 6.74 | 11.18 | 14.03 |
+| Honda K20 · Nissan SR20DET | 86.0 | 6.66 | 11.05 | 13.86 |
+| Toyota 2JZ-GTE · 1JZ-GTE | 86.0 | 6.66 | 11.05 | 13.86 |
+| Nissan RB25DET · RB26DETT | 86.0 | 6.66 | 11.05 | 13.86 |
+| Honda K24 (K-series) | 87.0 | 6.59 | 10.93 | 13.71 |
+| Ford Coyote 5.0 | 92.2 | 6.21 | 10.31 | 12.93 |
+| Nissan VR38DETT (R35 GT-R) | 95.5 | 6.00 | 9.95 | 12.49 |
+| GM LS1 / LS6 (5.7L) | 99.0 | 5.79 | 9.60 | 12.04 |
+| Subaru EJ25 (WRX / STI) | 99.5 | 5.76 | 9.55 | 11.98 |
+| Toyota 1FZ-FE (Land Cruiser) | 100.0 | 5.73 | 9.50 | 11.92 |
+| Chevy SBC 350 (4.00″) | 101.6 | 5.64 | 9.36 | 11.74 |
 
-> The four JDM inline-sixes (2JZ, 1JZ, RB25, RB26) and the K20 **all share an 86 mm bore**, so they
-> have identical knock bands — 6.66 kHz fundamental. Only bore matters; displacement/stroke/CR don't
-> (see §5). K24 and the big-bore SBC are the only ones that move.
+> **Bore is the whole story.** The K20, SR20DET, and the four JDM inline-sixes (2JZ, 1JZ, RB25, RB26)
+> all share an **86 mm bore** → identical 6.66 kHz fundamental regardless of displacement, stroke, or
+> CR (see §5). Across this entire list the fundamental only spans ~5.6–7.7 kHz.
+>
+> *Goldwing:* 2001–2017 GL1800 = 74 mm (7.74 kHz); 2018+ GL1800 = 73 mm (7.85 kHz) — same band in
+> practice. *1FZ-FE:* factory 100 × 95 mm. *LS varies by displacement* — the 6.2L LS3 is 103.25 mm
+> (~5.55 kHz). A typical few-thou overbore moves any of these <1% — ignore it.
 
 ## 5. What moves the band — and why bore is the only one that matters
 
