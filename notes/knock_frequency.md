@@ -86,21 +86,51 @@ move up a mode, multiply the fundamental by **1.66** (2nd) or **2.08** (3rd).
 > have identical knock bands — 6.66 kHz fundamental. Only bore matters; displacement/stroke/CR don't
 > (see §5). K24 and the big-bore SBC are the only ones that move.
 
-## 5. Sensitivity — fuel and CR barely move it; bore dominates
+## 5. What moves the band — and why bore is the only one that matters
 
-Because `f ∝ c` and `c = √(γ·R_u·T / M)`, only the burned-gas sound speed can shift the band once bore
-is fixed. Both common build changes are **sub-2%** — inside the skirt of any reasonable filter band:
+```
+KNOCK FREQUENCY
+│
+└─ Draper eq:   f = α · c / (π · B)
+   │
+   ├─ B  bore ........................ DOMINANT — this sets the band
+   │
+   ├─ α  Bessel-function root ........ exact mode selector (×1.00 / 1.66 / 2.08)
+   │
+   └─ c  speed of sound (burned gas) = √(γ · Rᵤ · T / M)
+      │
+      ├─ CR ......................... via charge temperature T ............... negligible  (~0.4%)
+      │
+      ├─ water injection ........... via charge temperature T (latent heat) .. largest 2nd-order (~1–4%)
+      │
+      └─ γ  ratio of specific heats
+         │
+         ├─ humidity ............... negligible  (<0.5%)
+         │
+         └─ fuel (ethanol) ........ minor       (~1.5%)
+```
 
-- **Pump gas → ethanol (E85/E100):** burned-gas `c` drops **~1.5%** (≈ −100 Hz on a 2JZ). Lower flame
+Because `f ∝ c` and `c = √(γ·Rᵤ·T / M)`, only burned-gas sound speed can shift the band once bore is
+fixed — and every secondary input is small enough to live inside the skirt of a normal filter band:
+
+- **CR 9 → 10 (or back):** `c` moves **~+0.4%** (≈ +25 Hz on a 2JZ). Pressure cancels in an ideal gas;
+  CR only raises the compressed-charge baseline ~18 K, and combustion adds a roughly fixed ΔT on top,
+  so burned-gas temperature barely shifts.
+- **Ambient humidity:** **<0.5%**. Even saturated intake air is only ~3–4 mol% water; its competing
+  effects (slightly lower γ and flame temp, slightly lighter products) nearly cancel.
+- **Pump gas → ethanol (E85/E100):** burned-gas `c` drops **~1.5%** (≈ −100 Hz). Lower flame
   temperature (~80–100 K, plus charge cooling) drops `c`; partly offset by lighter, water-rich
   products (ethanol products M≈28.1 vs gasoline 28.6 → +0.9%) and a slightly lower γ.
-- **CR 9 → 10 (or back):** `c` moves **~+0.4%** (≈ +25 Hz). Pressure cancels in an ideal gas; CR only
-  raises the compressed-charge baseline ~18 K, and combustion adds a roughly fixed ΔT on top, so the
-  burned-gas temperature barely shifts.
+- **Water / water-meth injection:** the **largest** of the secondary effects, but still **~1–4%**
+  (≈ −70 to −270 Hz at aggressive rates). Water's latent heat (~2.26 MJ/kg, ~6× gasoline) is the whole
+  point — it attacks charge and flame temperature hard, dropping `c` via √T. Partly self-cancelling:
+  the light water molecule (M=18) lowers burned-gas molar mass (raises `c`) and lowers γ. Net a few
+  percent lower at heavy rates — bigger than ethanol, but still inside a normally-chosen band.
 
-**Practical upshot:** set the band once from the bore (`6.66 kHz` for the 86 mm sixes). It covers
-every fuel blend and CR you'll run — important for the flex-fuel Supra (0–100% ethanol by fill-up):
-**no fuel-dependent knock frequency is needed.** Bore dominates by ~50×; everything else is noise.
+**Practical upshot:** set the band once from the bore (`6.66 kHz` for the 86 mm sixes). It covers every
+fuel blend, CR, humidity, and water-injection state you'll run — important for the flex-fuel Supra
+(0–100% ethanol by fill-up): **no fuel- or condition-dependent knock frequency is needed.** Bore
+dominates by ~50×; the rest never leaves the filter band.
 
 *(γ≈1.27 / T≈2400 K burned-gas assumptions are standard thermo, not a corpus table; the stoich
 product molar masses and `c=√(γRT)` form are exact.)*
