@@ -24,6 +24,27 @@ Therefore `veTable2 < veTable` at high load is expected behavior, not a defect.
 - Charge cooling is a real effect, but on this ECU it is not expressed as "ethanol VE
   higher than pump VE." Don't expect that signature.
 
+## Where the ethanol stoich/density fuel actually lives (NOT in VE2)
+
+The big ethanol fuel increase (~+57% at E100, ~+44% at E85 — the 14.7/9.0 stoich mass
+ratio less the density offset) is applied **automatically from ethanol content by a
+dedicated fuel correction, separate from the VE table.** This is why `veTable2 ≈ veTable`
+(or even `<`) is normal: VE2 only carries the *residual* dosing trim, not the stoich.
+
+- **V3 firmware:** table **`ethanolFuelScale`** indexed by **`ethanol10Bins`** (E0→E100).
+  Verified on the Supra V3 tune: raw `0 E 1D 2D 43 57 6C 85 A2 C2 E3` → at ×0.25 scale
+  gives E0=0%, E50≈+22%, E85≈+44%, **E100=0xE3=227 ≈ +57%**. (Confirm the 0.25 scale in EMU.)
+- **V2 firmware (e.g. project v2.175, Andrew's car):** the table doesn't exist; the
+  equivalent is a single scalar **`ethanolScaleFactor`** (V2-only; V3 replaced it with the
+  table above). Andrew's value `16400` most likely decodes ÷10000 = **1.64×** (up to +64%
+  fuel at E100, interpolated by ethanol %). **Read the displayed value in EMU to confirm:**
+  ~1.6 = correction active (VE2≈VE1 correct); ~1.0 = effectively off (then VE2 would have to
+  carry stoich and the car leans on ethanol).
+
+**Consequence / trap:** with `ethanolScaleFactor`/`ethanolFuelScale` active, do NOT bulk-add
+the ~50% to `veTable2` — it double-counts and runs dangerously rich. The "VE2 should be ~57%
+richer than VE1" instinct misattributes the stoich correction to the VE map.
+
 ## Still worth a real check (for the right reason)
 
 If the available logs were captured at low ethanol content, the flex blend weights the

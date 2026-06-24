@@ -60,3 +60,4 @@ Synthesised throughout the notes:
 - Heywood, *Internal Combustion Engine Fundamentals*
 - Bell (Graham), *Four-Stroke Performance Tuning*
 - Bell (Corky), *Maximum Boost*
+- Munjal, *Acoustics of Ducts and Mufflers* (2nd ed.) — exhaust/muffler acoustics (filter side)
