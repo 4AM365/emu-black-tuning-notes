@@ -77,7 +77,7 @@ torque/EGT, not knock. Charge cooling + knock-suppression benefit from enrichmen
 
 ## Related documents
 
-- [knock_frequency.md](knock_frequency.md) — bore → knock band, the `900` constant, Bessel-root modes (1.66×/2.08×), fuel/CR sensitivity
+- [knock_frequency.md](knock_frequency.md) — bore → knock band, the `900` constant, Bessel-root modes (1.66×/2.08×), fuel/CR/humidity/water-injection sensitivity (all sub-band)
 - [knock_voltage_cov_combustion_stability.md](../ai-analysis-skills/knock_voltage_cov_combustion_stability.md) — CoV-from-knock method (K1)
 - [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — variance as uniformity proxy (K2)
 - [ignition.md](ignition.md) — the timing tables knock constrains
