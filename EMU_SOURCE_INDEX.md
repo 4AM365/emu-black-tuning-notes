@@ -22,6 +22,7 @@ Rule of thumb: **referring to a repo name = referring to `BASE\EMU_BLACK_V3\<rep
 | `bradley` | Bradley's 1JZ | `BASE\EMU_BLACK_V3\bradley` | `BASE\EMU_BLACK\bradley-1jz` |
 | `land cruiser` / `fj80` | FJ80 Land Cruiser 1FZ-FE | `BASE\EMU_BLACK_V3\Land Cruiser` | — |
 | `napier` / `gs300` | Napier GS300 | — | `BASE\EMU_BLACK\Napier_GS300` |
+| `andrew` | Andrew's car (EMU Black, FW project v2.175; BTI CAN gauge) | — | `BASE\EMU_BLACK\andrew` (V1-only) |
 | `base maps` | ECUMaster base/reference maps | `BASE\EMU_BLACK_V3\Base maps` | — |
 | `default` | EMU default project | `BASE\EMU_BLACK_V3\DEFAULT` | `BASE\EMU_BLACK\DEFAULT` |
 | `firmware` | EMU firmware files | `BASE\EMU_BLACK_V3\FIRMWARE` | `BASE\EMU_BLACK\FIRMWARE` |

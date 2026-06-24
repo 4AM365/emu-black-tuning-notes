@@ -42,6 +42,42 @@ The dedicated boost-control document, organized like [idle.md](idle.md):
   out; no VSS gate → boost spike on low-speed re-engagement.
 - **Live values:** build doc.
 
+> #### ⚠ Boost-target reference convention differs between v2 and v3 firmware
+>
+> **The number you type into the Boost Target table is referenced differently depending on
+> firmware generation.** Same physical boost, different table value — get this wrong and you
+> command ~100 kPa (~14.5 psi) more or less than you intend.
+>
+> | Firmware | Table is entered/displayed in | Floor value | "0 boost" cell reads |
+> |---|---|---|---|
+> | **v2** (2.x) | **Absolute kPa** (MAP-referenced) | **100** | `100` |
+> | **v3** (3.x) | **Gauge kPa** (boost above atmosphere) | **0** | `0` |
+>
+> - **v2 → enter absolute.** To command *X* kPa of gauge boost, type **`100 + X`**.
+>   30.5 psi (210 kPa gauge) → enter **310**. The table cannot go below 100 (= atmospheric =
+>   0 boost). The **logged `Boost target` channel is still gauge** — that cell logs 210 / 2.1 bar
+>   / 30.5 psi, only the table-entry number is absolute.
+> - **v3 → enter gauge.** Type the boost-above-atmosphere value directly. 210 kPa gauge →
+>   enter **210**; closed-throttle / zero-boost cells are **0**.
+>
+> **Conversion factor (either generation):** kPa × 0.145038 = psi; 100 kPa = 1 bar ≈ 14.5 psi.
+>
+> **Practical gotcha:** never copy a Boost Target table between a v2 and a v3 project as-is.
+> v2→v3 subtract 100 from every cell; v3→v2 add 100. A v2 table pasted into v3 commands ~14.5 psi
+> too much everywhere; a v3 table pasted into v2 floors out (every cell clamps up to 100 = 0 boost).
+>
+> **Evidence (verified, not inferred):**
+> - *v2 = absolute:* EMU Black v2 changelog **2.107** (29-09-2019) — overboost-scaling fix:
+>   *"boost target can't be lower than **MAP 100kPa** (means boost = 0kPa/0bar/0psi)."* The floor
+>   is stated in absolute MAP, and the user confirms the live v2 table minimum is **100**.
+> - *v3 = gauge:* [`supra 05292026 v3.xml.emub3`](../supra/tunes/supra%2005292026%20v3.xml.emub3)
+>   (`project version="3.059"`) — `boostTarget1` data starts at **0** in every row
+>   (`0 4 16 21 2D 38 43 4D …`); v3 help ([docs/emu-black-help/Boost.md](../docs/emu-black-help/Boost.md))
+>   states table values *"represent Boost (pressure relative to atmospheric pressure), not MAP."*
+>
+> So ECUMaster switched the Boost Target table's display reference from **absolute (v2)** to
+> **gauge (v3)**, even though the controller's internal/ logged boost quantity was gauge all along.
+
 ### Boost PID
 
 - **What it is.** Closed-loop correction layered on the feed-forward base.
