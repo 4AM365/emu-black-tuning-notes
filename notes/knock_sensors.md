@@ -16,7 +16,7 @@ Organized like [idle.md](idle.md): settings first, then the principles behind th
 - **What it is.** Per-cylinder band-pass window around each combustion event, a rolling baseline,
   and the retard response. Inputs are assigned per cylinder (`ksInputCylinder1..8`).
 - **How to set it.** Assign each cylinder's knock input, set the frequency band to the bore's knock
-  frequency, window it to the combustion event, and set the baseline tracking + retard authority per
+  frequency ([knock_frequency.md](knock_frequency.md) — `F = 900/(π·R)`), window it to the combustion event, and set the baseline tracking + retard authority per
   EMU's knock setup. Confirm the channel is reading combustion (not mechanical noise) before trusting
   it — the knock packet is only above the noise floor in the **boost region**.
 - **Failure modes.** Using knock at **idle** (ring-down energy is tiny, packet buried in
@@ -77,6 +77,7 @@ torque/EGT, not knock. Charge cooling + knock-suppression benefit from enrichmen
 
 ## Related documents
 
+- [knock_frequency.md](knock_frequency.md) — bore → knock band, the `900` constant, Bessel-root modes (1.66×/2.08×), fuel/CR sensitivity
 - [knock_voltage_cov_combustion_stability.md](../ai-analysis-skills/knock_voltage_cov_combustion_stability.md) — CoV-from-knock method (K1)
 - [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — variance as uniformity proxy (K2)
 - [ignition.md](ignition.md) — the timing tables knock constrains
