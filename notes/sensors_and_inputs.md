@@ -50,6 +50,35 @@ assignment (`invertSw*`, latching/mux switches). Set the switch polarity and deb
 *functions* they trigger live on their own pages. **CAN keypads** (switch panels) are on
 [can_serial.md](can_serial.md), not here.
 
+### Primary / cam trigger — VR adaptive threshold (how it works)
+The EMU VR input is an **adaptive-peak-threshold + zero-crossing** conditioner (MAX9924–27 class;
+ECUMaster help: "adaptively adjusts sensitivity, *from 50 mV*"). It does **two separate jobs** — keep
+them separate or the settings won't make sense. Verbatim help text: [docs/emu-black-help/Sensorsandinputs.md](../docs/emu-black-help/Sensorsandinputs.md) (Primary trigger).
+
+- **Zero-crossing = the *timing*.** The edge is taken where the waveform crosses BIAS midpoint —
+  **amplitude-independent**, so timing doesn't drift with signal strength or RPM. (All thresholds are
+  referenced to BIAS.)
+- **Adaptive peak threshold = the *arming gate*.** A zero-crossing is only accepted as a real tooth if
+  the signal first cleared an arming level that **tracks a fraction of the recent peak**: high RPM → big
+  signal → high gate (rejects noise); low RPM → small signal → gate tracks **down** to a **~50 mV
+  floor**. Below the floor, nothing arms → no detection.
+- **`primTrigAdaptive` "strength" Low/High = the gate *level* (fraction of peak), NOT adaptation speed.**
+  High = more noise margin but a sagging tooth (eccentric/non-concentric wheel, or the weak tooth after
+  the gap) can fall below it → **"unexpected missing tooth."** Low = catches weak/varying teeth, less
+  noise margin. ECUMaster: change it "when the signal varies (non-centric trigger wheel)."
+- **Pulldown ↔ adaptive threshold interaction (validated):** a pulldown lowers input impedance →
+  rejects noise **and** attenuates the signal; the adaptive gate **tracks the smaller peak down and
+  self-compensates** the attenuation, while zero-crossing keeps timing intact. The **only** limit is the
+  50 mV floor — too strong a pulldown attenuates the weakest (cranking) signal below it → no sync. That
+  is exactly ECUMaster's "**1K pulldown, 4K7 if no signal during cranking with 1K**."
+- **Pulldown value axis:** lower R (1K) = **more** noise rejection but more loading; higher R (4K7) =
+  gentler load / safer cranking but **less** rejection. (So "4K7 = less interference" is true only for
+  *loading*, not for *rejection* — 1K rejects more.) The generic "never pull a VR, it biases the
+  waveform" rule is for **fixed-threshold** inputs; it doesn't apply to this BIAS-referenced
+  zero-crossing input, which is why ECUMaster recommends the pulldown.
+- **Input filter is last resort:** rolling-average low-pass, adds latency; "the lower the better." A
+  series ~10K resistor is the documented fix for low-RPM *logged* unexpected-missing-tooth errors.
+
 ---
 
 # Part 2 — Principles

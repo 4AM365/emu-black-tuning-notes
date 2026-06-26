@@ -18,6 +18,33 @@ Always start from a log that captures the event (see [idle_stall.md Step 0](idle
 
 ---
 
+## Rule it out FIRST: a cam-sync (phase) loss masquerading as an airflow bog
+
+Before reaching for any airflow/VE lever below, confirm the engine **held cam-to-crank sync through the dip**. A momentary loss of sync produces a bog that is *visually identical* to an airflow stall — RPM craters to a low floor then over-recovers — but no calibration change can fix it.
+
+**`Trigger error count` = 0 does NOT mean sync was held**, and the loss is usually **not** the crank teeth dropping out. `Trigger sync status` is the **cam↔crank sync** state (2 = full sync, 0 = lost), not "are the crank teeth present." On a VVT engine the most likely cause is an **unstable VVT sync cam**: the intake cam (which is also the sync cam) is held off its lock pin at idle and hunts, so its sync edge wanders — and on the decel into idle that wandering edge misses its expected primary tooth and the ECU dumps full sync.
+
+**Do not mis-read the recovery as the cause.** After a full sync loss the ECU drops into cranking-mode re-acquisition: it batch-fires, **locks to the first sync it sees** (a provisional tooth — e.g. 21), then once RPM passes `crankingThreshold` it **resolves the true tooth and pops over** (e.g. to 57). So a `CAM sync trigger tooth` excursion like 57→21→57 (and the `VVT CAM angle` reading garbage such as the `vvtCam1TriggerOffset` constant, 417°, mid-recovery) is the **re-acquire signature, not a causal phase flip**. The cause is whatever dropped full sync one sample earlier.
+
+Signature of the loss + recovery (downstream cascade is identical regardless of trigger cause):
+
+- `Trigger sync status` 2 → **0**; `Engine runtime` resets large→**0**; `ECU State` 3/4 → **1**; `Executed sparks count`→0, `Injectors PW`→0 (spark+fuel cut while fully unsynced, ~80 ms).
+- Then the cranking-style re-acquire (~160 ms): provisional-tooth lock → promote to true tooth past the cranking threshold. RPM keeps sagging through this.
+- A **cluster of running-gated flags drop to 0 on the same sample** and recover together: `Idle state` 2→0, `Idle control active` 1→0, `Idle air %`→0, `Coolant fan`, `AC Clutch`, `Lambda is valid`. That synchronized multi-flag drop is the tell — idle logic alone never does it. Idle control gating off is what yanks the air and drives the DBW closed; recovery overshoots.
+
+**Why it shows up on the decel into idle, every drive — the VVT sync-cam mechanism:** the cam-sync tooth-deviation tolerance **must be 0 on a multitooth primary**, so there is *zero* slack for the sync cam edge to move off its expected tooth. If the VVT intake cam (the sync cam) is commanded to a small non-zero angle at idle, it sits **off its lock pin** on marginal low-RPM/low-oil-pressure control and hunts several degrees (look for `VVT CAM angle` with a wide min–max band and the solenoid DC thrashing at a flat target). On the fast coast-down — tooth periods stretching, cam edge wandering, oil pressure sagging — the cam pulse lands off its tooth → full sync loss → the re-acquire above → idle-control-off cascade → bog.
+
+**Separate the cam side from the crank side before picking a lever.** First confirm the cam: is `CAM sync trigger tooth` stable in normal running (not counting the re-acquire excursion) and is `vvtCam1TriggerOffset` correct? If yes, the cam phase is **not** the cause — and the loss fingerprint (`RPM`→0, `Engine runtime` reset) confirms it's the **primary/crank decode** that dropped, not the cam. Two independent, non-conflicting levers:
+
+- **Crank side (the loss itself) — front-end first, filter last:** ECUMaster *strongly recommends a 1K pulldown* on a VR primary trigger (the build was running None). Lowering the input impedance dumps induced interference at the analog front end with **no added latency** — the right first move for a crank-side noise loss. Verify cranking still syncs after (1K loads the sensor most at the lowest-amplitude cranking RPM; step to **4K7** if cranking signal drops). Pair with shielded cable, shield grounded **one end only**. Only if noise persists, probe `primTrigInputFilter` none→low→medium — it adds delay and only rejects *added* edges, so it's diagnostic (kills the loss ⇒ interference; no effect ⇒ a true *dropped* edge = VR amplitude/air-gap, which neither pulldown nor filter recovers) and risks high-RPM misfire (verify on a redline pull: `Trigger error count` stays 0, `Trigger sync status` stays 2). A ~10K **series** resistor is the documented remedy for low-RPM unexpected-missing-tooth VR errors specifically.
+- **Cam side (idle stability, worth doing regardless):** if the VVT sync cam is commanded off 0° at idle it sits off its lock pin and hunts (wide `VVT CAM angle` min–max, solenoid DC thrashing at a flat target). Command **0° at idle** so it parks on the lock pin — steadier idle (0° overlap) and a dead-stable sync edge. Removes a perturbation even if the tooth wasn't visibly fluctuating.
+
+**Never lower `disableCamSyncOver` on a VVT engine.** Disabling cam sync stops the **cam-angle calculation** (cam sync runs every revolution to compute it), so it must stay enabled — it is not a lever here. The adaptive threshold (a crank-amplitude knob) is also not it. The airflow/VE levers below smooth the *recovery* but will not prevent a sync-initiated bog.
+
+> Confirmed instance: `cold idle dip again 3 all channels.csv`, log-rel t≈26.2 s — full sync loss (`Trigger sync status` 2→0, `Engine runtime` 402→0, sparks+fuel zeroed), then the cranking re-acquire signature `CAM sync trigger tooth` 57→21→57 and `VVT CAM1 angle`→417/362 garbage (recovery artifacts, **not** the cause); idle air 42%→0; floor 720 RPM; over-recovery to 1513. Same 720/1513 fingerprint as the lower-channel `cold idle dip again 2.csv` export (same physical event), recurring most drives at this decel-to-idle region. **Root cause traced to the VVT sync cam:** commanded 2.5° at idle, held off its lock pin, hunting −0.5°→+4.5° (std 1.47°) with solenoid DC thrashing 2–48% at a flat target — the wandering sync edge misses its tooth on the oil-pressure-sagging decel. Owner's fix: command 0° cam at idle so it parks on the lock pin.
+
+---
+
 ## The two root causes, in one place
 
 Return-to-idle bog is almost always one (or both) of:
