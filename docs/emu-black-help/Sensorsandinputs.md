@@ -176,7 +176,14 @@ To check if the sensor is connected correctly, you can use the Scope function in
 
 **In case of issues with the VR sensor signal (e.g., trigger errors like unexpected missing tooth for patterns with a missing tooth) occurring at rotations below the expected RPM limit, one can try connecting in series with the sensor signal a resistor with a resistance of approximately 10K.
 
-{#1}
+{#1} — Primary trigger parameter table (captured from the in-software help):
+
+| Name | Description |
+|---|---|
+| **Sensor type** | VR sensor — select when your sensor is inductive. HALL sensor — select when your sensor is hall or optical. |
+| **Adaptive threshold** | In the case of VR sensors it is possible to change the strength of the adaptive threshold. When the signal varies (e.g. a non-centric trigger wheel) changing this setting can help. |
+| **Pullup/Pulldown** | For VR sensor we **strongly recommend 1K pulldown** (4K7 if there is no signal during cranking with 1K). For Hall sensor pullup 1K is advised. |
+| **Input filter** | Enables low-pass filter. For the Hall sensor, we recommend not using any filter. For VR sensors, use the filter **only when there are signal noise issues**. The lower the filter setting, the better, as it introduces delay in the processed signal. |
 
 **VR SENSOR
 
