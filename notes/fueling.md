@@ -158,6 +158,34 @@ The dedicated fueling document, organized like [idle.md](idle.md):
   See [throttle_feel.md](throttle_feel.md), [return_to_idle_bog.md](return_to_idle_bog.md).
 - **Live values:** build doc.
 
+### Fuel rail / base pressure — `fuelRailType` / `fuelRailBasepressure` (+ `fuelPressureInput`)
+
+- **What they are.** `fuelRailBasepressure` is the regulator's **set differential at the reference
+  condition** (manifold = atmospheric — i.e. key-on, pump primed, engine dead). It is **not** the
+  pressure you read at idle. `fuelRailType` picks the regulator model (fixed vs MAP-referenced) and
+  whether a sensor on `fuelPressureInput` drives **active** correction.
+- **How to set it.** Base pressure must be the **engine-off, pump-primed** rail reading (no vacuum,
+  no boost). Critically, `injectorsSize` is the injector flow **at base pressure** — so base and
+  injector flow are a **matched pair**. ID-style injectors are rated at 3 bar; if you run a 4-bar
+  base you must enter the flow at 4 bar (`Q₄ = Q₃ × √(4/3)`), not the 3-bar number. Set them
+  together or not at all.
+- **Reading the live channels.** `Effective fuel pressure` = the differential the injector actually
+  flows against = rail − manifold; on a 1:1 reg it stays **flat across MAP** (the gauge rail falls
+  under vacuum precisely to hold it). `Fuel pressure error` = effective − base; `Fuel pressure
+  correction` = the √(P_eff/base) flow multiplier applied to PW. A flat `Effective fuel pressure`
+  with a falling gauge rail confirms a healthy MAP-referenced regulator. A *rising* injector
+  differential at idle = failed reference line.
+- **Failure modes.** (1) Reading idle gauge pressure as if it were base — it's base minus your idle
+  vacuum. (2) **Editing base alone** to match a measured rail without re-entering injector flow →
+  drives the model *further* off (see F6). (3) **Enabling active correction on a map that was
+  autotuned with it off** silently shifts the whole map's fueling by √(P_eff/base) — re-verify STFT
+  before driving. (4) A persistent non-zero `Fuel pressure correction` = base/injector pair doesn't
+  match reality (benign if constant — VE absorbs it — but the numbers lie).
+- **Downstream:** injector **dead time** (`injOpeningTimeTbl`) is keyed on *effective fuel pressure*,
+  so it only indexes correctly once base/injector are honest. Calibrate it from the injector's
+  offset table: [injector_deadtime_calibration.md](injector_deadtime_calibration.md).
+- **Live values:** build doc.
+
 ---
 
 # Part 2 — Principles
@@ -237,6 +265,41 @@ is expected, not a defect. The overall map *shape* (load knee, RPM hump) is stil
 physics — but don't use air-VE reasoning to set the absolute pump-vs-ethanol offset; measured
 lambda + mixture intent set it. Full correction: [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md).
 
+## F6. Base pressure is the engine-off differential; injector flow is referenced to it (√ΔP)
+
+Base fuel pressure is the regulator's set **differential** at the reference condition (manifold =
+atmospheric: key-on, pump primed, engine dead) — **not** the pressure observed at idle. Two facts
+flow from this and govern every fuel-pressure edit:
+
+- **A MAP-referenced (1:1) regulator holds the injector differential constant.** Its dome vents to
+  the manifold, so under idle vacuum the *gauge* rail pressure falls by exactly the vacuum amount
+  while rail − manifold stays at base. A gauge drop at idle is correct; the drop magnitude equals
+  your idle vacuum. The flow-relevant quantity (`Effective fuel pressure`) is flat across MAP. A
+  *fixed* (non-referenced) regulator instead holds gauge constant, so its injector differential
+  *rises* under vacuum and the dose correction varies with MAP.
+- **Injector flow scales with √ΔP, and `injectorsSize` is defined at base pressure.** Actual flow =
+  `injectorsSize × √(P_eff / P_base)`, which is exactly the `Fuel pressure correction` channel.
+  Because the rating is tied to base, **base pressure and injector flow are a matched pair** — an
+  injector rated 1065 cc/min @ 3 bar becomes 1065·√(4/3) ≈ 1230 cc/min @ 4 bar. Change one without
+  the other and the model carries a standing flow error (e.g. base 330 with a 3-bar-rated
+  `injectorsSize` while the rail actually runs 400 ≈ a few-% constant offset; pushing base to 400
+  alone widens it to ~15%).
+
+Consequences for tuning moves:
+
+1. **A constant base/injector mismatch is absorbable** — with a 1:1 reg the offset is constant
+   across MAP, so the VE table (and STFT) eat it and lambda still lands on target. The setup is
+   *functional*; the numbers just don't physically mean what they say. Honest fix = re-enter base
+   and injector flow **together**, then re-verify VE — bookkeeping, not a performance change.
+2. **Enabling active sensor correction re-anchors the fuel model.** It multiplies PW by
+   √(P_eff/base) where it previously assumed P_eff = base. If the VE map was autotuned with
+   correction *off*, switching it on shifts the whole map's fueling — leaner if P_eff > base,
+   richer if below — by that factor. Always re-check STFT/lambda after the toggle; never assume
+   neutral.
+3. **`Effective fuel pressure` is the diagnostic.** Flat across idle→cruise→boost confirms the 1:1
+   reg; its value vs base gives the sign/size of any correction shift; a rising idle differential
+   flags a dead reference line.
+
 ---
 
 ## Map quality & validation
@@ -251,13 +314,76 @@ lambda + mixture intent set it. Full correction: [ve_ethanol_table_charge_coolin
 - **`lambdaDelay`** is active and logged Lambda is time-aligned to its cell, so same-row
   measured-vs-target attribution is valid even under accel.
 
+## Pure-VE transition (2026-06-29)
+
+The Supra is moving from a **fuel-dose-proxy** VE map to a **pure VE map**. Injector data is
+now properly characterized and **fuel-pressure compensation is active**, so injector flow scales
+by the orifice equation (`Q ∝ √ΔP`) and the old map is being **rescaled per-cell** to respect it
+(dead-time + √ΔP vary by pulse width and per-cell ΔP — not a single global factor).
+
+Consequences:
+- Measured `λ/λ_target` now maps **1:1 to air-VE error** — lambda-derived corrections are cleaner
+  than under the dose-proxy model.
+- Air VE is **fuel-independent**, so `veTable2` should converge toward `veTable`; ethanol's
+  stoich/dose difference is carried by the AFR target + injector model, **not** a lower VE number.
+  The old "`veTable2 < veTable` is expected" reasoning no longer holds for this car.
+- Apply log-derived **% deltas to the rescaled base**, not absolute raw values — a multiplicative
+  trim commutes with the orifice rescale (`VE_final = VE_old × rescale × (1+corr)`), so order is
+  free, but the rescaled map is the correct base to trim.
+
+### Physics-consistency test for a pure-VE correction (2026-06-29)
+
+Once the map is pure VE, a log-derived correction is only legitimate if it's genuine **air** error,
+not injector/ΔP error smeared into the air model. Separate two questions:
+
+**(a) Is the surface geometry physical?** A real VE surface must be: concave-rising along MAP
+(steep off idle vacuum as residual dilution/throttling clears, asymptoting to a plateau near WOT —
+slope positive and *decreasing*); smooth/monotonic in RPM up to the breathing peak; continuous at
+the edge where corrected band meets untouched base. The `20260629_1753` smoothed VE1 passed all three
+(e.g. RPM2553 MAP-slopes +8.4/+6.6/+5.1/+3.8/+2.6/+1.7; zero RPM-monotonicity violations in band).
+Tiny reversals (≤0.3%) only in deep-boost base cells we never touched (turbo VE rolloff / texture).
+
+**(b) Is the correction VE-attributable or fuel-system error?** Diagnostic signatures:
+- **Sign-change across load** (rich at low MAP → lean at mid MAP) ⇒ VE-*curvature* error. A scalar
+  fuel error (flow constant, stoich) is single-signed everywhere and cannot flip with load.
+- **Lean worsens with pulse width / load** ⇒ NOT injector deadtime (deadtime error is worst at
+  *short* pulses — the opposite trend).
+- **Rail steady + small FP correction** (`20260629_1753`: mean +1.16%) ⇒ NOT ΔP droop.
+  What survives all three filters is air-shaped → legitimately folds into a pure VE map.
+
+**Provenance (corrected 2026-06-29):** for log `20260629_1753`, the **log is AFTER** the injector
+deadtime fix + FP-comp enable; the **VE map is the old (pre-correction) one**. That is the whole
+point — with fuel *delivery* now trustworthy, residual lambda error isolates VE error cleanly, so
+**both the shape and the level** of the correction are valid and must be applied in full. (The
+earlier "trust shape, level provisional" note assumed the opposite provenance and was wrong.)
+
+**STFT is slow — gate it.** Short-term trim takes up to a few seconds to saturate, so off-idle /
+transient driving it never winds in. Do NOT read the needed enrichment from STFT there; the WBO
+`λ/λ_target` already carries the *full* open-loop deficit. Credit STFT (`deficit = λ_err + STFT`)
+ONLY for samples held at idle/steady-state long enough to saturate (≈3 s). Consequence here: EMU's
+own autotune (STFT-derived) **under-reported** the lean — screenshot showed +2–6% where the direct
+clean-lambda field showed +5–8%. Use the direct field, not the autotune screenshot.
+
+**Parametrization that preserves level (don't dilute a localized correction):** a global
+per-row/col cubic (`full_smooth`) averages a localized +6% bump down toward the un-sampled base
+cells at the ends — it under-applies. Use instead: per-cell **median** clean deficit (N≥20);
+**confidence attenuation** `× min(1, √(N/50))` (tames the sparse, overrun-adjacent low-MAP rich
+pocket and transient high-MAP clips); a **count-weighted local smooth** with heavy self-weight
+(high-N cells barely move) — local averaging preserves the magnitude a global cubic destroys.
+Result on `20260629_1753`: cruise-band lift +5–7% (was diluted to +1.3%), core residual ~1%.
+**Data-coverage limit:** MAP > 93 kPa was lightly/unevenly sampled — corrected conservatively and
+flagged; refine with a log carrying more high-load coverage.
+
 ## Related documents
 
 - [lambda_target_vs_load.md](lambda_target_vs_load.md) — best-torque vs protection, boost rolloff (F2)
 - [flex_fuel_ethanol_compensation_blend.md](flex_fuel_ethanol_compensation_blend.md) — flex blend curve, cold-enrichment blends, ethanol idle (F3)
 - [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md) — FFIM per-cylinder trim (F4)
 - [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md) — VE as dose proxy (F5)
+- Fuel rail / base pressure — engine-off differential, √ΔP injector scaling, active-correction re-anchor (F6, settings block above)
+- [injector_deadtime_calibration.md](injector_deadtime_calibration.md) — `injOpeningTimeTbl` encoding + ID1050X offset → table method
 - [ve_correction_from_log.md](../ai-analysis-skills/ve_correction_from_log.md) / [ve_correctness_from_log_method.md](../ai-analysis-skills/ve_correctness_from_log_method.md) — correct VE from a log
+- [autotune_ve_difference_filtering.md](../ai-analysis-skills/autotune_ve_difference_filtering.md) — gate EMU autotune VE-DIFFERENCE cells against clean log samples (drop tip-in AE + overrun artifacts)
 - [ve_vs_map_at_constant_rpm.md](../ai-analysis-skills/ve_vs_map_at_constant_rpm.md) — VE shaping into boost
 - [ve_idle_region_nonlinearity.md](../ai-analysis-skills/ve_idle_region_nonlinearity.md) — idle knee + delta-overlay smoothing
 - [lambda_tracking_map_smoothing.md](../ai-analysis-skills/lambda_tracking_map_smoothing.md) — map-quality metric

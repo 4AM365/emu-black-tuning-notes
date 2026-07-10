@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="injOpeningTimeTbl" storage="ubyte" width="12" height="4" data="48 41 3A 33 2C 27 23 20 1D 1B 19 17 50 47 3F 36 2E 29 24 21 1E 1C 19 17 56 4D 44 3A 31 2C 27 23 20 1E 1B 19 60 55 4A 3E 33 2D 28 24 21 1E 1B 19 "/>
+  </tables>
+</project>

@@ -64,3 +64,11 @@ see [`supra/notes/idle_session_05242026.md`](../supra/notes/idle_session_0524202
 - A pure driving log has no steady idle to measure even if it logs CLT.
 - **100 Hz exports** sharpen the hunting PSD (Nyquist 50 Hz); still won't give per-cycle
   combustion CoV. Use them for a clean warm-vs-warmup, tune-to-tune comparison.
+
+## Implemented in the analyzer site
+The RPM-jitter metric is coded in [`tools/emub_analysis/cov.py`](../tools/emub_analysis/cov.py)
+(`_rpm_residual` + `compute_cov`) and shown on the **Combustion CoV** calculator page
+(`/cov`, `templates/cov.html`) as `CoV_RPM = std(RPM − 1 s trend)/mean` per region. The page
+labels it drive/idle QUALITY, not COV-of-IMEP, and states the 25 Hz aliasing wall explicitly.
+Note the calculator uses fixed load-region boxes (idle/cruise/high-load), not the steady-segment
+detector here, so a free-driving cruise box also captures shifts/throttle — idle is the clean read.

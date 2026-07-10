@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="dbwCharacteristic1" storage="ubyte" width="10" height="8" data="8 17 2C 43 59 6F 85 9C B2 C8 8 17 2C 43 59 6F 85 9C B2 C8 8 17 2C 43 59 6F 85 9C B2 C8 8 18 30 4A 62 78 8C A0 B4 C8 8 1A 38 58 78 92 A8 B8 C2 C8 8 1C 40 64 88 A4 B6 C0 C6 C8 8 1E 44 6C 92 AE BC C4 C8 C8 8 1E 48 72 9A B4 C0 C6 C8 C8 "/>
+  </tables>
+</project>

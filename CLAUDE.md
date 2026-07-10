@@ -72,6 +72,20 @@ Skill pairing quick-reference:
 - When displaying MAP/RPM tables, show RPM increasing on the Y axis and MAP increasing
   on the X axis. Put RPM labels on the left and MAP labels at the bottom.
 
+## Notes layers — LLM-canonical vs human digests
+
+- `notes/` and `supra/notes/` are the **canonical, LLM-dense layer**: full evidence
+  chains, symbol names, derivations. Written for retrieval; density is a feature.
+- `notes/human/` and `supra/notes/human/` are **derived digests for human reading**:
+  ≤ ~30 lines each, same basename as the canonical note, format = "What this covers /
+  The rules / Key numbers / When to care". They are views, never sources of truth —
+  if a digest and its canonical note disagree, the canonical note wins.
+- **Maintenance rule:** whenever you edit a canonical note, refresh its digest in the
+  same session. Never edit a digest directly; change the canonical note first.
+- Notes under ~25 lines get no digest (already tight); the human index lists them as
+  read-the-original.
+- New knowledge lands in the canonical note first, digest second.
+
 ## Notes and documentation
 
 - When a first-principles derivation or tuning principle surfaces, write it to `notes/`

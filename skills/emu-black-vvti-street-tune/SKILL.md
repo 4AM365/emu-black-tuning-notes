@@ -40,8 +40,25 @@ Do NOT invoke for:
 
 | Signal | What it represents | When it's reliable |
 |---|---|---|
-| **MAP at fixed TPS** | Cylinder filling at a fixed throttle restriction. Higher MAP at the same TPS = more air per cycle = more torque potential. | Steady-state cruise: flat road, constant speed, no wind gusts. Use cruise control or a long highway stretch. |
+| **Injector PW at fixed speed (cruise cells)** | Fresh-air mass per cycle at fixed lambda = direct BSFC proxy. **The cruise ranking signal: minimum PW wins.** | Steady-state cruise, closed loop, WBO valid. Cruise control, flat road. |
+| **MAP at fixed TPS (cruise cells)** | The dilution/trapping balance, NOT trapped air directly. At throttled cruise the throttle dominates: more residual dilution → MAP **rises** + PW falls (pumping-loss relief, the economy winner); more fresh trapping → MAP **falls** + PW rises (tip-in torque). Net torque moves ~nothing (a 5% VE change ≈ ±0.2% torque). Use MAP to attribute the mechanism, PW to rank. | Same conditions. **Do not rank cruise cells by MAP peak** — see warning below. |
+| **MAP at fixed TPS (boost / near-WOT cells)** | Trapped air. With the throttle unrestrictive, VE gains feed the turbine and MAP genuinely rises with filling. **MAP peak wins here.** | Steady load, boost at or below target, gate behavior unchanged across the sweep. |
 | **EGT at fixed everything** | Combustion efficiency. Lower EGT at the same lambda + commanded ignition = more energy extracted as work. | Steady-state, after thermal soak (~30s at the operating point). |
+
+> **⚠ Corrected 2026-07-10 — MAP-peak is NOT the cruise signal.** This skill
+> previously ranked all cells by "higher MAP at fixed TPS = more air." That
+> rationale only holds where the throttle isn't the restriction (boost /
+> near-WOT). At throttled cruise the flow balance inverts it: better fresh
+> filling pulls MAP *down*; more dilution pushes MAP *up* — and the higher-MAP
+> direction is the *economy* winner (shallower vacuum = less pumping work),
+> which is the actual cruise objective. Rank cruise cells by **minimum
+> injector PW at fixed speed**, bounded by combustion stability (smoothness /
+> knock-voltage CoV — dilution has a cliff), and expect the winner to sit at
+> higher MAP/TPS. Then re-sweep ignition: dilution slows the burn, so MBT at
+> the winning cam position moves toward MORE spark advance — skipping that
+> re-phase throws away part of the pumping-loss gain. `analyze_sweep.py`'s
+> MAP ranking is therefore valid for boost/torque cells only; for cruise
+> cells rank by PW and use MAP + PW jointly to attribute the mechanism.
 | **Per-cylinder EGT spread** | Charge distribution uniformity. Tighter spread = cam position not biasing one cylinder. | Requires per-cylinder probes. Use as tiebreaker between close cam positions. |
 | **STFT shift after cam change** | The VE table is now wrong at that cell — needs recorrection. | **Only valid after `Lambda is valid == 1`** (30–60s post-start). Don't try STFT-based VE work until you see the transition. |
 

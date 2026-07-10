@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="vvtiMapBins10" storage="word" width="10" height="1" data="14 23 31 40 4F 5D 6C 98 C4 F0 "/>
+    <symbol name="cam1AdvTbl" storage="sbyte" width="10" height="10" data="5 5 5 2 0 0 0 0 0 0 5 5 5 D 16 19 18 18 14 10 11 11 14 1D 26 28 24 22 1E 18 1B 1C 1E 22 27 28 24 22 1E 1A 1F 20 21 23 24 25 20 1F 1C 18 1C 1C 1D 1E 1E 1E 1C 1B 18 16 14 14 15 16 16 16 14 14 12 10 D D D D D D D C B A 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 "/>
+  </tables>
+</project>

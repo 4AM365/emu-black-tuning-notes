@@ -106,6 +106,20 @@ The default values are a good starting point.
 Activation parameters determine when the idle controller will be activated.
 This depends on the position of the accelerator pedal.
 
+| Name | Description |
+|---|---|
+| Idle On if PPS below | The idle controller will be activated when the accelerator pedal position is below this value. |
+| Idle Off if PPS over | The idle controller will be deactivated when the accelerator pedal position is above this value. This value should be greater than the Idle On if PPS below value, creating hysteresis. |
+| Afterstart delay | The time required for the idle controller to activate after the engine is started. |
+| Open loop over VSS | The vehicle speed above which all PID controllers are disabled and the strategy switches to Open loop mode. The log channel Idle force open loop is set to Yes. |
+| Clutch enables closed loop | In the case where Open loop mode has been enforced, this option allows switching back to Closed loop mode when the clutch pedal is pressed. |
+| Neutral enables closed loop | In the case where Open loop mode has been enforced, this option allows switching back to Closed loop mode when the gear is Neutral. |
+| Idle On if MAP over | The minimum pressure above which idle control can be activated. This parameter allows blocking the idle strategy during engine braking (much lower pressure in the intake manifold compared to during idle control). |
+| Activation mode | In most applications, the activation of Idle control is based on the position of the accelerator pedal. In rare cases (e.g., throttle bodies without a potentiometer, only equipped with a switch), it is possible to use a function that will activate the Idle strategy. |
+| Activation switch | The function used to activate Idle control when the Activation mode is set to Function. |
+
+<!-- Source: EMU Black software help, Idle > Activation. Pasted by Will 2026-06-28 (this section did not scrape; the {#1} below was the empty placeholder). -->
+
 {#1}
 
 

@@ -23,7 +23,10 @@ Usage (standalone)
   python smooth_ve.py
 
 Or import:
-  from smooth_ve import smooth_table, print_table, print_delta, write_csv
+  from smooth_ve import full_smooth, smooth_table, print_table, print_delta, write_csv
+
+  full_smooth(grid)            # fully-populated map, no anchors (machine-smoothed)
+  smooth_table(grid, anchors)  # pin a trusted subset, smooth the rest
 """
 
 from __future__ import annotations
@@ -113,6 +116,44 @@ def smooth_table(
             )
         table[mask] = original[mask]
 
+    return np.round(table, 1)
+
+
+# ─── Full-map smoother (no anchors) ──────────────────────────────────────────
+
+def _fit_1d(v: np.ndarray, degree: int) -> np.ndarray:
+    """Replace every value on a line with its degree-N polynomial fit (weight 1)."""
+    n = len(v)
+    if n <= degree:
+        return v.copy()
+    x = np.linspace(0.0, 1.0, n)
+    return np.polyval(np.polyfit(x, v, degree), x)
+
+
+def full_smooth(
+    original: np.ndarray,
+    degree: int   = 3,
+    n_passes: int = 3,
+) -> np.ndarray:
+    """Smooth a FULLY-POPULATED table that has no separate 'visited' anchor set.
+
+    This is the case when the user hands you a complete, already-autotuned map
+    (e.g. both VE tables straight out of the EMU autotune) and wants the
+    machine-smoothed / autotune generation. Unlike `smooth_table`, NOTHING is
+    pinned: every cell is weight-1 data and every cell is replaced by the
+    degree-N row/column polynomial. Column sweep (RPM axis) then row sweep (load
+    axis), repeated `n_passes` times. Output rounded to 0.1.
+
+    Use `smooth_table` (anchored) instead when only some cells were corrected by
+    a log-based autotune and the rest must be pulled onto the curve around them.
+    """
+    table = original.astype(float).copy()
+    nrow, ncol = table.shape
+    for _ in range(n_passes):
+        for j in range(ncol):
+            table[:, j] = _fit_1d(table[:, j], degree)   # RPM axis
+        for i in range(nrow):
+            table[i, :] = _fit_1d(table[i, :], degree)    # load axis
     return np.round(table, 1)
 
 

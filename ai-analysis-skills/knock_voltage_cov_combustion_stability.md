@@ -35,3 +35,13 @@ Also: no-knock cycles only (`Knocking cylinders == 0` AND cyl-N retard == 0). It
 qualitative proxy, not a calibrated CoV-of-IMEP — use it to rank tunes, not as an absolute.
 Ethanol blend and other uncontrolled run-to-run variables can shift the level, so compare
 maps on like-for-like logs where you can.
+
+## Implemented in the analyzer site
+This method is coded in [`tools/emub_analysis/cov.py`](../tools/emub_analysis/cov.py)
+(`_knock_residual_by_cyl` + `compute_cov`) and surfaced on the **Combustion CoV**
+calculator page (`/cov` route, `templates/cov.html`). The calculator bins by the same
+250 rpm × 10 kPa cells, gates on `Knocking cylinders`/retard, and reports a pooled +
+per-cylinder scatter index per region (idle/cruise/high-load) as a comparative metric —
+NOT pass/failed against the 2–5% band. It bounds by load region rather than the
+transition gate above (that's the calculator's spec); the high-load box is mostly
+transitional so the operating-point detrend carries the discrimination there.

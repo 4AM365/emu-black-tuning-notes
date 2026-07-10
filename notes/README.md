@@ -5,6 +5,11 @@ per top-level software node. Each page leads with **Settings** (the EMU tables f
 closes with the **Principles** behind them, where we have them. The exhaustive, every-symbol catalog
 is [tune_feature_tree.md](tune_feature_tree.md).
 
+**Two layers:** this folder is the canonical, dense layer (written for LLM retrieval — evidence
+chains, symbols, derivations). Tight half-page **human digests** of every substantial note live in
+[`human/`](human/README.md) — read those first; come here for the full story. Digests are derived
+views: the note here always wins, and any edit here must refresh the matching digest.
+
 ## Pages (software tree order)
 
 1. [Sensors and inputs](sensors_and_inputs.md) — TPS/PPS, MAP/BARO, IAT/CLT, O₂, EGT, pressure, VSS, switches

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "emub-analyzer",
+      "runtimeExecutable": "tools/emub_analysis/venv/Scripts/python.exe",
+      "runtimeArgs": ["tools/emub_analysis/app.py"],
+      "port": 5757
+    },
+    {
+      "name": "combustion-cov",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "serve", "-l", "5578", "../combustion-cov"],
+      "port": 5578
+    }
+  ]
+}

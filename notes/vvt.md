@@ -85,9 +85,13 @@ Cam advance also moves light-load EGT, idle stability, part-throttle drivability
 so **optimize per operating point, not a single global advance**. Boost scavenging is a real
 performance lever (a few % torque + valve/chamber cooling) **only while pre-turbine backpressure
 stays below intake pressure** — at high PR (small turbine, high boost) the margin closes and the
-benefit disappears. When sweeping on the street, **trust the MAP peak at fixed TPS**: MAP is the
-direct trapped-air-mass signal and nets overlap + IVC + ram without modeling them (per
-`emu-black-vvti-street-tune`).
+benefit disappears. When sweeping on the street, the signal depends on the cell (corrected
+2026-07-10): at **boost/near-WOT** the throttle isn't the restriction, so **MAP peak at fixed TPS
+= trapped air** — trust it. At **throttled cruise** the throttle dominates and the signal inverts:
+more dilution → MAP *rises* + injector PW *falls* (pumping-loss relief = the economy winner);
+more fresh trapping → MAP *falls* + PW *rises* (torque). Rank cruise cells by **minimum PW at
+fixed speed**, bounded by combustion stability, then re-find MBT (dilution slows the burn → more
+spark) — per `emu-black-vvti-street-tune`.
 
 ## V3. Oil pressure and temperature set the PID's authority
 
@@ -102,4 +106,5 @@ disable VVT cold; the floor of the solenoid range can also be used to eliminate 
 - [ignition.md](ignition.md) — base timing; cam/ignition coupling (V2 = I5)
 - [fueling.md](fueling.md) — VVT moves you within the existing MAP-indexed VE map (no discrete VVT-state fuel corrections needed if the MAP axis covers the range)
 - [boost.md](boost.md) — pre-turbine backpressure sets whether boost scavenging pays (V2)
+- [emap_map_ratio_cam_overlap.md](emap_map_ratio_cam_overlap.md) — measuring EMAP/MAP per cell and scheduling overlap/advance from it (incl. DCR/knock coupling)
 - `emu-black-vvti-street-tune` skill — the full MAP-peak street sweep procedure

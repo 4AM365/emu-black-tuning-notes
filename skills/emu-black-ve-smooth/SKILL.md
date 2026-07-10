@@ -29,9 +29,48 @@ smoothed result back as an importable file use **emu-black-emubt-export**. On th
 build the EMU "VE" table is a **fuel-dose proxy, not pure air VE** — see the build
 notes — so smoothing operates on the dose values as displayed, no unit conversion.
 
+## VE table storage & export spec — do NOT re-derive
+
+This is fixed firmware/build ground truth. Don't decode it from a tune every run —
+use these values directly when writing the smoothed table back:
+
+| | `veTable` (VE table 1) | `veTable2` (VE table 2) |
+|---|---|---|
+| EMU title / `.emubt` filename | `Fuel tables - VE table 1 [%].emubt` | `Fuel tables - VE table 2 [%].emubt` |
+| storage | `u12` | `u12` |
+| width × height | 16 (MAP) × 20 (RPM) | 16 (MAP) × 20 (RPM) |
+| display scale | **0.1** (raw = display × 10) | **0.1** |
+| stored byte order | **row 0 = LOWEST RPM (500)** | row 0 = LOWEST RPM (500) |
+| axes (this build) | MAP 20→240 kPa, RPM 500→7000 | same |
+
+The EMU UI and screenshots show **highest RPM at top**, but storage is low-RPM-first —
+so **flip the grid vertically (`np.flipud`) before export**. Scale 0.1 is the repo's
+own VE constant (`emu-black-ve-from-log`, `emu-black-ve-delta-map`); the EMU "VE" here
+is a fuel-dose proxy, smooth the displayed dose values, no unit conversion.
+
+Ready-to-run export (display units, low-RPM-first row-major):
+
+```bash
+python ../emu-black-emubt-export/scripts/export_emubt.py \
+  --name veTable --storage u12 --width 16 --height 20 --scale 0.1 \
+  --values "<320 display values, row 0 = 500 rpm>" \
+  --out "Fuel tables - VE table 1 [%].emubt"
+# repeat with --name veTable2 / "...VE table 2 [%].emubt"
+```
+
+Verify the round-trip once: decode the `.emubt` back, `raw × 0.1`, confirm the first
+stored row equals your 500-RPM row.
+
 ## Method (`scripts/smooth_ve.py`)
 
-The smoother is a NumPy module. Core call:
+The smoother is a NumPy module. Two entry points:
+
+- **`full_smooth(original)`** — for a **fully-populated, already-autotuned map** with
+  no separate "visited" set (the common case: user pastes both complete VE tables and
+  wants them machine-smoothed). Nothing is pinned; every cell is pulled onto the
+  degree-3 row/column curve. This is the machine-smoothed / autotune generation.
+- **`smooth_table(original, anchors)`** — when only some cells were log-corrected and
+  must stay put while their ragged neighbours get pulled onto the curve. Core call:
 
 ```python
 from smooth_ve import smooth_table, print_table, print_delta, write_csv
@@ -74,13 +113,13 @@ smoothed grid back automatically. Treat it as the primary fast path:
    (VE table 1 vs VE table 2 / which table set) before editing — see the screenshot
    section in **emu-black-tune**. Strip any axis-label row/column, record the bins, and
    confirm orientation (row 0 = highest RPM — flip if the paste came out low-RPM-first).
-2. **Auto-pick anchors.** For a paste, the trusted cells are the ones the autotune
-   actually moved. If the user pasted a separate "cells visited / hit-count / weight"
-   grid, anchor every cell with non-zero hits. If they pasted only the values, anchor
-   the cells that differ from a flat/seed value, or ask once for the visited set —
-   otherwise default to anchoring every non-empty cell and let the polynomial pull
-   the steps out around them.
-3. **Smooth** with `smooth_table(original, anchors)` (degree 3, n_passes 3 defaults).
+2. **Pick the mode.** If the user pasted a separate "cells visited / hit-count /
+   weight" grid, anchor every cell with non-zero hits and use `smooth_table`. If they
+   pasted a **fully-populated** map with no visited info (the common case — e.g. both
+   complete VE tables), use **`full_smooth`** (no anchors; every cell pulled onto the
+   curve). Do NOT "anchor every non-empty cell" — that pins everything and is a no-op.
+3. **Smooth** — `full_smooth(original)` for a full map, or `smooth_table(original,
+   anchors)` when anchoring a subset (both degree 3, n_passes 3 defaults).
 4. **Return the smoothed grid inline** in the same shape the user pasted, plus the
    `print_delta` move report (max + mean abs move). Offer the `.emubt` export as the
    next step if they want to import it.

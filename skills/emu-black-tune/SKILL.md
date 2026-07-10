@@ -115,6 +115,20 @@ Signed values appear in hex with a leading `-` in the export (e.g. `sbyte` `-4B`
 | Ignition (°) | sbyte | 1 | crank advance |
 | Lambda | ubyte | /100 or table-specific | verify against EMU |
 
+**Main fuel / ignition maps (16 MAP × 20 RPM, this build) — fixed spec, don't re-derive:**
+
+| Symbol | EMU title | storage | w×h | scale | notes |
+|--------|-----------|---------|-----|-------|-------|
+| `veTable` | Fuel tables - VE table 1 [%] | u12 | 16×20 | **0.1** | fuel-dose proxy (not air VE); pump-gas dose |
+| `veTable2` | Fuel tables - VE table 2 [%] | u12 | 16×20 | **0.1** | ethanol dose; `veTable2 < veTable` is expected |
+| `ignTable2` | Ignition table 2 | sbyte | 16×20 | 1 (°) | — |
+
+All three: **stored row 0 = LOWEST RPM (500)**; EMU UI shows highest RPM at top, so
+flip vertically when rendering or when writing back. X = MAP `mapBins` (20→240 kPa),
+Y = RPM (500→7000). Writing a smoothed `veTable`/`veTable2` back as `.emubt`: see the
+**emu-black-ve-smooth** skill's "VE table storage & export spec" — it has the exact
+`export_emubt.py` command, already baked with `u12 / 16×20 / scale 0.1 / flipud`.
+
 **The single biggest trap:** the word "airflow" is used for two unrelated things —
 (1) **DBW airflow %** (a throttle-plate target, 0–~110%) and
 (2) **mass airflow g/s** (sensor/fuel-pump axes). They scale differently and must never be mixed. Check the symbol's role before assuming `%`.

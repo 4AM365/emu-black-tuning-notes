@@ -78,6 +78,61 @@ one cell empirically first.
 - **Live values:** build doc (seasonal targets).
 - **Principle:** [P1](#p1-idle-is-a-30-egr-engine-cams-push-it-over-the-stability-cliff).
 
+### Activation gates — `idleOnIfPPSBelow` / `idleOffIfPPSOver` / `idleMinMapToActivate` / `idleOpenLoopOverVss` (+ clutch/neutral enables)
+
+These live on the EMU **Idle ▸ Activation** page and decide *when the idle controller is allowed
+to close the loop at all*. Until every gate is satisfied the idle PID does not run, and on a DBW
+car the plate simply follows the released pedal (shut) — so no airflow table matters until idle
+activates. Order of importance for return-to-idle:
+
+- **PPS gates (`Idle On if PPS below` / `Idle Off if PPS over`).** Pedal-based, with hysteresis
+  (e.g. on <3 %, off >4 %). This is the "is the driver off the throttle" test. On a DBW build it is
+  **PPS** (pedal), not TPS.
+- **`Idle On if MAP over` (`idleMinMapToActivate`) — the one that traps people.** Idle activates
+  only when MAP is **above** this value. It reads backwards until you realise **idle is not the
+  lowest-MAP state — engine braking is.** A genuine idle cracks the plate for idle air and settles
+  at moderate vacuum; a closed-throttle decel seals the plate while the engine pumps hard and pulls
+  *deeper* vacuum (lower kPa). The three regimes line up as:
+
+  ```
+  deep vacuum ◄──────────────────────────────────► toward atmospheric
+     engine braking      │  gate  │     idle            cruise / load
+       ~13–17 kPa                       ~30–40 kPa        50–100 kPa
+     (throttle SHUT,                  (throttle cracked
+      pumping hard)                    for idle air)
+  ```
+
+  So the gate sits in the **valley between engine-braking vacuum and idle vacuum**. "MAP **over** X"
+  = "we're at idle-or-higher pressure, i.e. genuinely idling — not in the deeper engine-braking
+  vacuum, so it's safe to close the loop." If it were "MAP **under** X" it would do the opposite:
+  wake idle *during* engine braking (and fight it) and stay off at a real idle. The PPS gate already
+  knows the pedal is up; this gate exists purely to **disambiguate "pedal-up coasting in gear" from
+  "pedal-up genuinely idling,"** since both have a closed throttle and only MAP separates them.
+- **It's referenced to engine-braking vacuum, NOT idle vacuum.** This catches people on cammed
+  builds: idle vacuum is *weak* (high MAP) because overlap/reversion kill low-RPM pumping, so a gate
+  down in the high-teens *looks* absurdly deep "for an idle." But the gate's job is to clear
+  **engine braking**, which is a *high-RPM, throttle-sealed* condition that pulls deep vacuum
+  (commonly 13–17 kPa) **regardless of cam** — at 2500–3000 rpm pumping rate dominates and overlap
+  barely matters. The cam actually *helps* here: it raises the idle-MAP floor and widens the gap the
+  gate sits in. Judge the value against the braking band, not against where idle runs.
+- **How to set `idleMinMapToActivate`.** Put it **just above the worst-case engine-braking MAP**
+  (so it still excludes coasting) and **well below the idle-MAP floor** (so it never blocks real
+  idle) — and confirm the floor across *all* idle conditions, including **cold fast-idle**, not just
+  warm idle. Too high → on a fast return-to-idle MAP doesn't climb back over the gate until the engine
+  is nearly stalled, so idle activates too late and stalls (see
+  [return_to_idle_bog.md §3](return_to_idle_bog.md)). Too low → idle wakes during high-RPM coasting;
+  benign-ish (at RPM ≫ target the airflow PID drives toward its minimum and actually preserves
+  engine braking) but not the design intent. Read both bands off a log of the actual car
+  (closed-throttle decel MAP-vs-RPM, and stable-idle MAP) and split the difference.
+- **`Open loop over VSS` (`idleOpenLoopOverVss`) + clutch/neutral enables.** Above this road speed
+  all PID is forced off (log channel **`Idle force open loop` = Yes**). *Clutch enables closed loop*
+  and *Neutral enables closed loop* let a clutch press or neutral cancel that force. **Before
+  blaming VSS for a late activation, read `Idle force open loop`** — if it's No (e.g. a clutch press
+  cleared it), VSS is not the gate; check MAP instead.
+- **Live values:** build doc.
+- **Principle:** [P5](#p5-cranking--active-handoff-the-manifold-time-constant); diagnosis flow in
+  [return_to_idle_bog.md](return_to_idle_bog.md).
+
 ### Active state airflow — `idleActiveAirflow`
 
 - **What it is.** The feed-forward base airflow the idle PID runs **on top of**, active once RPM

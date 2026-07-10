@@ -19,6 +19,34 @@ Build-specific numbers behind [`notes/idle_stall.md`](../../notes/idle_stall.md)
 - The **+13% `idleCoolantFanCorr`** is VSS-gated **off above ~56 km/h**. On a return from above ~56 km/h base idle airflow is the bare **~26.5%** table value instead of **~39%** (fan-on), and the airflow PID is clamped at **+12** — not enough to hold. Below ~56 km/h the fan is on and returns catch cleanly.
 - Fixes that don't add idle variation: more airflow-PID authority (`idleAirPIDOutMax` / `idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval` (**200 ms → ~50 ms**). Leave the fan +13% — correct load-comp.
 
+## Fault 3 — idle locked out by the MAP-activation gate (`idleMinMapToActivate`)
+
+Source log: `died_hot_return_to_idle_again.csv` (hot, CLT ~96 °C), closed-throttle rolling decel, PPS=0. The car stalled returning to idle and the binding gate was **`Idle On if MAP over` = 25 kPa**, not VSS (`Idle force open loop` = 0 the whole coast — the clutch press had cleared the VSS force). Mechanism + generic write-up: [`notes/return_to_idle_bog.md §3`](../../notes/return_to_idle_bog.md).
+
+**The three MAP bands measured on this car** (the inputs you need to set the gate):
+
+| Regime | MAP (this log) |
+|---|---|
+| Closed-throttle engine braking, high RPM (1700–3000) | **13–14 kPa** (lift transient touched **16–17**) |
+| Stable warm idle (state 2, stopped, ~1000–1260 rpm) | **32–58 kPa** (median 37, floor **32**) |
+| Current gate `idleMinMapToActivate` | **25 kPa** |
+
+MAP rises as RPM falls on the closed-throttle descent, so the gate value maps directly to the RPM where idle is *allowed* to grab:
+
+| Gate (kPa) | Idle catches at ≈ | Verdict |
+|---|---|---|
+| **25 (current)** | **582 rpm** | too late — engine already gone, stalls |
+| 22 | ~728 rpm | still marginal |
+| **18 (recommended)** | **~1060 rpm** | recoverable within the ~160 ms DBW lag |
+| <17 | >1300 rpm, risks tripping on the 16–17 high-RPM braking transient | too low |
+
+**Recommended: `idleMinMapToActivate` 25 → 18 kPa.** That's the bottom of the valid window
+**(17, 32)** — just above the worst engine-braking MAP seen (17, so coasting is still excluded)
+and far below the 32 idle floor (so it never blocks real idle). It moves the idle catch from
+582 rpm up to ~1060 rpm, giving the airflow PID + idle ignition time to arrest the drop before the
+DBW actuator lag would otherwise lose it. Re-verify a few closed-throttle coast-downs after the
+change (idle should not wake at high RPM during sustained braking; overrun fuel/throttle unchanged).
+
 ## Dead ends (this build)
 
 - Raising `idleActiveAirflow` 1000/1100 rows: indexed by idle **target**, which floors at 1200 (`idleRPM` bottoms at 1200), so those rows are never read. The VE table is indexed by actual rpm×MAP, so its 500-rpm row is the live lever.

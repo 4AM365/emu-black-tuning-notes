@@ -35,6 +35,7 @@ The canonical copy of each skill is **this repo** — the Claude skills director
 | [emu-black-ve-delta-map](emu-black-ve-delta-map/SKILL.md) | 3D delta surface between two table `.emubt` exports (before vs after). | [ve1_delta_map.py](emu-black-ve-delta-map/scripts/ve1_delta_map.py) |
 | [emu-black-ve-lambda-remap](emu-black-ve-lambda-remap/SKILL.md) | Build one VE table from another via the lambda-target delta (VE2 = VE1 × (1 − Δλ)); emits a JSON spec + back-calc report. | [remap_ve_for_lambda_delta.py](emu-black-ve-lambda-remap/scripts/remap_ve_for_lambda_delta.py) |
 | [emu-black-ve-from-log](emu-black-ve-from-log/SKILL.md) | Correct veTable/veTable2 from a closed-loop log (F = (1+STFT/100)×λ_act/λ_tgt, steady samples, bilinear accumulate) and write a corrected tune. | [ve_correct.py](emu-black-ve-from-log/scripts/ve_correct.py) |
+| [emu-black-emap-map-ratio](emu-black-emap-map-ratio/SKILL.md) | EMAP/MAP pressure-ratio table from logs, binned into the veTable grid (liveness-gated, despiked + zero-phase smoothed). Feeds reversion/overlap analysis in `notes/emap_map_ratio_cam_overlap.md`. | [emap_map_ratio.py](emu-black-emap-map-ratio/scripts/emap_map_ratio.py) |
 
 ## Skill pairing guide
 
