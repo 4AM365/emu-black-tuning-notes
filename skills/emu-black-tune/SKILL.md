@@ -301,6 +301,20 @@ launch/ALS/pit/rolling-AL/boost-limit DBW targets. Confirm scope with the user �
 limit tables (e.g. `dbwBoostTargetLimit`, `dbwCLTLimitTable`) are caps, not idle
 targets, and may not want the same remap.
 
+## Knock sensor symbols (scaling confirmed against the EMU UI, Supra, 2026-10-02)
+
+| Symbol | Raw → display | Notes |
+|---|---|---|
+| `knockWindowStart` | ×0.5 → ° ATDC (20 → 10 °ATDC) | window opens after this cylinder's TDC |
+| `knockWindowDurationEx` | ×0.5 → ° (100 → 50 °) | window = start … start + duration (Supra: 10–60 °ATDC) |
+| `knockFrequency` | paramList index (40 → 6.64 kHz) | matches `F = 900/(π·R)` for an 86 mm bore (6.66 kHz) |
+| `knockIntegrator` | ×10 → µs (16 → 160 µs) | |
+| `knockSensorGainCyl1..8` | paramList index (41 → 0.286) | equal on all cylinders (required unless full sequential) |
+| `ksInputCylinder1..8` | 1/2 = knock input 1/2, 0 = disabled | Supra: 1,2,1,2,1,2 |
+| `knockActionMinTps` | % (50) | knock retard only acts above this TPS, so cruise peaks never pull timing |
+| `knockIgnRetardRate` / `knockMaxIgnRetard` / `knockRestoreRate` | °/V / ° / cycles per ° (4→1 °/V shown in UI; 10 °; 5) | `knockIgnRetardRate` raw 4 displays as 1 °/V — scale unconfirmed beyond this one value |
+| `knockIgnitionRetardControlType` | 0 = All cylinders | |
+
 ## Cold start fuel parameters
 
 ### File format gotcha: binary vs. XML `.emub3`
