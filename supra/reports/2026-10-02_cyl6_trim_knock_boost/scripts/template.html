@@ -80,36 +80,105 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 .answer ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px;color:var(--fg2)}
 .part{font:600 32px/1.1 var(--f-display);margin:0;padding-top:30px;text-wrap:balance}
 </style>
+<style>
+.test{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;display:grid;gap:10px}
+.test-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+.test-head h3{font-size:19px}
+.verdict{font:600 13px/1 var(--f-body);padding:5px 9px;border-radius:999px;border:1px solid var(--rule)}
+.v-strong{color:var(--fg);background:color-mix(in srgb,var(--s2) 22%,transparent)}
+.v-mixed{color:var(--fg);background:color-mix(in srgb,var(--s0) 18%,transparent)}
+.v-none{color:var(--fg2);background:var(--bg)}
+dl.hp{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0;font-size:14px}
+dl.hp dt{color:var(--muted);font:500 12px/1.6 var(--f-mono);text-transform:uppercase;letter-spacing:.05em}
+dl.hp dd{margin:0;max-width:75ch}
+@media (max-width:560px){dl.hp{grid-template-columns:1fr}}
+table.asm td{white-space:normal;text-align:left;vertical-align:top;font-family:var(--f-body);font-size:13px;min-width:120px}
+table.asm th{text-align:left}
+.st{font:500 11.5px/1 var(--f-mono);padding:3px 7px;border-radius:4px;white-space:nowrap}
+.st-ok{background:color-mix(in srgb,var(--s2) 22%,transparent)}
+.st-part{background:color-mix(in srgb,var(--s1) 18%,transparent)}
+.st-fail{background:color-mix(in srgb,var(--s0) 25%,transparent)}
+.st-fixed{background:var(--bg);border:1px solid var(--rule)}
+table.reg td{white-space:normal;text-align:left;font-family:var(--f-body);font-size:13.5px;vertical-align:top}
+table.reg th{text-align:left}
+</style>
 <div class="wrap">
 <header>
   <div class="eyebrow">MKIV Supra · 2JZ-GTE · EMU Black log study · 2026-10-02</div>
   <h1>Did the per-cylinder trim cut knock peaks and idle misfire?</h1>
   <p class="lede">The trim went live on <b>May 4 2026 between 17:25 and 17:38</b>. Before = every sample without trim, Mar 1 → May 4 (about 15 hours of running). After = every sample with trim, May 4 → Sep 29 (about 10 hours). Data: 119 decoded LogAutosave binaries.</p>
+  <p class="lede">Each test states a hypothesis and a prediction, lists the assumptions it rests on and how each was challenged, then gives a verdict. Confidence intervals are 95 % and resample whole drives, so one bad drive can't carry a result.</p>
   <div class="legend" id="eraLegend"></div>
 </header>
 
 <div class="answers">
   <div class="answer">
     <span class="q">Question 1 · Did knock sensor peaks reduce after the trim?</span>
-    <span class="a">Yes at idle. Not measurably in boost. No at cruise.</span>
+    <span class="a">At idle, yes. The trim isn't proven to be the cause.</span>
     <ul>
-      <li>Idle, cyl 6 readings above 2× its normal level: <b>0.049 % → 0.006 %</b> of samples (−88 %). Extreme idle peaks fell on every channel; cyl 6 and cyl 4 had the most and lost the most.</li>
-      <li>Boost, in the cells both periods cover: cyl 6 unchanged (0.52 % → 0.53 %); cyl 1 and cyl 3 fell. Only 0.8 min of comparable boost after the trim.</li>
-      <li>Cruise, cyl 6: 0.056 % → 0.35 %. Peaks rose on every cylinder.</li>
+      <li>Idle, cyl 6 peaks above 2× its normal: <b>192 → 23 events</b> in about 4.3 h of idle on each side (rate × 0.12, CI 0.04–0.31). Same fuel, Apr 20 – May 10: 164 → 4.</li>
+      <li>Untrimmed cyl 1 fell by the same factor (× 0.12), and idle peaks mostly hit several channels at once, so the drop can't be tied to the trimmed cylinders.</li>
+      <li>Boost: can't tell (0.8 min of comparable data after). Cruise on the same fuel: no change (× 1.2, CI 0.7–2.0).</li>
     </ul>
   </div>
   <div class="answer">
     <span class="q">Question 2 · Did misfire at idle reduce after the trim?</span>
-    <span class="a">Yes.</span>
+    <span class="a">Not established.</span>
     <ul>
-      <li>Rich lambda blips at idle (more than 0.02 λ below the 0.6 s median): <b>0.144 → 0.052 per minute</b> (−64 %). Bigger than 0.03 λ: 0.089 → 0.017 (−81 %).</li>
-      <li>Blips of 0.01 λ or less, which are sensor-noise scale, didn't change. The first 2 minutes after each engine start are left out.</li>
-      <li>There is no misfire channel. A misfire reads rich on this wideband, so rich blips are the proxy. Idle RPM isn't used because of the throttle-body problems.</li>
+      <li>Rich lambda blips bigger than 0.02 λ at idle: <b>8 events in 149 min before, 6 in 229 min after</b>. Rate × 0.49, CI 0.13–1.9.</li>
+      <li>Too few events to separate a change from chance. An earlier count (−53 %, then −64 %) came from a method that made extra blips at the edges of each idle stretch.</li>
+      <li>Idle lambda target was 0.931 on both sides through Aug 21.</li>
     </ul>
   </div>
 </div>
 
+<section id="s-register">
+  <div class="eyebrow">Test register</div>
+  <h2>Every test, one line each</h2>
+  <div class="tbl"><table class="reg">
+    <thead><tr><th>Test</th><th>Hypothesis</th><th>Events or values, before → after</th><th>After ÷ before (95 % CI)</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#T1">T1</a> Idle knock peaks, cyl 6</td><td>Fewer after the trim</td><td>192 → 23 (same fuel 164 → 4)</td><td>0.12 (0.04–0.31)</td><td>Drop is real; cause not isolated</td></tr>
+      <tr><td><a href="#T2">T2</a> Boost knock peaks, cyl 6</td><td>Fewer after the trim</td><td>17 → 6 in 2.2 / 0.8 min</td><td>1.0 (0.3–4.5)</td><td>Inconclusive: too little data</td></tr>
+      <tr><td><a href="#T3">T3</a> Cruise knock peaks, cyl 6</td><td>Fewer after the trim</td><td>Same fuel 150 → 76 in 153 / 64 min</td><td>1.2 (0.7–2.0)</td><td>No change on the same fuel</td></tr>
+      <tr><td><a href="#T4">T4</a> Idle misfire (rich blips &gt; 0.02 λ)</td><td>Fewer after the trim</td><td>8 → 6 in 149 / 229 min</td><td>0.49 (0.13–1.9)</td><td>Not established</td></tr>
+      <tr><td><a href="#T5">T5</a> Cyl 6 − cyl 3 EGT</td><td>Gap closes after the trim</td><td>Light load +47 → +12 °C (same fuel +40 → +12)</td><td>−35 °C (−41 to −29)</td><td>Supported</td></tr>
+    </tbody></table></div>
+  <details><summary>Conditions before vs after (what else changed)</summary><div class="tbl"><table class="reg">
+    <thead><tr><th>Quantity</th><th>Before</th><th>After</th></tr></thead><tbody>
+      <tr><td>Idle lambda target</td><td>0.931</td><td>0.931 (0.901 for part of the time from Aug 22)</td></tr>
+      <tr><td>Cruise lambda target, same cells</td><td>0.961</td><td>0.973</td></tr>
+      <tr><td>Boost lambda target, same cells</td><td>0.884</td><td>0.869</td></tr>
+      <tr><td>Idle measured lambda</td><td>0.934</td><td>0.913</td></tr>
+      <tr><td>Idle ignition angle (median)</td><td>15.5°</td><td>16.5°</td></tr>
+      <tr><td>Cruise ignition, same cells</td><td colspan="2">+6.2° after (table), 2000–2500 rpm 28.5–31° → 35.5–39° on E57</td></tr>
+      <tr><td>Ethanol at idle (median)</td><td>56 % (9 % in March)</td><td>24.5 % (57 % May 4–10, 14 % from Aug 22)</td></tr>
+      <tr><td>Idle IAT / CLT</td><td>44 / 96 °C</td><td>46 / 96 °C</td></tr>
+      <tr><td>Idle short-term trim spread (SD)</td><td>4.6 %</td><td>3.2 %</td></tr>
+      <tr><td>Dwell, battery voltage</td><td colspan="2">Same both sides (4.25 ms to 4000 rpm; 13.57 V median)</td></tr>
+    </tbody></table></div></details>
+</section>
+
 <h2 class="part">Question 1 · Knock sensor peaks</h2>
+
+<section id="s-tests1" style="gap:12px">
+  <div class="test" id="T1">
+    <div class="test-head"><span class="eyebrow">T1</span><h3>Idle knock peaks, cyl 6</h3><span class="verdict v-mixed">Drop is real · cause not isolated</span></div>
+    <dl class="hp"><dt>Hypothesis</dt><dd>The trim richens cyl 6 (and 3–5), so idle combustion is steadier and the knock channel throws fewer peaks.</dd><dt>Prediction</dt><dd>Fewer cyl 6 peaks after; the drop concentrated on the trimmed cylinders, with untrimmed cyl 1 and 2 unchanged.</dd><dt>Result</dt><dd>192 → 23 peaks above 2× normal, rate × 0.12 (0.04–0.31). Same fuel: 164 → 4 (0–0.19). Cyl 4 × 0.21; untrimmed cyl 1 × 0.12 (0–0.52).</dd></dl>
+    <div class="tbl"><table class="asm"><thead><tr><th>Assumption</th><th>How it was challenged</th><th>What the data said</th><th></th></tr></thead><tbody><tr><td>“Normal” is fair: a baseline shift isn't faking peaks</td><td>Compare each cell's median and noise spread (MAD) before vs after; recount against a pooled median, each period's own median, and its own noise spread</td><td>Median 0.28 / 0.29 V, MAD 0.020 / 0.020 V. All three definitions show the drop</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Same operating conditions</td><td>Only cells both periods visited for at least 8 s</td><td>4.4 h / 4.2 h of idle in shared cells</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Not carried by a few drives</td><td>Drive-level bootstrap; share of events in the worst drive</td><td>Peaks in 21 drives before, worst drive 22 %</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>It lines up with the trim, not fuel or a slow drift</td><td>Same-fuel window Apr 20 – May 10 (E57, idle λ target 0.931 both sides)</td><td>164 → 4</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Knock sensing unchanged</td><td>No XML before May 22; compare medians and noise spread</td><td>Medians and MAD unchanged; settings identical May 22 → Oct 2</td><td><span class="st st-part">Partly</span></td></tr><tr><td>Nothing else at idle changed</td><td>Compare idle conditions</td><td>Idle ignition +1°, measured λ 0.934 → 0.913 at the same target, IAT +2 °C. Small, but not zero</td><td><span class="st st-part">Partly</span></td></tr><tr><td>The effect belongs to the trimmed cylinders</td><td>Untrimmed cyl 1 as a control</td><td>Cyl 1 fell by the same factor, and most idle peaks hit several channels at once, so the channels aren't independent controls</td><td><span class="st st-fail">Fails</span></td></tr></tbody></table></div>
+  </div>
+  <div class="test" id="T2">
+    <div class="test-head"><span class="eyebrow">T2</span><h3>Boost knock peaks, cyl 6</h3><span class="verdict v-none">Inconclusive</span></div>
+    <dl class="hp"><dt>Hypothesis</dt><dd>Richer rear cylinders knock less under boost.</dd><dt>Prediction</dt><dd>Fewer cyl 6 peaks in the boost cells both periods share.</dd><dt>Result</dt><dd>17 → 6 peaks in 2.2 / 0.8 min of comparable boost, × 1.0 (0.3–4.5). Cyl 1 × 0.29 (0–1.1).</dd></dl>
+    <div class="tbl"><table class="asm"><thead><tr><th>Assumption</th><th>How it was challenged</th><th>What the data said</th><th></th></tr></thead><tbody><tr><td>Enough comparable data</td><td>Count events and minutes in shared boost cells</td><td>0.8 min and 6 events after the trim</td><td><span class="st st-fail">Fails</span></td></tr><tr><td>“Normal” is fair</td><td>Medians and noise spread in shared cells</td><td>0.77 / 0.77 V, MAD 0.098 / 0.098 V</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Boost behaviour isn't a confound</td><td>Your call: boost control is the product of other factors, and overshoot is unrelated to knock peaks</td><td>Not used</td><td><span class="st st-ok">Holds</span></td></tr></tbody></table></div>
+  </div>
+  <div class="test" id="T3">
+    <div class="test-head"><span class="eyebrow">T3</span><h3>Cruise knock peaks, cyl 6</h3><span class="verdict v-none">No change on the same fuel</span></div>
+    <dl class="hp"><dt>Hypothesis</dt><dd>The trim reduces cruise peaks too.</dd><dt>Prediction</dt><dd>Fewer cyl 6 cruise peaks after, on the same fuel.</dd><dt>Result</dt><dd>Same fuel: 150 → 76 peaks in 153 / 64 min, × 1.2 (0.7–2.0). All data: × 6.4 (3.9–10.3), rising on every cylinder.</dd></dl>
+    <div class="tbl"><table class="asm"><thead><tr><th>Assumption</th><th>How it was challenged</th><th>What the data said</th><th></th></tr></thead><tbody><tr><td>Same conditions, all data</td><td>Compare timing, fuel and IAT in the same cells</td><td>Cruise timing +6°, ethanol 57 → 25 → 14 %, IAT +2 °C. The all-data rise is not a trim test</td><td><span class="st st-fail">Fails</span></td></tr><tr><td>Same conditions, same-fuel window</td><td>Restrict to Apr 20 – May 10</td><td>Ethanol equal; the extra cruise timing was already in place after May 4</td><td><span class="st st-part">Partly</span></td></tr><tr><td>Lambda target unchanged</td><td>Same-cell target before vs after</td><td>0.961 → 0.973 (leaner by 0.012)</td><td><span class="st st-part">Partly</span></td></tr><tr><td>“Normal” is fair</td><td>Medians and noise spread in shared cells</td><td>0.45 / 0.45 V, MAD 0.039 / 0.039 V</td><td><span class="st st-ok">Holds</span></td></tr></tbody></table></div>
+  </div>
+  <p class="note">The charts below are the evidence these tests draw on.</p>
+</section>
 
 <section id="s-exc">
   <div class="eyebrow">1a · Knock voltage peak cyl 6</div>
@@ -158,13 +227,21 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 
 <h2 class="part">Question 2 · Idle misfire</h2>
 
+<section id="s-tests2" style="gap:12px">
+  <div class="test" id="T4">
+    <div class="test-head"><span class="eyebrow">T4</span><h3>Idle misfire: rich lambda blips</h3><span class="verdict v-none">Not established</span></div>
+    <dl class="hp"><dt>Hypothesis</dt><dd>The trim removes lean-cylinder misfires at idle. A misfire reads rich on this wideband.</dd><dt>Prediction</dt><dd>Fewer rich blips per minute of steady warm idle after the trim.</dd><dt>Result</dt><dd>Blips bigger than 0.02 λ: 8 → 6 in 149 / 229 min, × 0.49 (0.13–1.9). Same fuel: 4 → 2, × 0.70 (0–3.7).</dd></dl>
+    <div class="tbl"><table class="asm"><thead><tr><th>Assumption</th><th>How it was challenged</th><th>What the data said</th><th></th></tr></thead><tbody><tr><td>A misfire reads rich</td><td>Your domain knowledge</td><td>Used as the proxy</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Idle RPM can't stand in</td><td>Your call: throttle-body problems dominate idle RPM</td><td>RPM sags and jitter dropped</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Counting is unbiased</td><td>Compare a per-stretch rolling median with a whole-file one</td><td>The per-stretch median made blips at stretch edges and inflated the earlier counts. Replaced</td><td><span class="st st-fixed">Fixed</span></td></tr><tr><td>Restarts don't pollute the count</td><td>Exclude the first 2 min after each start</td><td>Applied</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Blips come from misfire, not the controls</td><td>Blips within 0.5 s of a lambda-target change; closed-loop trim steps at blips</td><td>20 % of blips sit next to a target change (3–7 % of idle time does); trim steps are larger at blips</td><td><span class="st st-part">Partly</span></td></tr><tr><td>Same idle conditions</td><td>Lambda target, closed-loop activity, fuel</td><td>Target 0.931 both sides through Aug 21 (0.901 part of the time after); trim spread 4.6 → 3.2 %; ethanol differs</td><td><span class="st st-part">Partly</span></td></tr><tr><td>Enough events</td><td>Event counts and drive-level CI</td><td>8 vs 6 events; CI spans no change</td><td><span class="st st-fail">Fails</span></td></tr></tbody></table></div>
+  </div>
+</section>
+
 <section id="s-dips">
   <div class="eyebrow">2a · Rich lambda blips</div>
-  <h2>Fewer rich blips at idle</h2>
+  <h2>Rich blips at idle, by size</h2>
   <p>A misfire reads rich on this wideband. Count of rich blips per minute of steady warm idle: runs where <code>Lambda 1</code> drops below its centred 0.6 s (15-sample) rolling median by more than the size on the x axis, while lambda is valid. Steady idle = idle PID active, throttle closed, RPM slew under 300 rpm/s, CLT ≥ 80 °C, at least 4 s (the <code>emu-black-idle-stability</code> gate). Log scale.</p>
   <div class="legend" id="legDips"></div>
   <div class="chart"><div class="ctitle">Rich lambda blips per minute vs blip size</div><div id="lean"></div></div>
-  <p class="note">Blips of 0.01 λ or less didn't change; that is sensor-noise scale. From 0.015 λ up the rate fell 36–81 %. The first 2 minutes after each engine start are excluded. Idle RPM isn't used here: throttle-body problems dominate it over this period.</p>
+  <p class="note">Counts are small: above 0.02 λ, 8 blips before and 6 after. Blips of 0.01 λ or less are sensor-noise scale. The first 2 minutes after each engine start are excluded, and blips are measured against a rolling median over the whole log, not per idle stretch. Idle RPM isn't used here: throttle-body problems dominate it over this period.</p>
   <details><summary>Table view</summary><div class="tbl" id="tblMis"></div></details>
 </section>
 
@@ -183,9 +260,14 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
   <div class="chart"><div id="mdrive"></div></div>
 </section>
 
-<h2 class="part">3 · Context</h2>
+<h2 class="part">3 · What the trim was set to fix</h2>
 
 <section id="s-egt">
+  <div class="test" id="T5">
+    <div class="test-head"><span class="eyebrow">T5</span><h3>Cyl 6 − cyl 3 exhaust temperature</h3><span class="verdict v-strong">Supported</span></div>
+    <dl class="hp"><dt>Hypothesis</dt><dd>Adding fuel to cyl 6 relative to cyl 3 closes their exhaust-temperature gap. This is what the trim was set up to do.</dd><dt>Prediction</dt><dd>Cyl 6 − cyl 3 falls in every load band where both probes read.</dd><dt>Result</dt><dd>Change in the gap: idle −26 °C (−30 to −21), light −35 (−41 to −29), cruise −34 (−42 to −27). Same fuel: −19 (−30 to −10), −29 (−39 to −16), −29 (−35 to −22).</dd></dl>
+    <div class="tbl"><table class="asm"><thead><tr><th>Assumption</th><th>How it was challenged</th><th>What the data said</th><th></th></tr></thead><tbody><tr><td>A probe offset doesn't fake the change</td><td>Same probes in both periods; a fixed offset cancels in the before/after difference</td><td>Holds for the change. The absolute balance still carries any offset</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Not carried by a few drives</td><td>Drive-level bootstrap</td><td>36–71 drives before, 27–40 after per band</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Not a fuel effect</td><td>Same-fuel window</td><td>Gap still closes by 19–29 °C</td><td><span class="st st-ok">Holds</span></td></tr><tr><td>Other tune edits don't explain it</td><td>VE and lambda-target edits move both cylinders together; the gap isolates per-cylinder fuel</td><td>Holds as long as those edits don't treat cylinders differently</td><td><span class="st st-ok">Holds</span></td></tr></tbody></table></div>
+  </div>
   <div class="eyebrow">Exhaust gas temperature</div>
   <h2>Cyl 6 − cyl 3 EGT by load band</h2>
   <p>What the trim was set to fix. <code>EGT 2</code> − <code>EGT 1</code>, sample-weighted; whiskers span the per-drive means. MAP held in band for 2 s, overrun excluded.</p>

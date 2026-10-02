@@ -21,6 +21,9 @@ A, F = pickle.load(open(os.path.join(HERE, "..", "data", "eb_all.pkl"), "rb"))
 A = A.sort_values(["file", "TIME"])
 last_stop = A.TIME.where(A.RPM < 200).groupby(A.file, observed=True).ffill()
 A["since_start"] = (A.TIME - last_stop).fillna(1e6)
+# rich-blip reference: rolling median over the whole file's valid lambda (a per-segment median made blips at segment edges)
+_lam = A["Lambda 1"].where(A["Lambda is valid"] > 0.5)
+A["lam_med"] = _lam.groupby(A.file, observed=True).transform(lambda x: x.rolling(15, center=True, min_periods=8).median())
 A = A[A.RPM > 500].copy()
 t6, eth = A["Injector 6 trim"], A["Ethanol content"]
 A["g"] = -1
@@ -83,7 +86,7 @@ def misfire(gate):
             rpm = seg.RPM.values.astype(float)
             res = rpm - pd.Series(rpm).rolling(7, center=True, min_periods=1).median().values
             lam = seg["Lambda 1"].values.astype(float); lv = seg["Lambda is valid"].values > 0.5
-            lres = lam - pd.Series(lam).rolling(15, center=True, min_periods=1).median().values
+            lres = lam - seg["lam_med"].values.astype(float)
             mins = len(seg) * dt / 60; g = int(seg.g.mode()[0])
             dips = np.array([runs_over(res < -x) for x in DS], float)
             lean = np.array([runs_over(lv & (lres < -x)) for x in XS], float)   # rich blips (key kept as 'lean' for the page)
@@ -109,7 +112,7 @@ for g in (0, 1):
     target = groups[g]["lean"][XS.index(0.02)]
     for f in D[(D.g == g) & D.rich2.notna()].assign(dd=lambda x: (x.rich2 - target).abs()).sort_values("dd").f:
         d = A[A.file == f].reset_index(drop=True)
-        m = idle_mask(d, TRACE_GATE_S) & (d["Lambda is valid"] > 0.5)
+        m = idle_mask(d, TRACE_GATE_S) & (d["Lambda is valid"] > 0.5) & (d.since_start < 1e5)   # known start time only
         best = None   # qualifying window furthest from engine start
         for a0, b0 in IS.runs(m, 0.04):
             if b0 - a0 < 750: continue

@@ -8,11 +8,12 @@
 
 **Pre-trim context:** the EGT delta shrank as load rose (+44 °C cruise → +12 °C boost) — that load-dependence means real FFIM airflow maldistribution, not a fixed sensor offset. A one-time probe swap between 3 and 6 is the only way to separate any residual probe offset.
 
-**Before/after (2026-10-02, 119 decoded autosaves, binary split at the trim):** trim went live **May 4 2026, 17:25–17:38**. Before = Mar 1 → May 4, after = May 4 → Sep 29.
-- Knock peaks, cyl 6 > 2× its own normal (same cylinder, same cell, same period; shared cells only; baseline and noise spread unchanged): idle 0.049 → 0.006 % (every channel's extreme idle peaks fell); boost unchanged (0.52 → 0.53 %, only 0.8 min comparable after; cyl 1 and 3 fell); cruise 0.056 → 0.35 % (rose).
-- Idle misfire proxy (a misfire reads RICH; idle RPM unusable because of the TB issues; restart minutes excluded): rich lambda blips > 0.02 λ 0.144 → 0.052 /min (−64 %), > 0.03 λ −81 %.
-- EGT cyl6 − cyl3: light +44 → +9 °C, cruise +31 → −1 °C, idle +42 → +18 °C.
-- The earlier CSV-only pass (no idle or knock change) was wrong. Boost levels aren't compared: boost control depends on other factors.
+**Before/after (2026-10-02, 119 decoded autosaves, binary split at the trim, each test challenged; 95 % CIs resample drives):** trim went live **May 4 2026, 17:25–17:38**.
+- T1 idle knock peaks, cyl 6: 192 → 23 (× 0.12, CI 0.04–0.31; same fuel 164 → 4). Real drop, but untrimmed cyl 1 fell just as much, so the trim isn't isolated as the cause.
+- T2 boost peaks: inconclusive (0.8 min comparable after). T3 cruise peaks: no change on the same fuel; the later rise tracks +6° cruise timing and lower ethanol.
+- T4 idle misfire (rich λ blips > 0.02; a misfire reads rich; idle RPM unusable): 8 → 6 events, × 0.49 (0.13–1.9) — not established. Earlier −53/−64 % came from a counting artefact.
+- T5 cyl6 − cyl3 EGT: gap closed by 26–35 °C (same fuel 19–29 °C), all CIs clear of zero — supported.
+- Lambda target: idle 0.931 both sides (0.901 part of the time from Aug 22); cruise 0.961 → 0.973; boost 0.884 → 0.869.
 Charts: `supra/reports/2026-10-02_cyl6_trim_knock_boost/report.html`.
 
 **Follow-up (2026-10-02):** knock voltage can't rank cylinders (each window has its own noise floor). Boost peaks are single-cylinder and sit at +2° more timing with λ on target; cruise peaks rose with +6° cruise timing after May 4 and with lower ethanol, as multi-cylinder bursts; cruise already runs rich of target. So the data point at timing, not whole-map enrichment. EGT (cyl 6 vs 3 only) says cyl 6 still wants ≈ +5–6 % at idle and 4000 rpm / 20 kPa, ≈ −3 % at 4000 / 130; the trim tables are RPM-flat but the residual isn't. Dwell was unchanged before/after; its within-cell wiggle is battery voltage tracking heat soak. Knock window is 10–60 °ATDC: the next cylinder's spark always lands after it; the next coil's charge start sits inside it at cruise in both periods.

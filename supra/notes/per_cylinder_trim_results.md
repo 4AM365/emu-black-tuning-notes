@@ -32,6 +32,20 @@ Source: 119 LogAutosave `.emublog3` files, 2026-03-01 → 09-29 (~25 h running),
 
 **When the trim went in:** logged `Injector N trim` carries the trim-table output (100 = none). It is 100 on every cylinder through `20260504_1725_09` and 109 (cyl6) / 102 (cyl3) from `20260504_1738_14`: **2026-05-04 between 17:25 and 17:38**. Values moved 102–109 during May 4–11 while Will iterated, then settled.
 
+**Test register (scientific-method pass, Will 2026-10-02).** Each test: hypothesis → prediction → assumptions challenged → verdict. 95 % CIs on the after/before rate ratio resample whole drives (`tests_bootstrap.py`, `egt_bootstrap.py`, `assumption_checks.py`); "same fuel" = Apr 20 – May 10 (E57 both sides, idle λ target 0.931 both sides).
+
+| Test | Before → after | After ÷ before (95 % CI) | Verdict |
+|---|---|---|---|
+| T1 idle knock peaks, cyl 6 (> 2× own normal) | 192 → 23 events, ~4.3 h idle each side; same fuel 164 → 4 | 0.12 (0.04–0.31); same fuel 0.04 (0–0.19) | Drop is real. Cause not isolated: untrimmed cyl 1 fell by the same factor (0.12, 0–0.52) and idle peaks mostly hit several channels at once |
+| T2 boost knock peaks, cyl 6 | 17 → 6 in 2.2 / 0.8 min shared cells | 1.0 (0.3–4.5) | Inconclusive (too little comparable boost after) |
+| T3 cruise knock peaks, cyl 6 | same fuel 150 → 76 in 153 / 64 min | 1.2 (0.7–2.0); all data 6.4 (3.9–10.3) | No change on the same fuel; the all-data rise comes with +6° cruise timing and lower ethanol, not a trim test |
+| T4 idle misfire, rich λ blips > 0.02 | 8 → 6 in 149 / 229 min | 0.49 (0.13–1.9); same fuel 0.70 (0–3.7) | Not established (too few events) |
+| T5 cyl6 − cyl3 EGT gap | light +47 → +12 °C; same fuel +40 → +12 | change −35 °C (−41…−29); same fuel −29 (−39…−16); idle −26 (−30…−21); cruise −34 (−42…−27) | Supported |
+
+Assumptions that failed or only partly held: T1 control (cyl 1 not independent at idle); T1 idle conditions (ignition +1°, measured λ 0.934 → 0.913 at the same 0.931 target, IAT +2 °C); T2 data volume; T3 conditions (timing, ethanol, cruise target 0.961 → 0.973); T4 event count, and 20 % of blips sit within 0.5 s of a lambda-target change (3–7 % of idle time does), with larger closed-loop trim steps at blips; T4 counting — a per-idle-stretch rolling median created blips at stretch edges and produced the earlier −53 % / −64 % claims (replaced with a whole-log median). Lambda target answer: idle 0.931 / 0.931 (0.901 part of the time from Aug 22), cruise same cells 0.961 / 0.973, boost 0.884 / 0.869.
+
+**Superseded by the register above:** the knock-peak and misfire tables below were the working numbers before the drive-level challenge; keep them for the definitions, use the register for conclusions.
+
 **Comparison is binary (Will, 2026-10-02):** before = every sample with logged `Injector 6 trim` = 100 (Mar 1 → May 4 17:25, ~15 h running, 57 drives incl. 20 pump-fuel drives in March); after = every sample with trim > 100 (May 4 17:38 → Sep 29, ~10 h, 42 drives). Fuel differs: before = pump fuel then E57; after = E57 (May 4–10), E25, then E14 from Aug 22. Lower ethanol after works against the knock result.
 
 **Knock peaks, `Knock voltage peak cyl 6`.** Definition of normal (Will asked, 2026-10-02): the median of that cylinder's knock voltage in its cell (region × RPM 250 × MAP 10 kPa) **during the same period**; only cells both periods visited for ≥ 200 samples (8 s) count. Peak = sample above 1.5× / 2× normal. Control for baseline shift (`peak_normalization.py`): in the shared cells each cylinder's median and noise spread (MAD) match before vs after within one 0.02 V channel step, and pooled-median, own-median and own-MAD (z > 10) definitions agree at idle and cruise. Idle = `Idle state` 2, CLT ≥ 80; cruise = MAP 30–95, 1500–4000 rpm; boost = MAP 105–175, 3500–6000 rpm. Shared-cell coverage before / after: idle 4.4 / 4.2 h, cruise 6.9 / 3.1 h, boost 2.2 / 0.8 min.
