@@ -21,7 +21,7 @@ Rule of thumb: **referring to a repo name = referring to `BASE\EMU_BLACK_V3\<rep
 | `supra` | MKIV Supra 2JZ-GTE (this repo: `emu-black-tuning-notes`) | `BASE\EMU_BLACK_V3\Supra` (+ `LogAutosave`) | `BASE\EMU_BLACK\Supra` |
 | `bradley` | Bradley's 1JZ | `BASE\EMU_BLACK_V3\bradley` | `BASE\EMU_BLACK\bradley-1jz` |
 | `land cruiser` / `fj80` | FJ80 Land Cruiser 1FZ-FE | `BASE\EMU_BLACK_V3\Land Cruiser` | — |
-| `napier` / `gs300` | Napier GS300 | — | `BASE\EMU_BLACK\Napier_GS300` |
+| `napier` / `gs300` | Napier GS300 (Josh; v3 import 2026-09-15) | `BASE\EMU_BLACK_V3\Napier_GS300` | `BASE\EMU_BLACK\Napier_GS300` (v2.175 source tunes) |
 | `andrew` | Andrew's car (EMU Black, FW project v2.175; BTI CAN gauge) | — | `BASE\EMU_BLACK\andrew` (V1-only) |
 | `base maps` | ECUMaster base/reference maps | `BASE\EMU_BLACK_V3\Base maps` | — |
 | `default` | EMU default project | `BASE\EMU_BLACK_V3\DEFAULT` | `BASE\EMU_BLACK\DEFAULT` |

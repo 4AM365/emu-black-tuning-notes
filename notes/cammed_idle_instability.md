@@ -158,7 +158,7 @@ fluctuation (RPM CoV)**, not knock voltage — see
 
 ---
 
-## The takeaway for the video
+## Key Takeaway
 
 Cammed idle instability is not a calibration failure — it's the lean/dilute combustion limit
 made visible. The cam buys top-end breathing by accepting more overlap, and at idle that same

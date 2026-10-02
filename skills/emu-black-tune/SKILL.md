@@ -112,7 +112,8 @@ Signed values appear in hex with a leading `-` in the export (e.g. `sbyte` `-4B`
 | MAP / boost (kPa) | word | 1 | `mapBins` 0x14=20 → 20 kPa |
 | Coolant/IAT (°C) | sword | 1 | `cltBins8` may be offset; verify |
 | Mass airflow (g/s) | word | 0.1 | `fuelPumpAirflowBins` 0xBB8=3000 → 300 g/s — **mass, not %** |
-| Ignition (°) | sbyte | 1 | crank advance |
+| Ignition (°) — main/cranking advance | sbyte | 1 | crank advance |
+| **Ignition (°) — idle-ignition family** (`idleIgnitionTargetTbl`, `idleIgnitionMax/MinTorqueAngleTbl`, `idleIgnAngleCorrection`) | sbyte | **0.5 (inferred, verify one cell in EMU)** | Scale-1 decode gives absurd values (44° idle target, 60° max-torque angle); ×0.5 lands all three tables in sane ranges simultaneously (targets 22→18°, MBT 30→27°, min 13→10°). **2026-08-02 lesson: scale-1 was wrongly asserted for `idleIgnitionTargetTbl` and produced a hallucinated "44° cold idle target" — never carry the main-ignition scale onto the idle-ignition symbols without a display check.** |
 | Lambda | ubyte | /100 or table-specific | verify against EMU |
 
 **Main fuel / ignition maps (16 MAP × 20 RPM, this build) — fixed spec, don't re-derive:**
@@ -276,9 +277,9 @@ Names are stable across exports. `*Bins` = axis for the table of the same root.
 
 | symbol | meaning |
 |--------|---------|
-| `idleActiveAirflow` | EMU "Airflow - Active state air flow [%]". Closed-loop idle airflow target. **8 cols × 5 rows = 40 cells**. X = "Coolant Temp. (°C)" (`cltBins8` = 0/15/30/45/60/75/96/105 on this build). Y = "Idle target (RPM)" (1000/1100/1200/1375/1500 on this build) — keyed on idle TARGET, not actual engine RPM. ubyte ×0.5/count. Raw `data` rows run low→high RPM (row 0 = 1000 rpm); EMU UI shows high RPM at top — flip when rendering. |
+| `idleActiveAirflow` | EMU "Airflow - Active state air flow [%]". Closed-loop idle airflow target. **8 cols × 5 rows = 40 cells**. X = "Coolant Temp. (°C)" (`cltBins8` = 0/15/30/45/60/75/96/105 on this build). Y = "Idle target (RPM)" = symbol `idleTargetBins` (word ×5) — **editable, re-read it per export**: 1000/1100/1200/1375/1500 through mid-2026, **1000/1250/1500/1750/2000 in the 2026-09-19 exports**. Keyed on idle TARGET, not actual engine RPM. ubyte ×0.5/count. Raw `data` rows run low→high RPM (row 0 = 1000 rpm); EMU UI shows high RPM at top — flip when rendering. |
 | `idleArmedAirFlow` | EMU "Airflow - Armed state air flow [%]". Armed-state airflow target (pedal released, pre-PID), ubyte 8×1 vs RPM |
-| `idleCustomCorrection` | EMU "Airflow - Custom air flow correction [%]". **5 cols × 5 rows = 25 cells**. **X axis is IAT/CAT (charge-air temp), NOT CLT** — `idleCustomCorrX` bins on this build are 20/30/40/50/70 °C — used for heat-soak airflow compensation. **Y axis is "Idle target (RPM)"** (`idleCustomCorrY` = 1000/1100/1200/1375/1500 rpm) — lookup is on the current idle-target value, NOT actual engine RPM. As of 05/26/2026 build was switched from **additive** (sbyte direct %) to **scalar/multiplicative** mode (displayed as % delta in EMU UI; +2 % = mult 1.02, -28 % = mult 0.72). Confirm mode before rescaling — additive and scalar use different storage scales. |
+| `idleCustomCorrection` | EMU "Airflow - Custom air flow correction [%]". **5 cols × 5 rows = 25 cells**. **X axis is IAT/CAT (charge-air temp), NOT CLT** — `idleCustomCorrX` bins on this build are 20/30/40/50/70 °C — used for heat-soak airflow compensation. **Y axis is "Idle target (RPM)"** (`idleCustomCorrY`; 1000/1100/1200/1375/1500 rpm through mid-2026, 1025/1250/1500/1750/2000 in the 2026-09-19 exports — re-read per export) — lookup is on the current idle-target value, NOT actual engine RPM. As of 05/26/2026 build was switched from **additive** (sbyte direct %) to **scalar/multiplicative** mode (displayed as % delta in EMU UI; +2 % = mult 1.02, -28 % = mult 0.72). Confirm mode before rescaling — additive and scalar use different storage scales. |
 | `idleCrankingDC` | EMU title "Cranking airflow [%]". Airflow-% target vs CLT, 4 bins on `cltBins4` = `0/33/67/100 °C`, so **bin 0 = coldest**. (Despite "DC" in the name it is airflow-%, not a duty cycle, on a DBW setup.) |
 | `cyclingIdleAirflow` | airflow target during cycling-idle (anti-stall) mode |
 | `idleDBWTargetMin/Max` | **the Airflow-Actuator range** (TPS %, word @ 0.1/count). `idleDBWTargetMin=35`→3.5% floor, `idleDBWTargetMax=80`→8.0% ceiling. This is the `[floor, ceiling]` that all airflow-% values map into — the symbols to read to learn the CURRENT range, and to edit when changing it (floor 2.4% = `24`). Do **not** assume the ceiling from history; read it here. |
@@ -290,7 +291,7 @@ Names are stable across exports. `*Bins` = axis for the table of the same root.
 | `dbwCharacteristic1/2` | pedal→target maps (PPS × something) |
 | `dbwMinDC`/`dbwMaxDC`/`dbwMaxCurrent` | motor drive limits (not airflow %) |
 | `tpsMin`/`tpsMax` | TPS *sensor* ADC calibration (closed/WOT), **not** the airflow range |
-| `crankingCorrTbl`, `crankingCorrTbl2` | cranking fuel correction (CLT × TPS) |
+| `crankingCorrTbl`, `crankingCorrTbl2` | cranking fuel correction (CLT × crank revs) |
 | `tblsFFCrankingBlend` | flex-fuel blend for cranking tables |
 
 When asked "which symbols are airflow %", the core start/idle group is
@@ -320,8 +321,8 @@ This captures all fuel enrichment tables and their axis bins in one pass. Key sy
 
 | Symbol | Storage | Dims | Axes | Scale | Description |
 |--------|---------|------|------|-------|-------------|
-| `crankingCorrTbl` | u12 | 8 CLT × 5 TPS | `cltBinsCranking` × `tpsCrankingBins` | 1 (direct %) | Cranking fuel correction, pump gas |
-| `crankingCorrTbl2` | u12 | 8 CLT × 5 TPS | same | 1 (direct %) | Cranking fuel correction, ethanol |
+| `crankingCorrTbl` | u12 | 8 CLT × 5 revs | `cltBinsCranking` × `crankRevCntBins` | 1 (direct %) | Cranking fuel correction, pump gas |
+| `crankingCorrTbl2` | u12 | 8 CLT × 5 revs | same | 1 (direct %) | Cranking fuel correction, ethanol |
 | `tblsFFCrankingBlend` | ubyte | 9×1 | ethanol content % | **0.5** | Pump gas weight in cranking blend (100%=E0, 0%=E100) |
 | `aseTbl` | ubyte | 6 rev × 6 CLT | `aseCltBins` (rows) × revolutions (cols, bins not in XML) | 1 (direct %) | Afterstart enrichment, pump gas |
 | `aseTbl2` | ubyte | 6 rev × 6 CLT | same | 1 (direct %) | Afterstart enrichment, ethanol |
@@ -329,7 +330,7 @@ This captures all fuel enrichment tables and their axis bins in one pass. Key sy
 | `warmupTbl2` | ubyte | 10 CLT × 4 MAP | same | 1 (direct %) | Ongoing warmup enrichment, ethanol |
 | `tblsFFWarmupBlend` | ubyte | 9×1 | ethanol content % | **0.5** | Pump gas weight in warmup blend |
 | `cltBinsCranking` | sword | 8×1 | — | 1 (°C) | CLT axis for crankingCorrTbl |
-| `tpsCrankingBins` | word | 6×1 | — | 0.1 (%) | TPS axis for crankingCorrTbl (note: 6 bins for 5-row table — may have one unused entry) |
+| `tpsCrankingBins` | word | 6×1 | — | 0.1 (%) | TPS axis for `TPSScaleTbl` (anti-flood scale), NOT for crankingCorrTbl. Reads TPS, so on DBW the cranking throttle position lands on it — see notes/engine_start.md |
 | `aseCltBins` | sword | 6×1 | — | 1 (°C) | CLT axis for aseTbl |
 | `cltBinsWarmup` | sword | 10×1 | — | 1 (°C) | CLT axis for warmupTbl |
 | `mapBinsWarmup` | word | 4×1 | — | 1 (kPa) | MAP axis for warmupTbl |
@@ -338,7 +339,7 @@ This captures all fuel enrichment tables and their axis bins in one pass. Key sy
 
 ### Table layout
 
-**`crankingCorrTbl` / `crankingCorrTbl2`** — `height=5` rows are TPS bins (closed throttle = row 0, WOT = row 4). `width=8` columns are CLT bins (cold = col 0). Active during cranking state only (< `crankingThreshold` RPM, typically 400 RPM). Values = % extra fuel on top of base pulse width.
+**`crankingCorrTbl` / `crankingCorrTbl2`** — `height=5` rows are crank-revolution bins `crankRevCntBins` (1/3/7/13/20; corrected 2026-10-02 — earlier text said TPS). `width=8` columns are CLT bins (cold = col 0). Active during cranking state only (< `crankingThreshold` RPM, typically 400 RPM). Values = % extra fuel on top of base pulse width.
 
 **`aseTbl` / `aseTbl2`** — `height=6` rows are CLT bins (`aseCltBins`). `width=6` columns are revolution counts since start (bins not stored in XML — hardcoded in firmware). Values decay left→right to 0 over the first N revolutions. Active immediately after engine fires until all values reach 0.
 
@@ -348,7 +349,7 @@ This captures all fuel enrichment tables and their axis bins in one pass. Key sy
 
 At any ethanol content, the effective cranking correction is:
 ```
-effective% = crankingCorrTbl[clt][tps] × (blend/100) + crankingCorrTbl2[clt][tps] × (1 − blend/100)
+effective% = crankingCorrTbl[clt][rev] × (blend/100) + crankingCorrTbl2[clt][rev] × (1 − blend/100)
 ```
 where `blend` is the pump-gas weight from `tblsFFCrankingBlend` for the current ethanol content (scale 0.5, so raw 0x6C=108 → 54% pump gas weight).
 
@@ -358,12 +359,13 @@ At E60 on this build, the pump gas weight is approximately 37%, giving ~63% weig
 
 | Symbol | Scale | Description |
 |--------|-------|-------------|
-| `crankingThreshold` | word, 1 RPM | RPM below which cranking state is active (400 on this build) |
-| `crankingIgnAngle` | sbyte, 1° | Fixed ignition advance during cranking |
+| `crankingThreshold` | word, 1 RPM | RPM above which the ECU leaves Cranking for Afterstart. Designed meaning: **the engine has started** — set it where the engine is running on its own, above any starter-carried pulse/hover (see `notes/engine_start.md`) |
+| `engineStallRevs` | ubyte, 1 RPM (UI max 250) | RPM below which the ECU declares the engine stalled — a direct value, not an adder. Must sit **below the lowest cranking speed**, or a slow crank reads as a stall |
+| `crankingIgnAnlge` (sic) | sbyte, ×0.5° | Fixed ignition advance during cranking |
 | `crankingLambdaTarget` | ubyte, /100 | Lambda target during cranking (100 = λ1.00) |
-| `afterstartIgnitionLockAngle` | sbyte, 1° | Ignition angle held for post-start lock period |
-| `afterstartIgnitionLockTime` | ubyte, 1 (units TBD) | Duration of post-start ignition lock |
-| `afterstartIgnRestoreRate` | sbyte, 1°/cycle | Rate at which timing restores to base after lock |
+| `afterstartIgnitionLockAngle` | sbyte, ×0.5° | Ignition angle held for post-start lock period |
+| `afterstartIgnitionLockTime` | ubyte, 0.04 s/count | Duration of post-start ignition lock, from the Cranking exit |
+| `afterstartIgnRestoreRate` | sbyte, ≈0.125°/engine cycle per count (measured 2026-09-29) | Slew toward the idle-ignition demand after the lock; lock flag clears when executed = demand |
 | `afterstartEnableIgnLock` | ubyte, bool | 1 = post-start ignition lock active |
 | `idleControlAfterstartDelay` | ubyte, 1 (cycles?) | Idle PID engagement delay after start |
 | `idleAfterstartRPMincrease` | u12, 4×4 | Post-start RPM elevation table (CLT × time/rev bins) |

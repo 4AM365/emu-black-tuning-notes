@@ -159,6 +159,8 @@ A noisy CLT makes the idle ref table, warmup enrichment, and ASE all oscillate s
 
 Fix: check `CLT` for rapid small fluctuations (1–2°C jitter at stable temperature). This points to a wiring or sensor issue, not a calibration issue.
 
+Diagnose it on the **`CLT Voltage`** channel, not on `CLT` — an NTC's volts-per-degree collapses when hot, so the same disturbance reads as jitter cold and as 20 °C jumps at operating temperature, and the calibration table's bin placement can multiply it again. Method and a fully worked case: [sensors_and_inputs.md → P5](sensors_and_inputs.md), [supra/notes/clt_signal_noise.md](../supra/notes/clt_signal_noise.md).
+
 ### Front-feed manifold maldistribution at idle
 
 At idle with cams, misfires on one cylinder are enough to cause RPM oscillation. If a rear cylinder is consistently lean, every few cycles it misfires, RPM dips, the idle PID opens the throttle, the misfire stops, RPM rises, PID closes, misfire recurs — oscillation.
@@ -223,7 +225,7 @@ As RPM craters and MAP rises toward the low-RPM pumping-loss region, the speed-d
 
 ### 2. Airflow: fan-gated air drops out at speed (the depth)
 
-`idleCoolantFanCorr` (a positive idle-air bump while the cooling fan loads the engine) is VSS-gated **off above a speed threshold**. On a return from above that speed the base idle airflow is the bare table value instead of the higher fan-on value, and the airflow PID is clamped too low to hold. Below the speed threshold the fan is on and returns catch cleanly. Fixes that do **not** add idle variation: more airflow-PID authority (`idleAirPIDOutMax`/`idleAirFlowIntegralLimitMax`) and a faster `idlePIDUpdateInterval`. The fan correction itself is correct load-comp — leave it. See the build's working doc for this car's speed gate and PID clamp values.
+`idleCoolantFanCorr` (a positive idle-air bump while the cooling fan loads the engine) is VSS-gated **off above a speed threshold**. On a return from above that speed the base idle airflow is the bare table value instead of the higher fan-on value, and the airflow PID is clamped too low to hold. Below the speed threshold the fan is on and returns catch cleanly. Fixes that do **not** add idle variation: more airflow-PID **output authority** (`idleAirPIDOutMax`/`idleAirFlowIntegralLimitMax`). The fan correction itself is correct load-comp — leave it. **First check whether the PID is saturated:** if it is pinned on its output clamp during the dip, the clamp is the only lever that moves the ceiling — nothing else matters while saturated. If it is late but *not* saturated, suspect the **actuator** (DBW transport lag), not the control loop: measure the true loop rate by histogramming the PID-output channel's hold lengths in a log before blaming any update-interval symbol. On the reference build that symbol (`idlePIDUpdateInterval`=200) proved inert — the loop actually runs ~40 ms. See [idle.md → Airflow PID](idle.md). See the build's working doc for this car's speed gate and PID clamp values.
 
 ### What does NOT work
 

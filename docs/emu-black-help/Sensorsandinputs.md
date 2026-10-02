@@ -395,10 +395,31 @@ The Intake Air Temperature (IAT) sensor and the Coolant Temperature (CLT) sensor
 ** !!⚠Both sensors must be connected to the EMU and properly configured for the device to operate correctly!
 
 The EMU Black device has a built-in 2K2 pull-up resistor on the IAT and CLT sensor inputs, which, along with the variable resistance of the sensor, forms a voltage divider. In rare cases where the internal pull-up resistor may not be optimal for the specific sensor used, there is an option to disable the internal pull-up (__{1}__) and use an external resistor instead.
+<!-- {1} = "Enable pull up" checkbox, Sensors and inputs > IAT, CLT (symbols `iatPullup` / `cltPullup`, stored as bool). -->
 
 The diagram below illustrate the method of connecting IAT and CLT sensors to the EMU device.
 
 ![iatClt.png](Images/iatClt.png)
+
+<!-- Diagram transcription (image saved to Images/iatClt.png, copied from the V3 install
+     Resources\Help\EN\Images\ on 2026-09-22):
+
+     Both sensors are drawn as TWO-TERMINAL devices. One terminal of each goes to its
+     signal pin; the other terminals of BOTH sensors are tied together and run to the
+     EMU's own Sensor GND pin. Nothing in the diagram connects to engine or chassis ground.
+
+       CLT sensor  --- terminal 1 ---> B5   (CLT input)
+                   --- terminal 2 ---+
+                                     |
+       IAT sensor  --- terminal 1 ---|---> B32  (IAT input)
+                   --- terminal 2 ---+
+                                     |
+                                     +-----> B29  (Sensor GND)
+
+     Consequence worth stating explicitly: wired to spec, CLT and IAT SHARE a return
+     conductor back to B29. If their noise is uncorrelated in a log, they are not sharing
+     that return — see supra/notes/clt_signal_noise.md §1e. -->
+
 
 
 

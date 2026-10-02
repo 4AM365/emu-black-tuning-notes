@@ -1,0 +1,447 @@
+<title>Cylinder 6 Knock and Boost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of findings, charts run the full column width, small multiples wrap to one column on phones. */
+:root{
+  --bg:#f3f5f7; --surface:#fcfcfb; --fg:#15191d; --fg2:#4d5660; --muted:#6c757e; --rule:#dfe3e7; --grid:#e9ecef;
+  --s0:#eb6834; --s1:#2a78d6; --s2:#1baf7a;
+  --f-display:"Saira Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111315; --surface:#1a1a19; --fg:#eef0f2; --fg2:#bcc3ca; --muted:#939ba3; --rule:#2d3237; --grid:#262a2e;
+  --s0:#d95926; --s1:#3987e5; --s2:#199e70; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111315; --surface:#1a1a19; --fg:#eef0f2; --fg2:#bcc3ca; --muted:#939ba3; --rule:#2d3237; --grid:#262a2e;
+  --s0:#d95926; --s1:#3987e5; --s2:#199e70; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--f-body);margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+header{display:grid;gap:10px;padding-block:8px 22px;border-bottom:1px solid var(--rule)}
+.eyebrow{font:500 12px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(30px,5vw,46px)/1.05 var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font:600 26px/1.15 var(--f-display);margin:0;text-wrap:balance}
+h3{font:600 17px/1.3 var(--f-display);margin:0;letter-spacing:.01em}
+p{margin:0;max-width:68ch}
+.lede{font-size:17px;color:var(--fg2);max-width:70ch}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+section{display:grid;gap:14px;padding-block:34px;border-bottom:1px solid var(--rule)}
+section > *{min-width:0}
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding-block:22px 6px}
+.finding{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;display:grid;gap:4px;align-content:start}
+.finding .v{font:600 22px/1.15 var(--f-display)}
+.finding p{font-size:14px;color:var(--fg2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--fg2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.legend i.l{width:18px;height:3px;border-radius:2px}
+.k0{background:var(--s0)}.k1{background:var(--s1)}.k2{background:var(--s2)}
+.chart{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 8px 4px;position:relative;min-width:0}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.ctitle{font:500 13px/1.3 var(--f-body);color:var(--fg2);padding:2px 8px 4px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.grid3,.grid2{grid-template-columns:minmax(0,1fr)}}
+.ax text{font:11px var(--f-mono);fill:var(--muted)}
+.ax line,.ax path{stroke:var(--rule)}
+.gl{stroke:var(--grid);stroke-width:1}
+.alab{font:12px var(--f-body);fill:var(--fg2)}
+.zero{stroke:var(--muted);stroke-width:1}
+.d0{fill:var(--s0)}.d1{fill:var(--s1)}.d2{fill:var(--s2)}
+.l0{stroke:var(--s0)}.l1{stroke:var(--s1)}.l2{stroke:var(--s2)}
+.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.b0{fill:var(--s0);opacity:.13}.b1{fill:var(--s1);opacity:.13}.b2{fill:var(--s2);opacity:.13}
+.ring{stroke:var(--surface);stroke-width:2}
+.xh{stroke:var(--muted);stroke-width:1}
+.lbl{font:500 11px var(--f-mono);fill:var(--fg)}
+.lbl2{font:11px var(--f-mono);fill:var(--muted)}
+#tip{position:fixed;pointer-events:none;background:var(--surface);color:var(--fg);border:1px solid var(--rule);border-radius:6px;padding:8px 10px;font:12px/1.45 var(--f-mono);box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:10;max-width:300px}
+#tip b{font-weight:500}
+details{font-size:13.5px}
+summary{cursor:pointer;color:var(--fg2);font-weight:500;padding-block:4px}
+summary:focus-visible{outline:2px solid var(--s1);outline-offset:2px;border-radius:3px}
+.tbl{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;font:12.5px/1.45 var(--f-mono);font-variant-numeric:tabular-nums;min-width:100%}
+th,td{padding:5px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th{font-weight:500;color:var(--fg2);background:var(--bg)}
+td:first-child,th:first-child{text-align:left}
+.note{font-size:13.5px;color:var(--fg2);border-left:2px solid var(--rule);padding-left:12px;max-width:72ch}
+ul.plain{margin:0;padding-left:20px;display:grid;gap:6px;max-width:72ch}
+footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6px}
+</style>
+<style>
+.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;padding-block:24px 4px}
+.answer{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:18px 18px 16px;display:grid;gap:8px;align-content:start}
+.answer .q{font:500 13px/1.35 var(--f-mono);color:var(--muted)}
+.answer .a{font:700 28px/1.05 var(--f-display)}
+.answer ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px;color:var(--fg2)}
+.part{font:600 32px/1.1 var(--f-display);margin:0;padding-top:30px;text-wrap:balance}
+</style>
+<div class="wrap">
+<header>
+  <div class="eyebrow">MKIV Supra · 2JZ-GTE · EMU Black log study · 2026-10-02</div>
+  <h1>Did the per-cylinder trim cut knock peaks and idle misfire?</h1>
+  <p class="lede">The trim went live on <b>May 4 2026 between 17:25 and 17:38</b>. Ethanol was 56–57 % from Mar 29 to May 10, so the five weeks before and six days after run on the same fuel. Data: 119 decoded LogAutosave binaries, Mar 1 → Sep 29, about 25 hours of running.</p>
+  <div class="legend" id="eraLegend"></div>
+</header>
+
+<div class="answers">
+  <div class="answer">
+    <span class="q">Question 1 · Did knock sensor peaks reduce after the trim?</span>
+    <span class="a">Yes at idle and in boost. No at cruise.</span>
+    <ul>
+      <li>Idle, cyl 6 readings above 2× normal: <b>0.082 % → 0.005 %</b> of samples on the same fuel (−94 %). Trimmed cyl 4 fell too; untrimmed cyl 1 did not.</li>
+      <li>Boost, cyl 6 above 2×: <b>0.77 % → 0.29 %</b> (−63 %), then 0.17 %. Cyl 1 fell as well, so in boost the drop is engine-wide.</li>
+      <li>Cruise, cyl 6 above 2×: 0.056 % → 0.117 %. Peaks rose.</li>
+    </ul>
+  </div>
+  <div class="answer">
+    <span class="q">Question 2 · Did misfire at idle reduce after the trim?</span>
+    <span class="a">Yes on the same fuel. Later, partly.</span>
+    <ul>
+      <li>Sharp RPM sags at idle (more than 15 rpm below the 0.28 s median): <b>1.12 → 0.55 per minute</b> (−51 %). Every depth from 10 to 25 rpm fell 37–54 %.</li>
+      <li>Lean lambda blips (more than 0.02 λ): <b>0.48 → 0.32 per minute</b> (−33 %); above 0.03 λ, −48 %. They kept falling later (0.10).</li>
+      <li>From May 11 on, sharp sags went back to about the pre-trim rate as fuel and idle settings changed. There is no misfire channel; these are the two standard proxies.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="part">Question 1 · Knock sensor peaks</h2>
+
+<section id="s-exc">
+  <div class="eyebrow">1a · Knock voltage peak cyl 6</div>
+  <h2>How often cyl 6 jumps above normal</h2>
+  <p>Each line shows the share of samples where <code>Knock voltage peak cyl 6</code> is more than <i>k</i> times the median for its 250 rpm × 10 kPa cell, for every <i>k</i> from 1.25 to 3. One median per cell, pooled over all three periods. A line lower and to the left means fewer and smaller peaks. Log scale; points at zero are drawn on the floor.</p>
+  <div class="legend" id="legExc"></div>
+  <div class="grid3" id="excPanels"></div>
+  <p class="note">Idle = idle PID active (<code>Idle state</code> 2), CLT ≥ 80 °C. Cruise = MAP 30–95 kPa, 1500–4000 rpm. Boost = MAP 105–175 kPa, 3500–6000 rpm, the range both periods reach. The same-fuel after period has 80 min of idle, 64 min of cruise and 32 s of boost.</p>
+</section>
+
+<section id="s-cyl">
+  <div class="eyebrow">1b · Trimmed vs untrimmed cylinders</div>
+  <h2>At idle the drop follows the trim</h2>
+  <p>Share of samples above 1.5× normal for every knock channel. Trim at the time: cyl 1–2 none, cyl 3 +1–2 %, cyl 4 +3–5 %, cyl 5 +5–7 %, cyl 6 +7–9 %. Cyl 1 is the control.</p>
+  <div class="legend" id="legCyl"></div>
+  <div class="grid2">
+    <div class="chart"><div class="ctitle">Warm idle (% above 1.5×)</div><div id="cylIdle"></div></div>
+    <div class="chart"><div class="ctitle">Boost (% above 1.5×)</div><div id="cylBoost"></div></div>
+  </div>
+  <p class="note">In boost cyl 1 and cyl 3 fell as much as cyl 6, and boost overshoot stopped at the same time (part 3). The boost drop is real but can't be credited to the trim alone.</p>
+</section>
+
+<section id="s-kdrive">
+  <div class="eyebrow">1c · Drive by drive</div>
+  <h2>Cyl 6 idle peaks stopped on May 4</h2>
+  <p>Share of warm-idle samples above 2× normal for every drive with at least a minute of idle. Before the trim, peaks came and went: quiet in early April, heavy Apr 20 – May 1. After May 4 no drive returned to that level.</p>
+  <div class="legend" id="legKdrive"></div>
+  <div class="chart"><div id="kdrive"></div></div>
+</section>
+
+<section id="s-scatter">
+  <div class="eyebrow">1d · Knock voltage peak cyl 6 vs Boost</div>
+  <h2>Every boost sample, by period</h2>
+  <p>Samples with <code>Boost</code> above 5 kPa, 3000–6500 rpm, fuel on, up to 2,500 per panel. Same axes on all three. Hover a dot for its RPM and log.</p>
+  <div class="grid3" id="scatters"></div>
+</section>
+
+<section id="s-pulls">
+  <div class="eyebrow">1e · Single pulls</div>
+  <h2>Full-pedal pulls on the same fuel</h2>
+  <p>Boost on top, cyl 6 knock voltage below, on a shared time axis. Pedal ≥ 90 % and at least 1.5 s in boost.</p>
+  <div id="pullPairs" style="display:grid;gap:18px"></div>
+</section>
+
+<h2 class="part">Question 2 · Idle misfire</h2>
+
+<section id="s-dips">
+  <div class="eyebrow">2a · RPM dips</div>
+  <h2>Fewer sharp RPM sags and lean blips at idle</h2>
+  <p>A misfire takes one cylinder's push out of the crank, so RPM sags for a sample or two. Count of sags per minute of steady warm idle, for every depth from 5 to 50 rpm below a centred 0.28 s (7-sample) rolling median. The short window keeps sharp sags and drops the slow ~1 Hz idle hunt. Steady idle = idle PID active, throttle closed, RPM slew under 300 rpm/s, CLT ≥ 80 °C, at least 4 s (the <code>emu-black-idle-stability</code> gate). Log scale.</p>
+  <div class="legend" id="legDips"></div>
+  <div class="grid2">
+    <div class="chart"><div class="ctitle">RPM sags per minute vs sag depth</div><div id="dips"></div></div>
+    <div class="chart"><div class="ctitle">Lean lambda blips per minute vs blip size</div><div id="lean"></div></div>
+  </div>
+  <p class="note">5 rpm wiggles are ordinary ripple and don't change. The same-fuel drop sits at 10–25 rpm. Sags deeper than 30 rpm are rare in every period (under 0.15 per minute). Lean blips: <code>Lambda 1</code> rising above its centred 0.6 s median while lambda is valid; unburned air from a misfire reads lean.</p>
+  <details><summary>Table view</summary><div class="tbl" id="tblMis"></div></details>
+</section>
+
+<section id="s-trace">
+  <div class="eyebrow">2b · What it looks like</div>
+  <h2>Thirty seconds of warm idle, before and after</h2>
+  <p>For each period, the drive whose rate of sags deeper than 25 rpm is closest to that period's average, middle 30 s of its longest steady stretch. RPM with the idle target, then <code>Lambda 1</code>. A slow swing is the idle-PID hunt, which the sag count filters out.</p>
+  <div class="grid2" id="traces"></div>
+</section>
+
+<section id="s-mdrive">
+  <div class="eyebrow">2c · Drive by drive</div>
+  <h2>Sharp sags deeper than 15 rpm, per drive</h2>
+  <p>Per-drive rates scatter widely on both sides. The six same-fuel days sit at the low end of the before spread; later drives spread back out.</p>
+  <div class="legend" id="legMdrive"></div>
+  <div class="chart"><div id="mdrive"></div></div>
+</section>
+
+<h2 class="part">3 · Context</h2>
+
+<section id="s-egt">
+  <div class="eyebrow">3a · Exhaust gas temperature</div>
+  <h2>Cyl 6 − cyl 3 EGT by load band</h2>
+  <p>What the trim was set to fix. <code>EGT 2</code> − <code>EGT 1</code>, sample-weighted; whiskers span the per-drive means. MAP held in band for 2 s, overrun excluded.</p>
+  <div class="legend" id="legEgt"></div>
+  <div class="chart"><div id="egt"></div></div>
+</section>
+
+<section id="s-boost">
+  <div class="eyebrow">3b · Boost</div>
+  <h2>Boost overshoot stopped around the same time</h2>
+  <p>Each dot is one pull. Before the trim, pulls often overshot target: peaks to 105 kPa on E57 and 136 kPa on pump fuel in March, against targets of 100–116. After it, peaks sit at or under target, top 89 kPa. Grey = pump-fuel weeks before Mar 29.</p>
+  <div class="legend" id="legBoost"></div>
+  <div class="grid2">
+    <div class="chart"><div class="ctitle">Peak boost by date (kPa gauge)</div><div id="boostDate"></div></div>
+    <div class="chart"><div class="ctitle">Peak vs target per pull (kPa gauge)</div><div id="boostTgt"></div></div>
+  </div>
+</section>
+
+<section id="s-method">
+  <div class="eyebrow">4 · Data and limits</div>
+  <h2>Where the numbers come from</h2>
+  <ul class="plain">
+    <li>The <code>.emublog3</code> autosaves were decoded directly (504-byte records, 25 Hz), with every channel used here matched exactly against two CSV exports (Apr 8 and May 30). 20 duplicate or empty autosaves were dropped. Each sample's period comes from its own logged <code>Injector 6 trim</code> and <code>Ethanol content</code>.</li>
+    <li>The same-fuel after period is six days. Idle and cruise are well covered; boost is 32 s, so the boost answer leans on the later period, where ethanol is lower.</li>
+    <li>Other work happened around May 4 (idle airflow, VE, lambda settings) and boost behaviour changed. The idle knock result has a built-in control (cyl 1); the misfire proxies don't.</li>
+    <li>25 Hz logging can't see individual firings at idle (~55 per second). Sags and lean blips are the outline of a misfire, not a count of them. The window lengths (0.28 s RPM, 0.6 s lambda) were chosen so the ~1 Hz idle hunt doesn't register; a 1 s window counted hunt troughs as dips.</li>
+    <li>Knock-voltage CoV in boost (<code>emu-black-knock-cov</code> method, MAP &gt; 100 kPa): 25.1 → 20.4 → 21.2 %. Two knock counts appear in the CSV exports all year, both after the trim and both on cyl 1.</li>
+  </ul>
+  <div class="tbl" id="tblData"></div>
+</section>
+
+<footer>
+  <span>Analysis, decoder and scripts: <span class="mono">supra/reports/2026-10-02_cyl6_trim_knock_boost/</span> in emu-black-tuning-notes.</span>
+  <span>Canonical findings: <span class="mono">supra/notes/per_cylinder_trim_results.md</span>.</span>
+</footer>
+</div>
+<div id="tip" hidden></div>
+<script>
+const DATA = __DATA__;
+const G = DATA.groups;
+const NS = "http://www.w3.org/2000/svg";
+const tip = document.getElementById("tip");
+function el(tag, attrs, parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function txt(parent,x,y,s,cls,anchor){const t=el("text",{x,y,class:cls||"lbl2","text-anchor":anchor||"start"},parent);t.textContent=s;return t}
+function nice(lo,hi,n){const span=hi-lo,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0))),r=step0/mag;const step=(r<1.5?1:r<3?2:r<7?5:10)*mag;const t=[];for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(10));return t}
+function fmt(v,d){return v==null||isNaN(v)?"–":(+v).toFixed(d)}
+function showTip(html,ev){tip.innerHTML=html;tip.hidden=false;const pad=14;let x=ev.clientX+pad,y=ev.clientY+pad;const r=tip.getBoundingClientRect();if(x+r.width>innerWidth-8)x=ev.clientX-r.width-pad;if(y+r.height>innerHeight-8)y=ev.clientY-r.height-pad;tip.style.left=x+"px";tip.style.top=y+"px"}
+function hideTip(){tip.hidden=true}
+function legend(id,gs,line){document.getElementById(id).innerHTML=gs.map(g=>`<span><i class="${line?'l ':''}k${g}"></i>${G[g]}</span>`).join("")}
+function frame(container,o){
+  const W=o.w||720,H=o.h||330,m=Object.assign({t:14,r:18,b:42,l:52},o.m||{});
+  const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":o.aria||""},container);
+  const X=v=>m.l+(v-o.x[0])/(o.x[1]-o.x[0])*(W-m.l-m.r);
+  const Y=v=>H-m.b-(v-o.y[0])/(o.y[1]-o.y[0])*(H-m.t-m.b);
+  const ax=el("g",{class:"ax"},svg);
+  (o.yt||nice(o.y[0],o.y[1],5)).forEach(v=>{el("line",{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),class:"gl"},ax);txt(ax,m.l-7,Y(v)+3.5,o.yf?o.yf(v):v,"","end")});
+  (o.xt||nice(o.x[0],o.x[1],6)).forEach(v=>{el("line",{x1:X(v),x2:X(v),y1:H-m.b,y2:H-m.b+4},ax);txt(ax,X(v),H-m.b+16,o.xf?o.xf(v):v,"","middle")});
+  el("line",{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b},ax);
+  if(o.xl)txt(svg,(m.l+W-m.r)/2,H-6,o.xl,"alab","middle");
+  if(o.yl){const t=txt(svg,12,(m.t+H-m.b)/2,o.yl,"alab","middle");t.setAttribute("transform",`rotate(-90 12 ${(m.t+H-m.b)/2})`)}
+  const g=el("g",{},svg);
+  return {svg,g,X,Y,W,H,m};
+}
+function svgPoint(svg,ev){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function hoverPoints(f,pts){
+  const hl=el("circle",{r:6,fill:"none","stroke-width":2,visibility:"hidden"},f.svg);hl.style.stroke="var(--fg)";
+  const ov=el("rect",{x:f.m.l,y:f.m.t,width:f.W-f.m.l-f.m.r,height:f.H-f.m.t-f.m.b,fill:"transparent"},f.svg);
+  ov.addEventListener("mousemove",ev=>{const p=svgPoint(f.svg,ev);let best=null,bd=400;for(const q of pts){const d=(q[0]-p.x)**2+(q[1]-p.y)**2;if(d<bd){bd=d;best=q}}
+    if(best){hl.setAttribute("cx",best[0]);hl.setAttribute("cy",best[1]);hl.setAttribute("visibility","visible");showTip(best[2],ev)}else{hl.setAttribute("visibility","hidden");hideTip()}});
+  ov.addEventListener("mouseleave",()=>{hl.setAttribute("visibility","hidden");hideTip()});
+}
+function hoverX(f,xs){
+  const xh=el("line",{y1:f.m.t,y2:f.H-f.m.b,class:"xh",visibility:"hidden"},f.svg);
+  const ov=el("rect",{x:f.m.l,y:f.m.t,width:f.W-f.m.l-f.m.r,height:f.H-f.m.t-f.m.b,fill:"transparent"},f.svg);
+  ov.addEventListener("mousemove",ev=>{const p=svgPoint(f.svg,ev);let best=null,bd=1e9;for(const q of xs){const d=Math.abs(q[0]-p.x);if(d<bd){bd=d;best=q}}
+    if(best){xh.setAttribute("x1",best[0]);xh.setAttribute("x2",best[0]);xh.setAttribute("visibility","visible");showTip(best[1],ev)}});
+  ov.addEventListener("mouseleave",()=>{xh.setAttribute("visibility","hidden");hideTip()});
+}
+function linePath(pts){return pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join("")}
+function table(id,head,rows){document.getElementById(id).innerHTML=`<table><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
+function bar(f,x,bw,v,cls){const y=f.Y(v),y0=f.Y(0),r=Math.min(4,(y0-y)/2);el("path",{d:`M${x},${y0}V${y+r}Q${x},${y} ${x+r},${y}H${x+bw-r}Q${x+bw},${y} ${x+bw},${y+r}V${y0}Z`,class:cls},f.g)}
+/* grouped bars: cats on x, one bar per group */
+function grouped(container,cats,val,o){
+  const f=frame(container,Object.assign({x:[0,cats.length],xt:[],m:{l:46,b:34,r:10}},o));
+  const pts=[];
+  cats.forEach((c,ci)=>{const cx=f.X(ci+0.5);txt(f.g,cx,f.H-f.m.b+17,c.label,"alab","middle");
+    [0,1,2].forEach(g=>{const v=val(c,g);if(v==null)return;const bw=Math.min(24,(f.X(1)-f.X(0))/4.6),gap=Math.min(10,(f.X(1)-f.X(0))/14),x=cx+(g-1)*(bw+gap)-bw/2;bar(f,x,bw,Math.min(v,o.y[1]),"d"+g);
+      if(o.labels!==false)txt(f.g,x+bw/2,f.Y(Math.min(v,o.y[1]))-5,o.vf?o.vf(v):v,"lbl","middle");pts.push([x+bw/2,f.Y(Math.min(v,o.y[1])),`<b>${c.label}</b><br>${G[g]}<br>${o.tf?o.tf(c,g,v):v}`])})});
+  hoverPoints(f,pts);return f;
+}
+const DAY=s=>{const y=+s.slice(0,4),m=+s.slice(4,6),d=+s.slice(6,8),h=s.length>9?+s.slice(9,11)+(+s.slice(11,13))/60:12;return (Date.UTC(y,m-1,d)-Date.UTC(2026,0,1))/864e5+h/24};
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"];
+const mticks=(a,b)=>[...Array(10).keys()].map(i=>(Date.UTC(2026,i,1)-Date.UTC(2026,0,1))/864e5).filter(v=>v>=a&&v<=b);
+const mfmt=v=>MONTHS[new Date(Date.UTC(2026,0,1)+v*864e5).getUTCMonth()];
+const SWITCH=DAY("20260504_1731");
+function switchLine(f){el("line",{x1:f.X(SWITCH),x2:f.X(SWITCH),y1:f.m.t,y2:f.H-f.m.b,class:"zero","stroke-dasharray":"4 4"},f.g);txt(f.g,f.X(SWITCH)+6,f.m.t+11,"trim on, May 4")}
+
+const Q = DATA.q;
+const L10 = v => Math.log10(v);
+const fmtLog = v => { const x = Math.pow(10, v); return x >= 1 ? String(+x.toFixed(0)) : String(+x.toPrecision(1)); };
+legend("eraLegend", [0, 1, 2]);
+
+/* curve panel on a log y axis: series = [{g, xs, ys}] */
+function logCurves(container, series, o) {
+  const lo = L10(o.floor), hi = L10(o.top);
+  const yt = []; for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) yt.push(e);
+  const f = frame(container, { w: o.w || 440, h: o.h || 300, m: { l: 50, b: 40, r: 12 }, x: o.x, xt: o.xt, xf: o.xf, y: [lo, hi], yt, yf: fmtLog, xl: o.xl, yl: o.yl, aria: o.aria });
+  const pts = [];
+  series.forEach(s => {
+    const P = s.xs.map((x, i) => [f.X(x), f.Y(L10(Math.max(o.floor, s.ys[i]))), s.ys[i], x]);
+    el("path", { d: linePath(P), class: "ln l" + s.g }, f.g);
+    P.forEach(p => { el("circle", { cx: p[0], cy: p[1], r: 3.5, class: "d" + s.g + " ring" }, f.g); });
+  });
+  hoverX(f, series[0].xs.map((x, i) => [f.X(x), `<b>${o.xname} ${o.xf ? o.xf(x) : x}</b><br>` + series.map(s => `${G[s.g].split(" (")[0]}: ${o.vf(s.ys[i])}`).join("<br>")]));
+  return f;
+}
+
+/* 1a exceedance */
+(function () {
+  legend("legExc", [0, 1, 2], true);
+  const host = document.getElementById("excPanels"), ks = Q.knock.ks;
+  [["idle", "Warm idle", 0.001, 2], ["cruise", "Cruise", 0.001, 10], ["boost", "Boost", 0.01, 50]].forEach(([reg, label, floor, top]) => {
+    const c = document.createElement("div"); c.className = "chart"; c.innerHTML = `<div class="ctitle">${label}</div>`; host.appendChild(c);
+    const series = [0, 1, 2].map(g => { const r = Q.knock.rows.find(q => q.reg === reg && q.g === g && q.cyl === 6); return { g, xs: ks, ys: r.pct }; });
+    logCurves(c, series, { w: 360, h: 300, floor, top, x: [1.2, 3.05], xt: [1.5, 2, 2.5, 3], xf: v => v + "×", xl: "Peak above k × normal", yl: "% of samples (log)", xname: "above", vf: v => v.toFixed(3) + " %", aria: `Cyl 6 knock peak exceedance, ${label}` });
+  });
+})();
+
+/* 1b per cylinder (>1.5x = index of 1.5 in ks) */
+(function () {
+  legend("legCyl", [0, 1, 2]);
+  const i15 = Q.knock.ks.indexOf(1.5), i2 = Q.knock.ks.indexOf(2);
+  const val = (reg, g, c, i) => { const r = Q.knock.rows.find(q => q.reg === reg && q.g === g && q.cyl === c); return r ? r.pct[i] : null; };
+  const cats = [1, 2, 3, 4, 5, 6].map(c => ({ c, label: "cyl " + c }));
+  grouped(document.getElementById("cylIdle"), cats, (c, g) => val("idle", g, c.c, i15), { w: 440, h: 280, y: [0, 1.6], yt: [0, 0.4, 0.8, 1.2, 1.6], yl: "% of samples", labels: false, tf: (c, g, v) => `${v.toFixed(2)} % above 1.5×<br>${val("idle", g, c.c, i2).toFixed(3)} % above 2×`, aria: "Idle knock peaks per cylinder" });
+  grouped(document.getElementById("cylBoost"), cats, (c, g) => val("boost", g, c.c, i15), { w: 440, h: 280, y: [0, 10], yt: [0, 2, 4, 6, 8, 10], yl: "% of samples", labels: false, tf: (c, g, v) => `${v.toFixed(2)} % above 1.5×<br>${val("boost", g, c.c, i2).toFixed(3)} % above 2×`, aria: "Boost knock peaks per cylinder" });
+})();
+
+/* timeline helper */
+function driveTimeline(id, rows, yk, o) {
+  const x0 = DAY("20260325"), x1 = DAY("20261001");
+  const f = frame(document.getElementById(id), { w: 900, h: 290, x: [x0, x1], y: o.y, yt: o.yt, xt: mticks(x0, x1), xf: mfmt, yl: o.yl, aria: o.aria });
+  switchLine(f); const pts = [];
+  rows.forEach(r => { const v = r[yk]; if (v == null) return; const x = f.X(DAY(r.f)), y = f.Y(Math.min(v, o.y[1])); el("circle", { cx: x, cy: y, r: 4.5, class: "d" + r.g + " ring" }, f.g); pts.push([x, y, `<b>${r.f}</b><br>${o.tip(r)}`]); });
+  hoverPoints(f, pts);
+}
+/* 1c */
+legend("legKdrive", [0, 1, 2]);
+driveTimeline("kdrive", Q.knock_drive.filter(r => r.reg === "idle"), "p20", { y: [0, 0.5], yt: [0, 0.1, 0.2, 0.3, 0.4, 0.5], yl: "% idle samples above 2×", aria: "Cyl 6 idle knock peaks per drive", tip: r => `${r.p20.toFixed(3)} % above 2×, ${r.p15.toFixed(2)} % above 1.5×<br>${(r.n / 1500).toFixed(1)} min warm idle` });
+
+/* 1d scatter */
+(function () {
+  const host = document.getElementById("scatters");
+  [0, 1, 2].forEach(g => {
+    const c = document.createElement("div"); c.className = "chart"; c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="k${g}"></i>${G[g]}</span></span></div>`; host.appendChild(c);
+    const pts = [];
+    const f = frame(c, { w: 360, h: 300, m: { l: 44, b: 40, r: 10 }, x: [0, 110], y: [0.3, 2.5], xl: "Boost (kPa gauge)", yl: "Knock cyl 6 (V)", xt: [0, 25, 50, 75, 100], yt: [0.5, 1, 1.5, 2, 2.5], aria: `Cyl 6 knock voltage against boost, ${G[g]}` });
+    txt(f.g, f.W - f.m.r, f.m.t + 10, `${DATA.scatter_n[g].toLocaleString()} samples`, "lbl2", "end");
+    DATA.scatter.filter(p => p[3] === g).forEach(p => { const x = f.X(Math.min(p[0], 110)), y = f.Y(Math.min(p[1], 2.5)); el("circle", { cx: x, cy: y, r: 2, class: "d" + g, "fill-opacity": 0.4 }, f.g); pts.push([x, y, `<b>${p[4]}</b><br>Boost ${p[0]} kPa<br>Knock cyl 6 ${p[1].toFixed(2)} V<br>${p[2]} rpm`]); });
+    hoverPoints(f, pts);
+  });
+})();
+
+/* 1e pull pairs */
+(function () {
+  const host = document.getElementById("pullPairs");
+  DATA.pulls_tl.forEach(pp => {
+    const wrap = document.createElement("div"); wrap.style.display = "grid"; wrap.style.gap = "8px"; wrap.innerHTML = `<h3>${pp.label}</h3>`;
+    const gd = document.createElement("div"); gd.className = "grid2"; wrap.appendChild(gd); host.appendChild(wrap);
+    const tmax = Math.max(pp.before.t.at(-1), pp.after.t.at(-1));
+    ["before", "after"].forEach(side => {
+      const s = pp[side], g = s.g; const c = document.createElement("div"); c.className = "chart";
+      c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="l k${g}"></i>${s.log}</span></span></div>`; gd.appendChild(c);
+      const top = frame(c, { w: 420, h: 170, m: { l: 46, b: 22, r: 10, t: 10 }, x: [0, tmax], y: [0, 100], yl: "Boost kPa", yt: [0, 25, 50, 75, 100], xf: () => "", aria: "Boost over time" });
+      el("path", { d: linePath(s.t.map((t, i) => [top.X(t), top.Y(Math.max(0, Math.min(100, s.boost[i])))])), class: "ln l" + g }, top.g);
+      const bot = frame(c, { w: 420, h: 190, m: { l: 46, b: 36, r: 10, t: 8 }, x: [0, tmax], y: [0.3, 2.5], xl: "Time (s)", yl: "Knock cyl 6 V", yt: [0.5, 1, 1.5, 2, 2.5], aria: "Cyl 6 knock voltage over time" });
+      el("path", { d: linePath(s.t.map((t, i) => [bot.X(t), bot.Y(Math.min(2.5, s.k6[i]))])), class: "ln l" + g, "stroke-width": 1.5 }, bot.g);
+      const xs = s.t.map((t, i) => [bot.X(t), `<b>t = ${t.toFixed(2)} s</b><br>Boost ${s.boost[i]} kPa<br>Knock cyl 6 ${s.k6[i].toFixed(2)} V<br>${s.rpm[i]} rpm`]);
+      hoverX(bot, xs); hoverX(top, s.t.map((t, i) => [top.X(t), xs[i][1]]));
+    });
+  });
+})();
+
+/* 2a misfire curves */
+(function () {
+  legend("legDips", [0, 1, 2], true);
+  const M = Q.misfire;
+  logCurves(document.getElementById("dips"), M.groups.map(r => ({ g: r.g, xs: M.ds, ys: r.dips })), { floor: 0.01, top: 100, x: [2, 52], xt: [5, 10, 15, 20, 25, 30, 40, 50], xf: v => v, xl: "Sag deeper than (rpm below 0.28 s median)", yl: "Sags per minute (log)", xname: "sags deeper than", vf: v => v.toFixed(2) + " /min", aria: "Idle RPM dip rate versus depth" });
+  logCurves(document.getElementById("lean"), M.groups.map(r => ({ g: r.g, xs: M.xs, ys: r.lean })), { floor: 0.005, top: 20, x: [0, 0.065], xt: [0.01, 0.02, 0.03, 0.04, 0.06], xf: v => "+" + v.toFixed(3).replace(/0$/, ""), xl: "Lean blip bigger than (λ above 0.6 s median)", yl: "Blips per minute (log)", xname: "blips bigger than", vf: v => v.toFixed(3) + " /min", aria: "Idle lean lambda blip rate versus size" });
+  const rows = []; M.ds.forEach((d, i) => rows.push([`RPM sag > ${d} rpm`, ...M.groups.map(r => r.dips[i].toFixed(2))]));
+  M.xs.forEach((x, i) => rows.push([`Lean blip > ${x.toFixed(3)} λ`, ...M.groups.map(r => r.lean[i].toFixed(3))]));
+  rows.push(["Steady idle minutes", ...M.groups.map(r => r.min.toFixed(0))]);
+  table("tblMis", ["Events per minute", ...G], rows);
+})();
+
+/* 2b traces */
+(function () {
+  const host = document.getElementById("traces");
+  Q.idle_traces.forEach(s => {
+    const g = s.g, c = document.createElement("div"); c.className = "chart";
+    c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="l k${g}"></i>${s.f} · ${s.rate.toFixed(2)} sags &gt; 25 rpm per min</span></span></div>`; host.appendChild(c);
+    const tmax = 30;
+    const r = frame(c, { w: 420, h: 200, m: { l: 50, b: 22, r: 10, t: 10 }, x: [0, tmax], y: [900, 1400], yt: [900, 1000, 1100, 1200, 1300, 1400], yl: "RPM", xf: () => "", aria: "Idle RPM trace" });
+    el("path", { d: linePath(s.t.map((t, i) => [r.X(t), r.Y(Math.max(900, Math.min(1400, s.tgt[i])))])), class: "zero", fill: "none", "stroke-dasharray": "4 4" }, r.g);
+    el("path", { d: linePath(s.t.map((t, i) => [r.X(t), r.Y(Math.max(900, Math.min(1400, s.rpm[i])))])), class: "ln l" + g, "stroke-width": 1.5 }, r.g);
+    txt(r.g, r.X(29.5), r.Y(s.tgt[0]) - 5, "target", "lbl2", "end");
+    const l = frame(c, { w: 420, h: 170, m: { l: 50, b: 36, r: 10, t: 8 }, x: [0, tmax], y: [0.8, 1.1], yt: [0.8, 0.9, 1.0, 1.1], xl: "Time (s)", yl: "Lambda 1", aria: "Idle lambda trace" });
+    let segs = [[]]; s.t.forEach((t, i) => { if (s.lam[i] == null) { if (segs.at(-1).length) segs.push([]); } else segs.at(-1).push([l.X(t), l.Y(Math.max(0.8, Math.min(1.1, s.lam[i])))]); });
+    segs.filter(q => q.length > 1).forEach(q => el("path", { d: linePath(q), class: "ln l" + g, "stroke-width": 1.5 }, l.g));
+    const xs = s.t.map((t, i) => `<b>t = ${t.toFixed(2)} s</b><br>${s.rpm[i]} rpm (target ${s.tgt[i]})<br>λ ${s.lam[i] == null ? "not valid" : s.lam[i].toFixed(3)}<br>knock cyl 6 ${s.k6[i].toFixed(2)} V`);
+    hoverX(r, s.t.map((t, i) => [r.X(t), xs[i]])); hoverX(l, s.t.map((t, i) => [l.X(t), xs[i]]));
+  });
+})();
+
+/* 2c */
+legend("legMdrive", [0, 1, 2]);
+driveTimeline("mdrive", Q.misfire_drive, "dip15", { y: [0, 3], yt: [0, 1, 2, 3], yl: "Sags > 15 rpm per minute", aria: "Idle RPM sags deeper than 15 rpm per drive", tip: r => `${r.dip15.toFixed(2)} sags > 15 rpm /min<br>${r.dip25.toFixed(2)} sags > 25 rpm /min<br>lean blips > 0.02: ${r.lean2 == null ? "–" : r.lean2.toFixed(2)} /min<br>${r.min} min steady idle` });
+
+/* 3a EGT */
+(function () {
+  legend("legEgt", [0, 1, 2]);
+  const bands = ["idle", "light", "cruise", "transition"]; const E = DATA.egt.filter(r => r.g <= 2);
+  const f = frame(document.getElementById("egt"), { w: 900, h: 300, m: { l: 96, b: 40 }, x: [-30, 70], y: [0, 4], xl: "Cyl 6 − cyl 3 EGT (°C)", xt: [-20, 0, 20, 40, 60], yt: [], aria: "EGT difference cyl 6 minus cyl 3 by band" });
+  el("line", { x1: f.X(0), x2: f.X(0), y1: f.m.t, y2: f.H - f.m.b, class: "zero" }, f.g); const pts = [];
+  bands.forEach((b, bi) => {
+    const yc = f.Y(3.5 - bi); txt(f.g, f.m.l - 10, yc + 4, b, "alab", "end"); if (bi) el("line", { x1: f.m.l, x2: f.W - f.m.r, y1: f.Y(4 - bi), y2: f.Y(4 - bi), class: "gl" }, f.g);
+    [0, 1, 2].forEach(g => {
+      const r = E.find(q => q.g === g && q.band === b); if (!r) return; const y = yc + (g - 1) * 15;
+      if (r.lo != null) el("line", { x1: f.X(Math.max(-30, r.lo)), x2: f.X(Math.min(70, r.hi)), y1: y, y2: y, class: "l" + g, "stroke-width": 2, "stroke-linecap": "round", "stroke-opacity": .45 }, f.g);
+      const x = f.X(r.mean); el("circle", { cx: x, cy: y, r: 5, class: "d" + g + " ring" }, f.g); txt(f.g, x + 9, y + 4, (r.mean > 0 ? "+" : "") + r.mean.toFixed(0), "lbl");
+      pts.push([x, y, `<b>${b} · ${G[g]}</b><br>mean ${r.mean.toFixed(1)} °C over ${r.files} drives<br>per-drive range ${fmt(r.lo, 0)} to ${fmt(r.hi, 0)}`]);
+    });
+  });
+  hoverPoints(f, pts);
+})();
+
+/* 3b boost */
+(function () {
+  document.getElementById("legBoost").innerHTML = [0, 1, 2].map(g => `<span><i class="k${g}"></i>${G[g]}</span>`).join("") + `<span><i style="background:var(--muted)"></i>Before · pump fuel (Mar 1 – 29)</span>`;
+  const P = DATA.pulls; const x0 = DAY("20260301"), x1 = DAY("20261001");
+  const f = frame(document.getElementById("boostDate"), { w: 440, h: 300, m: { l: 44, r: 10 }, x: [x0, x1], y: [20, 140], yl: "Peak boost (kPa)", xt: mticks(x0, x1), xf: mfmt, yt: [20, 50, 80, 110, 140], aria: "Peak boost per pull by date" });
+  switchLine(f); const pts = [];
+  P.forEach((p, i) => { const x = f.X(DAY(p.f)) + ((i * 37) % 9 - 4) * 0.5, y = f.Y(p.peak); const c = el("circle", { cx: x, cy: y, r: 3.5, class: (p.g === 9 ? "" : "d" + p.g) + " ring" }, f.g); if (p.g === 9) c.style.fill = "var(--muted)"; pts.push([x, y, `<b>${p.f}</b><br>peak ${p.peak} kPa, target ${p.tgt}<br>pedal ${p.pps} %, ${p.dur} s in boost`]); });
+  hoverPoints(f, pts);
+  const g2 = frame(document.getElementById("boostTgt"), { w: 440, h: 300, m: { l: 44, r: 10 }, x: [20, 120], y: [20, 140], xl: "Logged Boost Target max (kPa)", yl: "Peak boost (kPa)", xt: [20, 40, 60, 80, 100, 120], yt: [20, 50, 80, 110, 140], aria: "Peak boost against target per pull" });
+  el("line", { x1: g2.X(20), y1: g2.Y(20), x2: g2.X(120), y2: g2.Y(120), class: "zero" }, g2.g); txt(g2.g, g2.X(118), g2.Y(118) + 14, "peak = target", "lbl2", "end");
+  const pts2 = []; P.forEach(p => { const x = g2.X(p.tgt), y = g2.Y(p.peak); const c = el("circle", { cx: x, cy: y, r: 3.5, class: (p.g === 9 ? "" : "d" + p.g) + " ring" }, g2.g); if (p.g === 9) c.style.fill = "var(--muted)"; pts2.push([x, y, `<b>${p.f}</b><br>peak ${p.peak} kPa, target ${p.tgt}`]); });
+  hoverPoints(g2, pts2);
+})();
+
+/* 4 data table */
+(function () {
+  const F = DATA.files.filter(f => f.g >= 0);
+  const rows = [0, 1, 2].map(g => { const s = F.filter(f => f.g === g); const m = s.reduce((a, f) => a + f.min, 0); return [G[g], s.length, Math.round(m), Math.round(s.reduce((a, f) => a + f.eth * f.min, 0) / m)]; });
+  const s9 = F.filter(f => f.g === 9); rows.unshift(["Before · pump fuel (Mar 1 – 29), context only", s9.length, Math.round(s9.reduce((a, f) => a + f.min, 0)), 9]);
+  table("tblData", ["Period", "Drives (files)", "Running minutes", "Ethanol %"], rows);
+})();
+</script>

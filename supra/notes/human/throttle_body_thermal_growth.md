@@ -1,8 +1,10 @@
-# Throttle body thermal growth (GS430 TB)
+# Throttle body thermal growth (ES330 TB, 22030-20060)
 
 > Digest of [throttle_body_thermal_growth.md](../throttle_body_thermal_growth.md) — the dense note is canonical; if they disagree, it wins.
 
 **What this covers:** this build's worked numbers for how the aluminum bore outgrows the stainless plate as the throttle body heats, and whether the implemented `idleCustomCorrection` matches the physics.
+
+**Caveat (2026-09-19):** the plate material is **unknown** (stamped "H"); stainless is an assumption. Brass would cut the differential ~3×.
 
 **The rules:**
 

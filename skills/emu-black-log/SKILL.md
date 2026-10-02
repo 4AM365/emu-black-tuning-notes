@@ -55,6 +55,43 @@ VVT sweeps, lean-cruise tuning) must wait until the WBO is valid. EGT, MAP,
 RPM, ignition retard, knock data are all valid immediately and don't need this
 gate.
 
+## ⚠ RULE: check for mid-log tune edits before pooling anything
+
+A log is **not** guaranteed to describe one calibration. Two channels expose live edits:
+
+- **`Data changing`** — non-zero while a parameter is being written from the laptop.
+- **`Making permanent`** — non-zero while that change is committed to flash.
+
+Tuning sessions routinely contain several. On the Supra's `omg.csv` (2026-08-24) there
+were **29 `Data changing` spans and 9 `Making permanent` spans in 1022 s** — the armed
+airflow table and the idle target table both changed mid-recording.
+
+```python
+for c in ['Data changing', 'Making permanent']:
+    m = (df[c] != 0).astype(int).values
+    d = np.diff(np.r_[0, m, 0])
+    for s, e in zip(np.where(d == 1)[0], np.where(d == -1)[0] - 1):
+        print(f"{c}: t={df['TIME'][s]:.2f} -> {df['TIME'][e]:.2f}")
+```
+
+Consequences, all of which have burned real analyses:
+
+1. **A same-day XML export describes the END state only.** Everything before the last
+   `Making permanent` ran a different calibration.
+2. **Never pool statistics across an edit** without checking the parameter you care
+   about. Reconstruct the pre-edit value from the log instead (see 3).
+3. **A step in a reconstruction residual dates the edit.** Reconstruct the table from
+   the log, difference against the current XML, and bin the residual by time: a flat
+   offset in one time segment and ~0 in another is an edit, not a scaling error. This
+   is how the Supra's `+11 raw count` armed-airflow change was dated to t≈337 s.
+4. **CPU-load spikes near 100 % at the tail of a flash write are expected**, not a fault.
+5. A mid-log edit can also produce a **logging gap** — `omg.csv` has a 2.88 s seam during
+   cranking coinciding with `Data changing` = 1. Don't score a gap as elapsed engine time.
+
+Corollary: an edit that happens mid-log is also a **free A/B experiment**. Split on the
+edit timestamp and compare — but state the confounds (CLT, target, and load history all
+drift across a session), and don't claim proof from a handful of pre-edit events.
+
 ## File format
 
 - **Delimiter**: semicolons (`;`), NOT commas
@@ -220,6 +257,43 @@ Same as warm stall but also check:
 - `Cranking correction` — adequate pulse width for cold fuel atomization
 - `Afterstart Enrichment` at 100% = start of ASE decay; ensure decay is slow enough
 
+### ⚠ RULE: detect flood-clearing before diagnosing any cranking segment
+
+During cranking (ECU State 2, RPM below `crankingThreshold`), the throttle should sit exactly
+where the **cranking airflow table** commands it, with the pedal untouched. **If `PPS` > 0, or
+`TPS` is anywhere other than the cranking-airflow-commanded position, Will is flood-clearing
+the engine on purpose** — the anti-flood `TPSScaleTbl` is then deliberately scaling fuel toward
+zero (TPS-indexed; on the Supra's boost-TPS DBW characteristic, full pedal = TPS ~70% → −77%).
+
+- **Exclude those samples from any start-parameter diagnosis.** Injector PW, dose, lambda, and
+  cranking-table math in a flood-clear segment reflect the anti-flood cut, not the calibration.
+- Diagnose cranking fuel ONLY from pedal-free segments (PPS 0, TPS at the cranking-airflow value).
+- Segment mask: `crank = (df['ECU State']==2); floodclear = crank & (df['PPS']>0)`
+  (or TPS deviating from the pedal-free cranking TPS seen elsewhere in the log).
+
+Full cranking fuel equation + anti-flood decode: `notes/engine_start.md`.
+
+### DBW stiction / fouled throttle body (idle-owned plate not following its command)
+
+Signature: `TPS` sits **above** `DBW target` by > 0.3 % for seconds at a time while `DBW Out. DC` is pinned at
+`dbwMinDC`; idle hangs 20–800 rpm high, the airflow PID winds to `idleAirPIDOutMin`, ignition PID retards. When the
+plate finally lets go the wound-down command lands under the sustaining position and RPM craters. The fouled Supra TB
+(2026-09-19, before cleaning) spent 20 % of idle-owned time in this state (28 s episodes); clean, 1.5 % and no episode
+with the duty pinned. Score it:
+
+```python
+idle = df[df['DBW Target source'] == 2]
+over = (idle['TPS'] - idle['DBW target'] > 0.3) & (idle['DBW Out. DC'] <= dbw_min_dc + 5)
+# run-length the mask; report episodes >= 0.5 s, their TPS vs target, and the share of idle-owned time
+```
+
+Also read: the **zero-duty rest position** (engine off, `DBW Out. DC` == 0) — it rises as the plate fouls (Supra: 8.9
+cold-dirty → 11–12.5 hot-dirty → 6.3–6.6 clean), and the **holding duty vs TPS** scatter, which is bimodal on a clean
+mechanism (hysteresis) and collapses onto the clamp on a dirty one. If the log holds a key-on engine-off DBW routine,
+use only the **slow duty ramps** for the duty→position curve: break-away open/closed duty and the limp-home rest. The
+fast stop-to-stop phase logs `DBW Out. DC` with the opposite sign to the plate motion — do not fit it.
+`supra/notes/tb_clean_2026-09-19.md` has the worked case.
+
 ### Lean surge at cruise
 
 Signature: AFR oscillates above lambda target; `Short term trim` chasing positive.
@@ -310,9 +384,9 @@ print(knock_summary[knock_summary > 0])
 | `Idle state` | 0 | INACTIVE — PPS above activation threshold (driver in control) or engine off. Airflow = Armed-state table (engine running) or 0 (engine off) |
 | `Idle state` | 1 | ARMED — PPS released, RPM above `Target + Ramp down offset`. Airflow taken from `idleArmedAirFlow` table. PID disabled, custom corr NOT applied. Ramp-down-offset decays toward 0 at `Ramp down decay rate` |
 | `Idle state` | 2 | ACTIVE — closed-loop PID idle. Airflow = `idleActiveAirflow` + custom corr + PID. Airflow PID tracks ignition-angle error (not RPM error) |
-| `Idle state` | 3 | AFTERSTART DELAY or CRANKING (verify per build — Idle help lists both as discrete states between INACTIVE and ACTIVE) |
+| `Idle state` | 3 | **CRANKING** (confirmed on the Supra fw v59 build, 2026-08-24: state 3 holds while RPM < `crankingThreshold` and `Cranking correction` is non-zero). Idle help lists AFTERSTART DELAY and CRANKING as discrete states between INACTIVE and ACTIVE — see state 5 |
 | `Idle state` | 4 | DBW BLEND — blending between idle-commanded TPS and driver-commanded TPS via `idleDBWBlendPoint` (single value) or `idleDBWBlendPointTbl` (RPM-indexed). Custom corr NOT applied |
-| `Idle state` | 5 | CYCLING IDLE — cyclic RPM increase for cooling (alternative strategy) |
+| `Idle state` | 5 | **AFTERSTART DELAY** on the Supra fw v59 build — held for exactly `idleControlAfterstartDelay` after catch (measured 0.28 s at delay = 3 → ≈93 ms/count), during which `Idle air %` stays at the cranking value before the PID engages and state → 2. Documented elsewhere as CYCLING IDLE (cyclic RPM increase for cooling); if a build uses that strategy, disambiguate by whether the state appears only in the ~0.3 s after catch |
 | `Idle state` | 6 | DC OVERRIDDEN — diagnostic override (do not use while vehicle is moving) |
 | `Lambda is valid` | 0 | WBO not ready (no trim) |
 | `Lambda is valid` | 1 | WBO validated (trim active) |

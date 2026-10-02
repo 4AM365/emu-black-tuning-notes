@@ -23,6 +23,10 @@ Skill pairing quick-reference:
 
 - XML exports are the readable format: filename contains `.xml.emub3`.
 - Binary `.emub3` files start with `PK` — not grep-able, skip them.
+- **Never attempt to unzip, decode, or decrypt binary tune/QuickSave files** (their
+  contents are `.crypted` — it's a dead end and wasted compute). If a needed value
+  exists only in a binary file, **stop and ask Will to export it** (XML or .emubt),
+  then continue. Ask-don't-chase applies to any unreadable artifact here.
 - Canonical files live in `supra/tunes/` and `supra/exports/`.
 - The EMU OneDrive folder (`EMU_BLACK_V3\Supra`) is the source for files not in the repo.
 
@@ -33,7 +37,7 @@ Skill pairing quick-reference:
   (default to the V3 tree; fall back to the older `EMU_BLACK` V1 path only when noted).
 - Quick map: `supra` → `EMU_BLACK_V3\Supra` (+ `LogAutosave`), `bradley` →
   `EMU_BLACK_V3\bradley` (1JZ; V1 `EMU_BLACK\bradley-1jz`), `land cruiser`/`fj80` →
-  `EMU_BLACK_V3\Land Cruiser`, `napier`/`gs300` → V1 `EMU_BLACK\Napier_GS300` only.
+  `EMU_BLACK_V3\Land Cruiser`, `napier`/`gs300` → `EMU_BLACK_V3\Napier_GS300` (v3 import 2026-09-15; v2 sources in V1 `EMU_BLACK\Napier_GS300`).
 - Access rules (per global CLAUDE.md): normal/local access only for `supra`; for every
   other folder, open only the specific file named — no broad OneDrive traversal.
 - **Maintenance:** whenever a tune repo/vehicle is mentioned that isn't already in
@@ -62,6 +66,28 @@ Skill pairing quick-reference:
   and label any conclusion as a hypothesis — do not present generic-build assumptions as
   facts about this car.
 
+## Match the log to the calibration that was live
+
+When the question is about a log — especially an old one — establish what the ECU was actually
+running at that moment, in this order:
+
+1. **Derive it from the log first.** If the parameter is recoverable from logged channels, do that
+   and stop: it is authoritative for that instant and cannot go stale. Examples — idle target
+   arithmetic (base + `Idle ramp down offset` + the A/C / VSS / clutch increases) recovers each
+   increase; a threshold shows up as the value at which a state flips (`Idle state`,
+   `Idle force open loop`, `Idle control active`); open-loop base airflow = `Idle air %` minus
+   `Idle PID air % correction` minus `Idle airflow custom corr.`.
+2. **Otherwise use the tune export immediately preceding that log, by date — not the newest one.**
+   Check `supra/tunes/`, then `supra/exports/`, then the EMU source folder; many logs have a
+   same-named export beside them. A later export describes edits made after the drive.
+3. **If only a binary `.emub3` exists for that date, stop and ask Will to export the XML.** Never
+   decode the binary. Name the file and the parameter you need, then carry on with everything that
+   does not depend on it.
+4. **Check `Data changing` / `Making permanent` before pooling any statistic.** Segment the log at
+   the last edit and state which segment each result came from.
+5. **When a derived value and an export disagree, the log wins for that log.** Say so plainly and
+   ask which was in force — do not report it as a firmware or scaling anomaly.
+
 ## Table math rules
 
 - **Never guess on table conversion.** Do per-cell math and show the full back-calc first.
@@ -69,8 +95,36 @@ Skill pairing quick-reference:
   any airflow rescale — never assume values from history.
 - Verify scale empirically (one cell: `raw × scale` vs EMU display) before trusting any
   scale constant.
+- **EMU table axes are editable scales; only the cell count is fixed.** A table's size (e.g. `veTable`
+  16 × 20) is set by firmware, but its axis bins (`rpmBins`, `mapBins`, …) are whatever values Will enters.
+  The Supra's `rpmBins` is currently an even 500 → 7000 spread across the fixed 20 bins (09-19 export), and
+  can just as well be 200 → 7000 or any spacing. **When Will says "add a row", he means re-scale the
+  axis so a bin lands where it's needed.** Never describe it as shifting rows, dropping a row, or making the
+  table bigger (Will, 2026-09-30, after repeated misstatements). Re-scaling moves every bin, so cell values
+  have to be re-mapped to the new bins. Do the per-cell math (rule above).
 - When displaying MAP/RPM tables, show RPM increasing on the Y axis and MAP increasing
   on the X axis. Put RPM labels on the left and MAP labels at the bottom.
+
+## Cranking tables are VE-relative — read the VE cells first
+
+Whenever a cranking table (`crankingCorrTbl`/`crankingCorrTbl2`, and by extension ASE) is discussed or changed:
+
+- **The cranking dose is the VE fuel equation × (1 + cranking %)**, not a standalone fuel demand
+  (`notes/engine_start.md` → Cranking fuel equation). A cranking % is a correction to the VE cell
+  being looked up, and it means nothing without that cell.
+- **The VE table's RPM axis bottoms out at 500 rpm and clamps there.** Cranking runs at ~150–250 rpm and
+  near-atmospheric MAP, so it reads the high-MAP (WOT) end of the 500 rpm row. Will added that 500 rpm bin
+  so a **running** engine that bogs to ~500 rpm gets rescued, and it works (2026-09-30). Its cells describe
+  a bogging running engine, **not cranking fuel demand**. The cranking table corrects that mismatch
+  (B = VE_true/VE_table), and the correction stays there: don't move the VE axis down to a cranking speed,
+  because the bog band would then blend with a cranking-speed bin.
+- **Before reasoning about any cranking cell, read from the current export the VE cells the crank and
+  run-up actually look up:** the 500 rpm row at the logged cranking MAP, and the cells between the
+  500 rpm row and the next row up at the falling MAP through the run-up to `crankingThreshold`. Reason
+  in absolute dose (VE × MAP × (1 + %)) or true enrichment ((1 + %)/B − 1), not in table %.
+- Corollaries: any edit to the low-RPM, high-MAP VE cells silently rescales every cranking cell. A
+  cranking % and an ASE % can be compared directly only at the same instant (same VE cell), e.g. at
+  the Cranking → Afterstart exit.
 
 ## Notes and documentation
 

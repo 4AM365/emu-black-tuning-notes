@@ -1,0 +1,429 @@
+LOG DISCOVERY  (mtime window 2026-06-05 .. 2026-08-05)
+  2026-08-04  oil compensation test with hot restart and varied ho read
+  2026-08-04  oil compensation test with hot restart.csv           read
+  2026-08-04  oil compensation test.csv                            read
+  2026-08-02  oil data after 25 minutes.csv                        read
+  2026-08-02  oil temp data.csv                                    skip: no oil-pressure channel
+  2026-06-13  20260613_1141.csv                                    read
+  2026-06-29  20260629_1753.csv                                    skip: no oil-pressure channel
+  2026-06-28  4bar_base_fuel_press.csv                             skip: no oil-pressure channel
+  2026-07-30  ahfuck less data.csv                                 skip: no oil-pressure channel
+  2026-07-30  ahfuck.csv                                           skip: file < 20 kB
+  2026-07-17  armedstatebogjuly17.csv                              skip: no oil-pressure channel
+  2026-07-18  backpressure measurement smooth.csv                  skip: no oil-pressure channel
+  2026-07-30  before_increased_active_airflow.csv                  skip: no oil-pressure channel
+  2026-07-19  boost0719.csv                                        skip: no oil-pressure channel
+  2026-06-26  cold idle dip again 2.csv                            skip: no oil-pressure channel
+  2026-06-26  cold idle dip again 3 all channels.csv               read
+  2026-06-26  cold idle dip again.csv                              read
+  2026-06-20  cold idle dip.csv                                    skip: no oil-pressure channel
+  2026-07-29  crank_fail_0729.csv                                  read
+  2026-06-28  died_hot_return_to_idle_again.csv                    read
+  2026-07-30  hotcranx.csv                                         skip: no oil-pressure channel
+  2026-07-19  idle0719.csv                                         skip: no oil-pressure channel
+  2026-08-02  key_data.csv                                         skip: missing ['Idle state']
+  2026-06-28  new_lambda_settings.csv                              skip: no oil-pressure channel
+  2026-07-19  niceboostpulls.csv                                   skip: no oil-pressure channel
+  2026-07-17  randomlydied.csv                                     skip: no oil-pressure channel
+  2026-06-26  syncloss.csv                                         skip: file < 20 kB
+  2026-06-26  triggers_highrpm_today_loss.csv                      skip: no oil-pressure channel
+  2026-07-30  varied_cranking_airflow.csv                          skip: no oil-pressure channel
+  2026-08-02  Cold oil reference.csv                               read
+  2026-07-10  bp1.csv                                              skip: no oil-pressure channel
+  2026-07-10  bp2.csv                                              skip: no oil-pressure channel
+  2026-07-10  bp3.csv                                              skip: no oil-pressure channel
+
+  !! oil compensation test with hot restart: duplicate content of 'oil compensation test with hot restart and varied hot idle targets' -> dropped (would double-weight)
+
+  !! oil compensation test: duplicate content of 'oil compensation test with hot restart and varied hot idle targets' -> dropped (would double-weight)
+
+GATE SENSITIVITY — median airflow % per oil-pressure bin (n)
+    entry_age / sd | 2 bar | 3 bar | 4 bar | 5 bar | 6 bar
+       0s /   25 |  28.5 ( 5060) |  41.0 ( 2895) |  37.0 ( 2486) |  37.0 ( 2541) |  42.5 ( 9065)
+       5s /   25 |  28.5 ( 4598) |  41.5 ( 2420) |  37.0 ( 2481) |  35.5 ( 2460) |  42.5 ( 8597)
+      15s /   25 |  28.0 ( 3789) |  42.0 ( 1399) |  37.0 ( 2182) |  34.5 ( 2368) |  37.5 ( 7077)
+      30s /   25 |  27.0 ( 2888) |  43.0 (  808) |  37.0 ( 1962) |  33.0 ( 2031) |  34.5 ( 5533)
+      15s /   15 |  28.5 ( 2619) |  38.5 (  744) |  37.0 ( 1431) |  32.0 ( 1614) |  37.0 ( 6730)
+      15s /   50 |  28.0 ( 3967) |  42.5 ( 1792) |  37.0 ( 2429) |  36.5 ( 2999) |  37.5 ( 7401)
+
+RPM-ENVELOPE COMPARISON — median airflow % per oil-pressure bin (n)
+   steady |  28.0 ( 3789) |  42.0 ( 1399) |  37.0 ( 2182) |  34.5 ( 2368) |  37.5 ( 7077)   | samples <1050 rpm: 339
+   target |  28.0 ( 3271) |  42.5 ( 1275) |  37.0 ( 2107) |  37.0 ( 2035) |  41.5 ( 5721)   | samples <1050 rpm: 229
+   either |  28.0 ( 3955) |  42.0 ( 1680) |  37.0 ( 2386) |  34.5 ( 2972) |  37.5 ( 7434)   | samples <1050 rpm: 360
+
+>>> building tables with RPM envelope = 'target'
+
+  oil compensation test with hot restart and varied hot idle targets: 16706 rows -> 3142 usable (126s of sustained idle)
+       engine running (RPM>400)             16706 ->   14410
+       idle state == 2 (ACTIVE)             14410 ->    7621
+       MAP < 60 kPa                          7621 ->    7604
+       entry age > 15s                       7604 ->    4595
+       RPM envelope [target]                 4595 ->    3142
+       airflow logged (>0)                   3142 ->    3142
+       oil pressure present                  3142 ->    3142
+       CLT present                           3142 ->    3142
+
+  oil data after 25 minutes: 11935 rows -> 2770 usable (111s of sustained idle)
+       engine running (RPM>400)             11935 ->   11935
+       idle state == 2 (ACTIVE)             11935 ->    6047
+       MAP < 60 kPa                          6047 ->    6047
+       entry age > 15s                       6047 ->    3208
+       RPM envelope [target]                 3208 ->    2770
+       airflow logged (>0)                   2770 ->    2770
+       oil pressure present                  2770 ->    2770
+       CLT present                           2770 ->    2770
+
+  20260613_1141: 17298 rows -> 1520 usable (61s of sustained idle)
+       engine running (RPM>400)             17298 ->   17293
+       idle state == 2 (ACTIVE)             17293 ->    5652
+       MAP < 60 kPa                          5652 ->    5652
+       entry age > 15s                       5652 ->    1826
+       RPM envelope [target]                 1826 ->    1520
+       airflow logged (>0)                   1520 ->    1520
+       oil pressure present                  1520 ->    1520
+       CLT present                           1520 ->    1520
+       oil press. status == 1                1520 ->    1520
+       A/C clutch off                        1520 ->    1520
+
+  cold idle dip again 3 all channels: 1120 rows -> 81 usable (3s of sustained idle)
+       engine running (RPM>400)              1120 ->    1119
+       idle state == 2 (ACTIVE)              1119 ->     597
+       MAP < 60 kPa                           597 ->     597
+       entry age > 15s                        597 ->      81
+       RPM envelope [target]                   81 ->      81
+       airflow logged (>0)                     81 ->      81
+       oil pressure present                    81 ->      81
+       CLT present                             81 ->      81
+       oil press. status == 1                  81 ->      81
+       A/C clutch off                          81 ->      81
+
+  cold idle dip again: 358 rows -> 0 usable (0s of sustained idle)
+       engine running (RPM>400)               358 ->     358
+       idle state == 2 (ACTIVE)               358 ->       0
+       MAP < 60 kPa                             0 ->       0
+       entry age > 15s                          0 ->       0
+       RPM envelope [target]                    0 ->       0
+       airflow logged (>0)                      0 ->       0
+       oil pressure present                     0 ->       0
+       CLT present                              0 ->       0
+       oil press. status == 1                   0 ->       0
+       A/C clutch off                           0 ->       0
+
+  crank_fail_0729: 393 rows -> 0 usable (0s of sustained idle)
+       engine running (RPM>400)               393 ->       0
+       idle state == 2 (ACTIVE)                 0 ->       0
+       MAP < 60 kPa                             0 ->       0
+       entry age > 15s                          0 ->       0
+       RPM envelope [target]                    0 ->       0
+       airflow logged (>0)                      0 ->       0
+       oil pressure present                     0 ->       0
+       CLT present                              0 ->       0
+       oil press. status == 1                   0 ->       0
+       A/C clutch off                           0 ->       0
+
+  died_hot_return_to_idle_again: 1314 rows -> 0 usable (0s of sustained idle)
+       engine running (RPM>400)              1314 ->    1253
+       idle state == 2 (ACTIVE)              1253 ->     179
+       MAP < 60 kPa                           179 ->     179
+       entry age > 15s                        179 ->       0
+       RPM envelope [target]                    0 ->       0
+       airflow logged (>0)                      0 ->       0
+       oil pressure present                     0 ->       0
+       CLT present                              0 ->       0
+       oil press. status == 1                   0 ->       0
+       A/C clutch off                           0 ->       0
+
+  Cold oil reference: 13419 rows -> 7125 usable (285s of sustained idle)
+       engine running (RPM>400)             13419 ->   11528
+       idle state == 2 (ACTIVE)             11528 ->   11498
+       MAP < 60 kPa                         11498 ->   11493
+       entry age > 15s                      11493 ->   10371
+       RPM envelope [target]                10371 ->    7125
+       airflow logged (>0)                   7125 ->    7125
+       oil pressure present                  7125 ->    7125
+       CLT present                           7125 ->    7125
+
+POOLED 14638 samples (9.8 min). Dropped 229 outside the RPM axis span [950,1562].
+
+OIL-PRESSURE BIN OCCUPANCY (nearest-bin lumping, per instruction)
+  2 bar: n=  3271  actual OP range 1.81-2.50  median 2.12
+  3 bar: n=  1275  actual OP range 2.56-3.50  median 3.06
+  4 bar: n=  2107  actual OP range 3.62-4.50  median 4.25
+  5 bar: n=  2035  actual OP range 4.62-5.50  median 4.88
+  6 bar: n=  5721  actual OP range 5.62-7.62  median 6.88
+
+COVERAGE: 30 of 200 cells hold data (15%); 21 hold >=1 s.
+
+OPERATING LOCUS — the axes are not independent, so most of the cube is unvisitable
+   CLT bin |      n | oil pressure seen (bar)   | RPM held
+         0 |      0 | (no samples)
+        15 |      0 | (no samples)
+        30 |   1065 | 6.75 - 7.62 (med 7.25)  | 1290-1537
+        45 |   2009 | 6.62 - 7.50 (med 7.12)  | 1239-1540
+        60 |   1079 | 6.31 - 7.12 (med 6.69)  | 1175-1479
+        75 |   1659 | 2.81 - 6.81 (med 6.31)  | 1150-1250
+        96 |   8280 | 1.81 - 6.31 (med 3.50)  | 950-1478
+       105 |    317 | 1.81 - 4.25 (med 2.12)  | 1010-1250
+
+
+### Airflow % — Y = actual RPM held
+
+**Oil pressure 2 bar**  (n=3271)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | — | 28.5† | 28.0† |
+| **1100** | — | — | — | — | — | — | 24.5 | 26.5† |
+| **1000** | — | — | — | — | — | — | 21.5 | 21.0 |
+
+**Oil pressure 3 bar**  (n=1275)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | 47.5 | — |
+| **1375** | — | — | — | — | — | — | 43.0 | — |
+| **1200** | — | — | — | — | — | 44.0 | 38.8 | 33.0 |
+| **1100** | — | — | — | — | — | — | 25.0 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 4 bar**  (n=2107)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 66.2 | 37.0† | 36.5† |
+| **1100** | — | — | — | — | — | — | 34.0† | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 5 bar**  (n=2035)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 32.5 | 37.0† | — |
+| **1100** | — | — | — | — | — | 29.0 | 31.0† | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 6 bar**  (n=5721)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | 77.5 | 72.5 | 61.0 | — | — | — |
+| **1375** | — | — | 58.0† | 49.5† | — | — | — | — |
+| **1200** | — | — | — | 41.5† | 34.5 | 30.5 | 34.0 | — |
+| **1100** | — | — | — | — | — | 29.0 | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+### Sample count (n, 25 Hz)
+
+**Oil pressure 2 bar**  (n=3271)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | — | 2593 | 302 |
+| **1100** | — | — | — | — | — | — | 143 | 3 |
+| **1000** | — | — | — | — | — | — | 229 | 1 |
+
+**Oil pressure 3 bar**  (n=1275)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | 67 | — |
+| **1375** | — | — | — | — | — | — | 375 | — |
+| **1200** | — | — | — | — | — | 7 | 792 | 5 |
+| **1100** | — | — | — | — | — | — | 29 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 4 bar**  (n=2107)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 2 | 2093 | 6 |
+| **1100** | — | — | — | — | — | — | 6 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 5 bar**  (n=2035)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 207 | 1788 | — |
+| **1100** | — | — | — | — | — | 2 | 38 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 6 bar**  (n=5721)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | 118 | 787 | 25 | — | — | — |
+| **1375** | — | — | 947 | 717 | — | — | — | — |
+| **1200** | — | — | — | 505 | 1054 | 1433 | 127 | — |
+| **1100** | — | — | — | — | — | 8 | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+### Airflow % with the fan's +13 removed (engine-only requirement)
+
+**Oil pressure 2 bar**  (n=3271)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | — | 15.5† | 15.0† |
+| **1100** | — | — | — | — | — | — | 11.5 | 13.5† |
+| **1000** | — | — | — | — | — | — | 8.5 | 8.0 |
+
+**Oil pressure 3 bar**  (n=1275)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | 34.5 | — |
+| **1375** | — | — | — | — | — | — | 30.0 | — |
+| **1200** | — | — | — | — | — | 31.0 | 25.8 | 20.0 |
+| **1100** | — | — | — | — | — | — | 12.0 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 4 bar**  (n=2107)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | — | 24.0† | 23.5† |
+| **1100** | — | — | — | — | — | — | 21.0† | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 5 bar**  (n=2035)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 21.5 | 21.5† | — |
+| **1100** | — | — | — | — | — | 29.0 | 17.5† | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 6 bar**  (n=5721)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | 77.5 | 72.5 | 61.0 | — | — | — |
+| **1375** | — | — | 58.0† | 49.5† | — | — | — | — |
+| **1200** | — | — | — | 41.5† | 34.5 | 30.5 | 27.5 | — |
+| **1100** | — | — | — | — | — | 28.8 | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+### Airflow % — Y = Idle TARGET (EMU table indexing)
+
+**Oil pressure 2 bar**  (n=3271)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | — | 28.5† | 28.0† |
+| **1100** | — | — | — | — | — | — | 24.5 | — |
+| **1000** | — | — | — | — | — | — | 21.5 | 21.0 |
+
+**Oil pressure 3 bar**  (n=1275)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | 47.5 | — |
+| **1375** | — | — | — | — | — | — | 43.0 | — |
+| **1200** | — | — | — | — | — | 44.0 | 41.5 | 33.0 |
+| **1100** | — | — | — | — | — | — | 25.0 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 4 bar**  (n=2107)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 66.2 | 37.0† | 36.5† |
+| **1100** | — | — | — | — | — | — | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 5 bar**  (n=2035)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 32.5 | 37.0† | — |
+| **1100** | — | — | — | — | — | — | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 6 bar**  (n=5721)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | 77.5 | 72.5 | 61.0 | — | — | — |
+| **1375** | — | — | 58.0† | 49.0† | 60.8 | — | — | — |
+| **1200** | — | — | — | 41.0 | 34.5 | 30.5 | 34.0 | — |
+| **1100** | — | — | — | — | — | — | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+### Sample count, Y = Idle target
+
+**Oil pressure 2 bar**  (n=3271)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | — | 2606 | 305 |
+| **1100** | — | — | — | — | — | — | 131 | — |
+| **1000** | — | — | — | — | — | — | 228 | 1 |
+
+**Oil pressure 3 bar**  (n=1275)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | 56 | — |
+| **1375** | — | — | — | — | — | — | 438 | — |
+| **1200** | — | — | — | — | — | 7 | 743 | 5 |
+| **1100** | — | — | — | — | — | — | 26 | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 4 bar**  (n=2107)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 2 | 2099 | 6 |
+| **1100** | — | — | — | — | — | — | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 5 bar**  (n=2035)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | — | — | — | — | — | — |
+| **1375** | — | — | — | — | — | — | — | — |
+| **1200** | — | — | — | — | — | 209 | 1826 | — |
+| **1100** | — | — | — | — | — | — | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+**Oil pressure 6 bar**  (n=5721)
+
+| RPM＼CLT | 0 | 15 | 30 | 45 | 60 | 75 | 96 | 105 |
+|---|---|---|---|---|---|---|---|---|
+| **1500** | — | — | 118 | 791 | 23 | — | — | — |
+| **1375** | — | — | 947 | 966 | 2 | — | — | — |
+| **1200** | — | — | — | 252 | 1054 | 1441 | 127 | — |
+| **1100** | — | — | — | — | — | — | — | — |
+| **1000** | — | — | — | — | — | — | — | — |
+
+wrote C:\Code\car-projects\emu-black-tuning-notes\supra\notes\oil_pressure_airflow\tables.md, cells.csv, cells_by_idle_target.csv

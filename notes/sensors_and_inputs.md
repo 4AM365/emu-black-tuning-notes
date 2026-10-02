@@ -18,6 +18,10 @@ characteristic) is on [dbw.md](dbw.md), not here.
 ### IAT, CLT
 Charge-air and coolant temperature. **Lock these down before chasing idle** (P1). CLT feeds the idle
 ref table, warmup enrichment, ASE, and fan logic simultaneously, so CLT noise oscillates all of them.
+Wiring per ECUMaster's diagram: two-terminal sensors, signals to **B5** (CLT) and **B32** (IAT),
+both second terminals **commoned to B29 Sensor GND** — never engine or chassis ground. Fixed
+internal **2K2** pull-up, enabled by a bool (`cltPullup`/`iatPullup`); no value selector and no
+digital filter on these two inputs. Noise diagnosis method: P5.
 
 ### MAP, BARO
 Manifold and barometric pressure. Built-in vs external MAP, 5 V cal, baro source. The load axis for
@@ -112,11 +116,88 @@ distribution (rear-vs-front delta on a front-feed manifold). A $20 k-type probe 
 on each runner is the single highest-value sensor add for a self-tuner ([ignition.md](ignition.md),
 [fueling.md → F4](fueling.md), [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md)).
 
+## P5. An NTC's noise gain is worst exactly where you care — diagnose in volts, not degrees
+
+A thermistor divider loses volts-per-degree as it gets hot (resistance collapses toward zero while
+the pull-up stays fixed), so a *constant* electrical disturbance produces a small temperature error
+cold and a large one at operating temperature. Never judge temp-sensor noise in °C — log the
+`* Voltage` channel and work the residual there, then convert through the calibration at the end.
+
+Three diagnostics that cost nothing and localize the fault:
+
+1. **Key on, engine off.** A clean flat voltage here clears the ADC, the reference, and the sensor;
+   anything that appears the instant the engine fires is pickup.
+2. **The temperature dependence tells you the coupling.** With `V/5 = R_th/(R_pu+R_th)`, a series
+   disturbance in the sensor leg (ground offset, or magnetic pickup in the signal/return loop)
+   reaches the ADC scaled by `1 − V/5`, so it is **worse hot**. Current injected onto the wire
+   (capacitive pickup) or noise on the 5 V pull-up rail scales by `V/5` — **worse cold**. The two
+   predictions differ by ~4× across a normal warm-up and are easy to separate in one log.
+3. **Cross-check CLT against IAT — and know which answer means what.** ECUMaster's own diagram
+   (`Sensorsandinputs.md` → `Images/iatClt.png`) returns *both* sensors to a **common Sensor GND
+   pin** (B29; CLT signal B5, IAT B32), so wired to spec they share one conductor. Glitching on the
+   same samples therefore means a real disturbance on that shared return or on the 5 V rail.
+   Glitching **independently means they are not on it** — each is referenced to something local.
+   That is positive evidence for engine/chassis grounding, not evidence against a ground problem:
+   engine ground is a distributed conductor carrying coil, starter and alternator return current,
+   and two points on a block differ by tens of millivolts during a switching impulse, so two
+   locally-bonded sensors glitch independently by construction. After a correct rewire the two
+   channels should become *correlated* — that is the confirmation, not a new fault.
+4. **Separate coil from injector.** Dwell is usually near-constant, so coil energy per event is
+   fixed while injector duty swings with load. Normalize the glitch rate by spark rate: flat per
+   spark while injector duty multiplies ⇒ coil current is the source, and the coil grounds and coil
+   harness are what to move.
+
+Two multipliers sit downstream of the raw noise and are worth auditing before touching hardware:
+
+- **The calibration table.** EMU's `voltage5VCLTBin` is 8-bit and the wizard's point placement is
+  yours to choose; a coarse or duplicated cell near the operating point creates a dead band on one
+  side and a slope cliff on the other, turning a small voltage glitch into a large reading. Fit
+  Steinhart-Hart to the table's own points — a real NTC fits to well under 1 °C RMS, so any point
+  that refuses to fit is a bad cell, not a sensor characteristic.
+- **The pull-up.** `cltPullup`/`iatPullup` are **bools** on a fixed internal 2K2 (analog inputs get
+  4K7 and a 3-way selector); the only way to change the value is to clear the bool, fit an external
+  resistor to +5 V, and regenerate the table with the wizard's `Rx` set to match. Sensitivity peaks
+  when `R_pu ≈ R_th` at the temperature you care about, and lowering `R_pu` also lowers node
+  impedance *and* the ground-offset transfer ratio — it wins on all three axes, paid for in cold-end
+  range. It scales the symptom; it does not remove the source.
+
+Worked example with all of this measured on a real log:
+[supra/notes/clt_signal_noise.md](../supra/notes/clt_signal_noise.md).
+
+## P6. Sensor ground is separated from power ground by current path, not by isolation
+
+*Model knowledge, not ECUMaster text (2026-09-25).* ECUMaster publishes no EMU Black schematic;
+the pinout only says sensor grounds (29/38/39) are "not connected to the engine" and power grounds
+(17/24/27/28) are. The standard ECU design this describes:
+
+- **Not galvanically isolated.** Sensor ground (AGND) is its own copper net joined to power ground
+  (PGND) at **one point** — a star point, usually at the ground pins or under the ADC/5 V regulator,
+  sometimes through a 0 Ω link, ferrite bead or small resistor. The ADC and the 5 V reference sit on
+  AGND, so they share one reference with every sensor return.
+- **What the separation buys is that big currents never flow through AGND copper.** Coil primaries,
+  injectors, the DBW H-bridge and the ECU's own supply return on PGND. Any trace or wire has
+  resistance, so `V = I·R`: 10 A of coil current across 5 mΩ of shared copper is 50 mV, which an
+  ADC reading an NTC at operating temperature sees as degrees. Sensor currents are milliamps, so the
+  AGND path stays at one potential.
+- **Why the harness must keep the rule.** Land a sensor return on the block and its reference now
+  runs block → straps → ECU power-ground wire, all carrying engine current, so that `I·R` appears in
+  series with the signal. Bond the AGND net to the block anywhere and you create a second path in
+  parallel with the internal star point — a ground loop — and a share of engine current flows through
+  AGND copper inside the ECU, corrupting every input referenced to it. On pre-"P" hardware that is the
+  documented switch-input cross-talk ([supra/notes/ac_request_input_noise.md](../supra/notes/ac_request_input_noise.md)).
+  A corroded power ground makes this worse: the ECU's own return current then looks for a way home
+  through any sensor bonded to the block.
+- **Consequence for testing:** with the ECU plugged in, the sensor-ground net beeps to the block
+  through the star point whatever the harness does. Unplug the ECU to test harness routing. On the
+  unplugged ECU, ohms from a sensor-ground pin to a power-ground pin shows the internal tie — a direct
+  link reads ≈0 Ω, a protective resistor reads a few ohms or more (unmeasured on this unit).
+
 ---
 
 ## Related documents
 
 - [dbw.md](dbw.md) — TPS/PPS *map* (the characteristic) and DBW motor
+- [../supra/notes/clt_signal_noise.md](../supra/notes/clt_signal_noise.md) — CLT pickup, cal-table dead band, pull-up trade study
 - [engine_protection.md](engine_protection.md) — dual-TPS plausibility, oil-pressure protection
 - [fueling.md](fueling.md) — wideband closed-loop logic, `lambdaDelay`, per-cylinder EGT trim
 - [supra/notes/mass_flow_estimator_quirk.md](../supra/notes/mass_flow_estimator_quirk.md) — why idle airflow reads ~10× high

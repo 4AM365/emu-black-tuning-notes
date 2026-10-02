@@ -1,0 +1,2056 @@
+. Body El 
+. . . . 
+· · 
+. · · 
+970297 
+· · . 
+. ectronics Area Network (BEAN) 
+. 
+Hiroshi Honda Shi . 
+. 
+· 
+• 
+geru u--
+· 
+· 
+. 
+. 
+..... , •• Knunort Sakal, and Takao Akatsuka ·. 
+. · . . 
+'• ... 
+ABSTRACT 
+This 
+paper 
+describes 
+th.e 
+multiplex . 
+communication protocol, BEAN (Body Electronics 
+Area Network), dev~lo~ed for body control system on 
+passenger cars which m recent years has increased 
+the scope of multiplex communication. BEAN is 
+t>aSed on a protocol developed in 1 ~92 (SAE920231.) 
+but expands upon the performance m areas, sud\ as 
+the suitability of the ID system_ for increase of ECUs , 
+the variable data length enabling the transmission of 
+diagnostic data, and the transmission rate, while 
+keeping the cost and radiation noise level low. 
+The · . 
+sottware size of BEAN is compact enough to be · 
+implemented by general purpose 8bit MCUs which 
+have recently seen improvements in performanee. 
+The BEAN communication devices are available 
+corresponding to the scale of the application artd 
+configuration of the ECU taking into . account the 
+software capability. 
+This protocol was evaluated 
+using simulation with the body control system. on 
+luxury passenger cars. 
+INTRODUCTION 
+In 1992. we developed a simple and low cost 
+multiplex communication protocol for the body 
+control system. This system was aimed mainly at 
+door control systems such as the power window and 
+door lock control and has been used in mass 
+production on the LEXUS LS400 since 1995. 
+Recently, the number of functions available 
+in the electronic system for the body control has been 
+increasing, and it has become necessary to enlarge 
+the area with multiplexing to reduce wire harness 
+volume. For example, the power wtndow function 
+~. -
+. -· :· ' 
+-: ·. -. / ·. 
+. : :: ··- ... 
+-· .. 
+Toyota. Motor Colp. 
+Susumu Aldyam• 
+·0eneo(;c)fp.· 
+.· . 
+~~':~~es 8 jam. Protedion .control feature ~ ~ 
+1 · 
+· power window control. Moreover, the door 
+~:ntrol syste"! is linked to the airbag system for . 
+mu . 
+conti:ot Figure 1 shows the data to be. 
+· 
+ltiplexed '° a body control system built into a 
+passenger car. Switch data has been the main data 
+of the conve~tional body system, but the use of 
+~:rot data, hke vehicle speed, cooling system fluid 
+. 
+perature and ambient temperature are also · 
+mcreaSing in order to reduce the wire hamess size 
+and to share data among different ECUs. Thougtl 
+the d~a is not transmitted frequently, it ls still several 
+bytes in length. 
+;~
+···· ·~i~-~;~~-;.;·~~ \ ·. 
+: 
+switchd.t. 
+: 
+~ 
+control date 
+; 
+~ -
+~d.ta 
+: 
+. . 
+' 
+-~ -.................... . _ ····-----··-·--· 
+0. lkbit 
+Qoor •ea netwodl 
+I 
+f 
+I 
+I ·l · 
+Ftgure 1.: Number of data to be muhi~ed 
+f:igure 2 shows an example of a large scale · 
+bodY controt system. For the setvicing of such large 
+systems, 
+diagnostic · capability 
+is 
+requil'ed. 
+However, each ECU implementing the diagnostic 
+interface circuit (IS09141) would resutt in an 
+tnaease In cost of the system. 
+To solve ·Ulis 
+pr®tem, tt is more. emcumt tMt one ~cu. ~- the · 
+.. . . 
+._·., 
+.· .. ... 
+· . .. 
+__ .. 
+_ .. 
+·t?t 
+tew•Y tor all 
+interface circtJif and function as a ~~Us via trie 
+multiplex transmtsslon to. orh!sary to be able to 
+. multiplex bus. Therefore. it IS ne 
+harldfe such complex data. 
+the amount and 
+Under tt.ese cirromstances, 
+itted is also 
+variety of the data to be t~~area optional 
+lncrNsiOQ. tn the body etectronic~st is' a strong 
+functions frequently change hand, the selection of an 
+consideration. We beheve t a 
+we 
+· needed 
+and 50· 
+optimal networtc system is 
+· with bOth high 
+initiated the development of a protocol 
+cost at 8 
+perlonnance and flexibility thal keeps 
+minimum. 
+. 
+th requirements of 
+This paper summanzes e 
+. 
+h 
+the protocol and describes the specifications of~~ 
+protocol that was developed for the bOdy electrom I 
+system (BEAN). 
+Next, we present som~ act:,: 
+examptes of the data communication devices 
+toots necessary for the development of the system. 
+Then. .using the LEXUS LS400 as a il,1.xu~ ~r 
+example, a case study of the BEAN appl1.ca~on ts 
+conducted Finally, the tuture issues of building an 
+in-vehicie network tor the body system. are 
+disalsSed. 
+·o ··
+. 
+i . 
+.. tQI j 
+i -
+: .. I 
+. . ~ 
+2: An exampe Of body area netwodc system 
+ftEQUtREMaas FOR THE NElWORK OF BODY 
+ELECTRONICS SYSTEM 
+. · 
+· . !he requirements for the netWotlt of bod 
+etec:lton1cs system are summar1zed as follows; 
+Y 
+1. Maximum transmission 
+. 
+.. 
+2. Data transrrf · ·. · 
+rate ~ng ~single Wire. · 
+a low cost. lS$Oli mtertace wtrict1 as deSigned al 
+. 3, =level that does.not affect in.-v~ 
+JIJJtlO•lllf Ilk
+over twenty nodes with two hundred P<>SstbJe 
+4. messages. 
+h 
+. 
+. tocol is compact .enoug to be realized by 
+5. proneral putPose 8b1t MCU. 
+.· • . 
+ge 
+saving function to reduce power 
+. · 
+6. power mption when the ignition key is off. 
+1_ ~~: 
+10 transmit diagnostic messages. 
+The protocol devel?_Ped fo~ the LS40Q d 
+. 
+ve enough expandability, but 1s able to actii~ · 
+not ll~. n in cost. Since the body control systern ~ 
+redu ·~ limited by cost and ECU size 
+IS . 
+severe:J ed that it was best to 
+enhan~ tWe 
+:~:'~;cation ability of the_ ~oyota protocol to atta~ 
+bOth tow cost and expandabrhty. 
+. . 
+sPECIFfCA TJONS FOR BEAN PROTOCOL 
+In this secl~on , the physical layer and data· 
+fink layer, the pnmary features of BEAN, are 
+discussed. 
+PHYSICAL LA YER 
+The specifications. 
+taking the adaptability 
+~o passenger cars into 
+consideration for the physical layer of BEAN are as . 
+· follows: 
+1. Low electromagnetic radiation noise · 
+2. CSMA/CD method 
+3. Non-shielded singf e Wire 
+4. Resistance to ground off~~• among ECUs 
+s. Resistance against surge noise 
+· 6. Larger cio.ck tolerance 
+. .. ·. . . . 
+Low Electromagnetic Radiation Noise • . 
+Recently, the use of the glass printed antenna for the 
+radio has been increasing. Because this antenna, 
+however, is easily influenced by noise as compared 
+with the conventional rod antenna, it is vital that we 
+limit the electromagnetic radiation noise generated 
+from electronic components. In the bus interface 
+circuit adopted for LS400, the wave form output to 
+. 
+the communication line was controlled in the form of · 
+a trapezoid to reduce the noise. The bus interface 
+circuit is shown in Figure 3. 
+· 
+~
+· 
+Tx v-:-__,rvv--...._._---l 
+Floure 3: Sus intertace circuit 
+Now. we confirmed the radiation noise level 
+similar control method by changing the 
+with 8
+155;00 rate to 1 Okbps. (We chose NRZ as the 
+1rsnsf1'1 ding method and adopted bit stuffing to 
+bit eneo the clock tolerance. 
+) However, as a 
+increas~he noise 
+increased largely because the 
+result.of the wave form edg.e ~ad to be increased in 
+stoP8rd nee with the transm1ss1on rate. (Figure 4) 
+acCO a Accordingly, ~e ne~ly developed a new 
+t control type dnver whrch could achieve a low 
+cU~"ievel with a transmission rate of 10kbps. The 
+nois~I of this driver will be explained in the next 
+deta1 s 
+section. 
+10kbps 
+WaYe farm COltnil(traJl&zoidl 
+LY
+'. . : _I lf: 1 l J
+· 
+.
+. ·
+· . H 
+. . . 
+~ 
+. ; . 
+c;;:;~---~-'---~·L..~ 
+. 
+I 
+I 
+Vri'i'A.-·-
+~ 
+.. ' . --
+,_ 
+\ .rJ -~ I
+i 
+. 
+. i' . Y 
+' 
+,,....~ 
+[...._;.. -·T""· - ..... 
+~.~.- - ··- - •.. 
+'!IC_·~"-
+• 
+• 
+. 
+I 
+=~ :~ ~~.~r+= .~:~ -~ 
+'. 
+-
+i . - .. -. __ ._.t' 1--
+.. \ 
+figure 4: Comparison between Skbps and 10kbps 
+using similar control methods. 
+Current Control Type Bus Interface Circuit-
+The block diagram of Figure 5 shows the structure of 
+the driver/receiver corresponding to a non-shielded · 
+single wire, transmission rate of 1 Okbps and NRZ · 
+encoding method. 
+. 
+The driver/receiver gradually outputs current 
+to the bus in order to reduce the radiation noise. · 
+The voltage wave form is quickly changed to stably 
+receive the data. The functions of the circuit are 
+described as fallows and the wave form is shown in 
+Figure 6. 
+The driver consists of an integrator circuit 
+and voltage-current conversion circuit. 
+The terminating circuit functions as a constant 
+current source. 
+When the output 0./Tx) of the communication 
+IC shown in Figure 5 changes, the integrator circuit 
+changes the output (V1c) 
+voltage gradually. The 
+output signal of integrator circuit is connected to the 
+voltage-current conversion circuit. The voltage-
+current conversion circuit gradually changes the 
+output current (Ive) according to the output wave of 
+the integrator circuit. In this way, the driver outputs 
+~rrent to the 6US. The voltage of the BUS (VBUS) 
+is shown in Figure 6. 
+173 
+f dt 
+COti'munlcaflon IC· 
+. recieiVer 
+Figure 5: Btock diagram of bus interface circuit . 
+·The tenninating circuit consists of a constant 
+current source wor1dng as current limiting ·circuit. 
+When the output current of the driver begins to drain 
+c~rre_nt greater than the limit of the terminating 
+C1fC~it , the voltage of the bus is high, and when it 
+beg1~s t? drain a current less than the limit of the 
+terminating circuit. the voltage of the bus is low. 
+Vrx 
+H 
+L 
+J 
+l 
+: 
+~-
+! 
+. vr-: ------\ 
+i 
+~.--~--
+i 
+·I 
+i 
+t . 
+' 
+~~---J . 
+~~
+1 ____ __
+i. . 
+.·.~ 
+l ; 
+.: 
+·1 
+Vic 
+Ive 
+Vsus . 
+Figure 6~ Wave fonn$ 
+.· . . •" 
+··--··-··-- --··--. ~ 
+•• •
+· i .. . 
+· .. ' ' . 
+·, . 
+11·· 
+' . 
+.. 
+. .. . . 
+. •-· 
+. 
+~ -T~~~~L 3 
+Figure 7 Su$· interlace ~ii< (current eontrot 'Yfe) 
+.. ····- '. 
+. ............. ~ ... 
+.... ,.,, ...... 
+i 
+I 
+j 
+. . .. .. t. . , .. 
+' 
+. -1...l~
+. 
+l •. 
+--: µ~ jt•••' 
+__ .. 
+- -;---~ 
+. 
+' 
+. 
+i 
+l 
+; 
+~ 1-: . 
+RmUfi>n noise 
+_. __ 
+. ...R- ~ --- - . . 
+-· 
+f . 
+. ·-1'·-·· 
+--.---,---,-· 
+. 
++ 
+j
+; 
+..-4.--.. -· 
+-·t·- -+--r-+·- I 
+. 
+: 
+I 
+i 
+/ 
+Figure 8: Radiation noise (current control type) 
+DATA LINK LAVER- The data link layer ls.a 
+·vef)' important section thal plays a large part 111 
+determining the system performance ~nd_ greatly 
+affects the 
+cost 
+of the 
+commurncation 
+I~ . 
+Optimization of the data link layer of the p~tocol is 
+studied by taking into consideration the requirements 
+descObed in the previous section and the scale of the 
+communicaHon dev.ice. 
+Optimization Of The Data Link layer· 
+In the in-vehlcie network of the body control system, 
+major communication data is triggered by the 
+operation of a driver. Therefore, the most efficient 
+transmission method is the CSMA/CD method, 
+suited to signals with fewer periOdical properties. 
+The system's drawback. namely its inability 
+to ensure 1he data delay time except for messages 
+which have the highest priority, may be neglected in 
+a body control system. 
+It is improbable that two or 
+more transmission requests originate at the same 
+time, because the probability that a driver and a 
+passenger operate switches at the exact same time 
+is co~ered to be an extremely rare case (mo$t Of 
+the 5'Qnats are triggered by switch operations). 
+Featu~s _of the 
+CSMA!CD. 
+sucn 
+as 
+better 
+expandability and capability or eastty adding or 
+174 
+8150 make it advantageous In 
+defetlrlCI nodes~em . 
+Ille 
+bOdY control 
+5~ 
+efficiently transmit the Va.rt 
+. 
+Also. , oafs (i.e. switch signals, dia n °~ . 
+8pp1icat1on srgn sary to make the length of da~ Ost1e 
+) It is neces 
+'"'-
+data . 
+. 
+variable, a multiplex system. extern.al noise rna 
+· 
+In 
+nlcation errors. 
+In this Protocol y 
+cause 
+comm~heck methods, such as checkin ' 9 
+types of error at in addition to the error Checl Of 
+the trame ro;:d to ensure the reliability of the da~ 
+cRC. are de '"rs the data is automatically resent 11• 
+tf an erro,r occut p' revent the omission of data. 
+up . 
+t 1hree times o 
+o 
+Outline of data link layer • ~he o~line of data 
+f 
+the newly developed m-vehtcle netwol1{ 
+~ink lsye~~~ . 
+Table 
+1 
+shows 
+the 
+Prtm 
+1s 
+~es 1. ns Figure 9 shows the communitat:n 
+spee1fica 10 
+· 
+frame fonnat . 
+. 5 ecification of data link la er 
+Table 1. 
+SPECIFICATION 
+thod CSMA/C 
+wi 
+1 wise arbitration 
+Access me 
+check 
+8-bit CRC 
+Error nse 
+ACK: Acknowledgment 
+Respo 
+NAK: Non-Acknowled ment 
+1 - 11b es 
+I soF ML 
+ME~-·io 
+. CRSB 
+RSP 1~s 
+.j . 
+JU1f1 ~ I 8 /s·;-111 
+8 lf,Bl~ I 
+I PRI 
+DST-ID DATA1-11 
+EOM EOF IDL I.. 
+/ • soF (1bit) shows the start of a frame. 
+j 
+I . PRJ (4bits} shows the priority and with a maximum .
+1 
+i of 16 priority levels. 
+·· , 
+j • ML (4bits) shows the length of the message and 
+· ! 
+i the number of bytes of [ID + DATA](3 - 13). 
+· I 
+I · DST-ID (8bits) is an ID showing the 
+· 
+! communication destination. 
+I · MES-ID (8bits) is an area showing the contents of 
+1 the message. 
+J ·DATA (8- 88bits) represents the data area and has 
+! length variable from 1 byte to 11 bytes. 
+l • CRC {8bits) represents the area of error check 
+; 
+i code. 
+l 
+l · EOM (8blts) shows the end of the message and 
+I 
+; controls the time to prepare the response for 
+· 
+'. 
+i sending. 
+i 
+! • RSP (2bits} represents the response area. 
+· 1 
+L_:EOF (6bit~ shows _the end of a frame. 
+1 
+Figure 9: Frame Fonnat 
+. .· The bit stuffing rule is employed • an inverted 
+bit 1smserted when 5 consecutive bits have the same 
+value in the penOd from SOF to CRC. Broadcast type 
+5 are available in addition to the point-to-
+message 
+messages, and the communication 
+point Wf 
+8 
+switched by the DST-ID. 
+When the 
+mettiod i! FFH. the communication Is set to the 
+psr-ID ·ng method. 
+If the DST-ID contains a 
+broadcB~~r than FFH, that value represents the 
+vahJe 0.t 
+10 
+The length of the data area is 
+· at1on 
+· 
+destin 
+to 11 bytes which allows the packaging of 
+variable ~~col messages into the data area. 
+(It is 
+othe~ proto include 3bytes of header and 8bytes of 
+possible 
+data.) 
+Wake-up/Sleep Control ~ Some ECUs of the 
+trol system are required to function even 
+bodY c~n ignition key is set at OFF. To prevent 
+wll~". t ~he battery, a function to enter the power 
+dra1.ntn9 mode when operation of the ECU is not 
+saving 
+and to return the normal operation by 
+neede? 
+voltage changes on the transmission line is 
+detecting 
+provided. 
+EXAMPLE OF BEAN DEVICE 
+This section describes a communication 
+. 
+(data 
+link 
+controller) 
+which 
+enables 
+device nication with the BEAN protocol explained 
+com mu 
+. 
+in the previous sections. 
+EXAMPLE USIN~ GEN~RAL MCU • Using 
+neral 
+single 
+chip 
+m1croprocessor, 
+afl 
+a 
+ge nication is controlled by the software. This 
+comml~tcable for small scale ECUs and is a small load 
+isapp 
+control programs. 
+0
+~ 
+tages 
+of 
+this 
+system 
+are 
+shortened 
+A va1n pment time and ease of modification for 
+deve 0 
+I d 
+ch 
+ges in the protocol. For example. the oa on the 
+M~~ is 61 % on aver~ge usi.ng a~embly language 
+h n BEAN is built usmg a H1tach1 H8 MCU. (Where 
+~eeclock frequency is 8MHz.) 
+EXAMPLE USING CUSTOM 
+COMMUNICATION IC • Wired logic cir?uit~ are 
+. 
+chieved by using the custom commumcat1on IC 
+~ndependent of the MCU. This system can be us~ by 
+any MCU without limitation. The advantage of this 
+system is that the system reduces the load on the. 
+host MCU. Figure 10 shows a photo of the lC chip. 
+Table 2 shows the primary specifications. 
+' 
+. 
+~ 
+'· 
+.,.,,:'. ' ·~ ; 
+'· 
+F'igure 1 O: Photo of the chip 
+175 
+Table 2 
+Pn mary soecification 
+Ii EM 
+SPECIFICATION 
+Chio Size 
+4mmx 2mm 
+Oesian rule 
+1.2um rule 
+Circuit scale 
+4000 aates 
+I 
+EXAMPLE USING ORIGINAL MCU FOR 
+Boov CONTROL - The body control microcomputer 
+(~OS-microcomputer) used for BEAN is an 8-bit 
+high Speed, low power microcomputer designed for 
+in.vehicle use. with built-in communication hardware 
+that 
+implements 
+the 
+BEAN 
+protocol 
+using 
+customized communication software. 
+Using an original dual-task MCU, each task 
+functions 
+alternately based on the time sharing, 
+and processes 2 instructions at o .5 u s intervals when 
+the external frequency is set at 8 MHz (internal 
+frequency is 4 MHz). 
+This enables high speed 
+processing because 96% of the available 48 
+instructions 
+are 
+executed 
+in 
+1 
+cycle. 
+The 
+communication software is processed only in the A 
+task (one task of the dual~task) and the l task (the · 
+other task} is not influenced by the communication. 
+The ref ore, the L task can be programmed for the VO 
+controller such as the inpuUoutput process or error 
+process, wlthout WOJT)ling about the communication 
+process overhead(Figure 11). 
+Features are as 
+follows: 
+1. The application program can be created easily, 
+independent of the BEAN protocol 
+2. Simplification of peripheral circuits (figure 12) 
+3. Built·in malfunction prevention (I.e. watch dog 
+timer) 
+4. Low power consumption 
+lla$k---..--
+Figure 11: tmages oft.. and A t-"5: 
+.·~ 
+Figure 12: &ample of peripheral arcuftS. 
+BEAN DEVELOPMENT TOOLS 
+The multiple)( transmission protocol has the 
+advantages of simplified wire hamesses. However, 
+as the scale of the system becomes _larger, 
+development and evaluation becomes more diffi~ 
+The development tools 
+corresp~nding. to .es · 
+-development phase -- such as the simulation pnor to 
+development, prototype modeling 
+of each .ecu, 
+functional checks of all ECUs. and confiimahon of 
+functions an actual vehicle -- are needed. For these 
+pufJ>Oses, development tools called ~LAN testers" are 
+available. 
+The primary functions of the developmen1 
+toots are ~xplained below: 
+1. Collection. recoroing, and display of 
+communication bus date. 
+~-
+Detection and display of errors. 
+3. Specified data sent at a specified timing. 
+4. Specified collection data such as swttch data 
+output from ports in real time. 
+5. AnalOg signals (i.e. the vehicle speed, water 
+temperature) output in real time. 
+Funct1ons 3 to 5 are useful for the functional 
+. chect of a single ECU or used as an alternative ECU. 
+Functions 4 and 5 are useful for monitoring the signal 
+· <>! sensM and switches on an actual vehicle. 
+Figure 13 shows a custom LAN tester. Figure 14 
+Shows 
+the 
+PC 
+card{PCMCIA 
+type2) 
+type 
+development tool. 
+·. ~ 
+13: Custom LAN Tester. 
+176 '. 
+.,. Bl.IS 
+...... t:.o.> 
+.· '•' 
+: ....... 
+figure 14: PC card type development toot. 
+CASE STUDY USING LS,00 
+This section describes the BEAN case stlld 
+. 
+using the LEXUS L~OO which h~s a complex la 
+·~. 
+scale body electronic system. Figure 2 shows~ 
+configuration of the system. The number of nod~ . 
+connected to the body control network is 15. 
+· 
+STRUCTURE OF THE NETWORK - First. 
+the structure of the network is shown. 
+Function~ 
+restricted by ~h~ protocol, sue~ as fault. tolerance are 
+performed within the respective applrcation taking 
+fail-safe into consideration. 
+. 
+Multiplex Transmission Sianals - Multiplex· 
+transmission signals are selected as follows by taking 
+into 
+~ns~deration 
+the 
+reliability 
+of 
+the . 
+commumcat1on: 
+Signals necessary for the control of a node · · . 
+even during bus failure, are inputted directly by th~ 
+node and then tra~smitted to the other nodes. For 
+example,. th~ vehicle speed signal is calculated by 
+the .~m~mat1on meter ECU and the ignition key start 
+positio.n is detected by the engine ECU and then 
+both signals are transmitted through the network by 
+the respective ECU. 
+· 
+. 
+In the body system, there are many signals 
+SUitabl~ for asynchronous event triggering. If an error 
+occurs '" ~e message, some of the data will be lost 
+To solve this problem, signals like the warning signal 
+to the comb· 1· 
+. ma ion meter ECU is not only sent by 
+event . ti:ansmisslon, 
+but 
+also 
+by 
+periodical . 
+transmission. 
+Comm · · 
+umcation Method - Each node uses 
+messages corres 
+d. 
+ignition k 
+. pon mg to the vehicle mode - the 
+Diagno&s ey 15 set at OFF, Accessory, ON, . or . 
+received fro Each node basically sends the data 
+For exam m sensors and switches to the network. 
+control is ~~ 
+wbyhen all sensor data necessary for 
+an ECU, (i.e. engine ECU), Data,. 
+ch 85 the RPM of the engine and water 
+su 
+rature ts ~ent to the netwo~ during the 
+te~~;cal transmission only when the ignition key is 
+pen~ the oN position even though the amount of the 
+set received from the body control system is small 
+dst:fficlently design th~ wire harness system, signal~ 
+ro und the nodes are inputted to the ECU to send 
+a~rn to the network, even though they may not be . 
+~eeded tor cont~I. For exam.pie. the engine ECU 
+ds the hydraulic pr~ssure switch of the engine and 
+~~~ds the data to the instrument cluster ECU . 
+Bus Reliability - Since this protocol's goal is 
+reduce the cost o.f the ~hysical layer, th: folloWlng is 
+ken into cons1derat1on on the vehicle side to 
+!~prove the bus reliability .. The bus is connected In 
+d ·sy 
+chain 
+configuration 
+to 
+ensure 
+safe 
+81 
+'f 
+. 
+. 
+mmunication even 1 a wire m the system is 
+~oken . Multiple bus terminating circuits are mounted 
+in the n~~ork to p~event t~e ~ntir~ s~stem from 
+malfunctionmg even 1f a termmatmg circuit fails. 
+Gateway For Diagnosis Data - In Figure 2, 
+the engine ECU and body ECU are nodes that use 
+the 1509141 
+interface for communicating with 
+diagnostic to.els. The other nodes are connected to 
+the diagnostic tools through BEAN. The messages 
+specially designe~ for diagnosis is set on each node 
+beforehand and 1s sent only when In the diagnosis 
+mode. 
+The diagnostic message is placed into the 
+DATA area of BEAN by the body ECU. Since this 
+message is sent via the broadcast method, other 
+ecus automatically read the message and confirm 
+that the diagnosis request has been sent. If there is 
+diagnostic data, the ECU returns to the body ECU a 
+message to transmit the diagnostic data to the tool. · 
+When the body ECU determines that the MES-ID is 
+for diagnostic data, the body ECU puts the DATA 
+area into a diagnostic message to be sent to the tool. 
+Thus, the body ECU is able to transmit the diagnosis 
+message from other nodes without reading its 
+contents, resulting in a reduction in the load on the 
+body ECU. 
+COMMUNICATION 
+CAPACITY 
+AND 
+SIMULATION - Using the model shown in Figure 2, 
+the volume of communication data shown in Table 3 
+is needed. 
+Table 3: Communication data volume 
+Transmit data Transmit mode 
+Data volume 
+· SWitch signal Periodical 
+272bit 
+Not oeriodical 
+136bit 
+Control data 
+Periodical 
+41bvte 
+Not oeriodical 
+176bvte 
+Since short interval pertodic data may greaUy 
+affect the . communication capacity, to insure the 
+Performance Of th 
+transmlssi 
+. 
+e CSMAJCD system, the interval of 
+utiliz . 
+on is opttniized based on a· average buS · 
+perfoation target of 40% or less. In order to verify \he 
+slmu1~1oance 
+of 
+the 
+network, 
+the 
+fcllowk'IQ 
+171
+ns were performed. 
+· 
+simut r §imul@1jon System - The configuration of the . 
+det . a ion system is shown in Figute 15. 
+The 
+SA~ls of the simulation system are contained in the 
+paper 910463 and will not be described in this 
+paper 
+Th 
+· 
+· 
+. 
+ca 
+· 
+e s1mulat1on system was designed to be 
+r pable of evaluating both the entire communication 
+1~~~ a!n,~ell as processing of individual signals. 
+fono!s: tch can be evaluated by the system are as 
+1. 
+S~n~I base evaluation: Number of data 
+onginally produced, number of collisions, . 
+number of data discarded, delay time. 
+2. NOde base evaluation: Number of data sent 
+~mount of data sent, Average data sendinQ . 
+time. 
+3. C?mmunication. system base evaluation: Total 
+size of messages, Total data discarded. 
+$11WLA llON PROGRAM 
+DATA BUS 
+I t 
+1 • 
+"9tTRATE 
+•N:.CESS.S~ 
+DATA 
+l NOOE 
+l 
+DfscR!PllON 
+DESCRtPllON. 
+'GEtERAllONMOOE 'TRAASNISSION NODE 
+"GEtERATION 
+"RECEPTION NODE 
+PROBABIUlY 
+Figure 15: Configuration of the simulation system. 
+Result Of Evaluation - According to the 
+results of the evaluation and simulation, the· 
+performance of the communication protocol was 
+verified as follows: 
+1. 
+Delay time: Fig. 16 shows the delay time 
+distribution of all passenger seat window UPIOOWN 
+signals which have the highest priority and the 
+vehicle status signal which has the lowest priority. 
+The delay time refers to the interval between 
+occurrence of the transmission data and the · 
+completion of its reception. For the highest priOrity. 
+the delay lime is 20 ms or less. 
+2. Bus utilization: The bus utilization is an index 
+representing the rate of time when a message 
+(including headers and error check codes) is on the . 
+communication 
+line. 
+The bus utilization is 
+calculated baSed on the fonnula below: 
+Sus utilization = (Frame length) x (Number of 
+uc.nsmission frames) . I (M~ 
+Ume) • 
+age s.zms 
+% 
+Delay time : Aver 
+ao1 
+Max 1 s.5ms 
+60 
+20 
+10 
+% 
+801 
+60i 
+20~ 
+10~ 
+l 
+! 
+5 
+10 
+15 
+20 
+25 
+30 
+delay time : ms 
+(ai The highest priority 
+Delay time~ Average 10.6ms 
+Max 191.3ms 
+I l 
+·~ 
+.JIL 1 
+r I 
+I 
+5 
+10 
+15 
+20 190 200 
+dalay time(ms) 
+(b) The lowest priority 
+Figure HI: Delay lime distribution. 
+178 
+sUE OF THE BODY CONTftol 
+uf1JRE rs 
+~ETWORK 
+following subjects will ~rise as the 
+. Th~odY control network increases ,u~ or 
+;11-vetucle 
+n Ille 
+full.Ire· 
+OF 
+co•••• 
+e.xPANSION 
+•Y•mUNfcA,.. 
+_ 11 will be necessary to collsid 11()~ 
+CAPACITY r the communication capacity er 11\e 
+nsion ° 
+d 
+· 
+· 
+as 1~ 
+expa 
+. tron items an communrcat1on fre 
+•re 
+cornrnunica one rnethod to rneet this .is to in~~llncy 
+increase. ·ssion rate. However, to achieve this .ease 
+the trans~ary 10 develop faster communi' 
+11~ 
+be nece 
+avoid increasing lhe cost of the ~oo 
+devices to thod is to reduce the arno Cu 
+ther rne 
+h bl 
+k b 
+· · 
+tnit 01 
+Ano 
+. . n data for eac 
+oc 
+y d1v1ding the 
+trans~issio se it will be necessary to reduc bus. 
+for this cathe 'gateway by dividing the bus at e _the 
+b rden on 
+· · 
+d t 
+Polflb 
+u 
+mount of transmrssron a a is srnau 
+wriere the a 
+. 
+IMPROVEMENT OF FAILSAFE - Currenu 
+d control system netwo~k handles only Sign Y, 
+the ~o ~ot affect control even rf communication w als 
+that .1° As the number of syst~ms increases :~ 
+t~ fa
+1
+1 · communication 
+range 
+1s 
+enlarged ~.
+1 
+srgna . 9 the redundancy of the communicar'e 
+i~provrnAdditionally, depending on the tYPe ionf 
+~nes. 
+o 
+vehicle. the wire ham.~sses bmay need to be rtin 
+ttirough an area where 1 hma~t e expbosed to a higher 
+. 
+level. To solve t rs. 1 may 
+e necessa"' 1 
+noise 
+h. h h 
+h" 
+., o 
+use wire harnesses w 1c 
+_ave a 
+1gher noise 
+sistance. 
+As a result, vanous physical layers 
+~eluding a faster transmission rate, will be needed i~ 
+the future. 
+CONNECTION TO OTHER LAN - In the 
+near future, 
+several 
+types 
+of 
+LAN 
+Will be 
+implemented in vehicles. Examples are shown 
+below: 
+1. High speed control system bus for the Power 
+train and chassis control. 
+2. 
+Low cost, low speed, flexible body control 
+system bus. 
+3. 
+High speed, large capacity multimedia system 
+bus to transmit visual images and voice data. 
+4. 
+Standard diagnostic bus for use with service 
+tools. 
+Since each LAN has different features and 
+each vehicle has different equipment, we doni 
+believe it is a good idea to integrated all in-vehicle 
+LANs into a single LAN. The in-vehicle network ~II 
+be built by using several LANs that take advantage of 
+the benefits of each LAN. 
+coNCLUStON 
+we have developed a new protocol that is 
+rcable for large scale network systems, that can 
+aPP 
+1 plernented by the software program of a 
+be Im 1 single chip microprocessor. So engineers are 
+genera 
+· 
+L' 
+d 
+· 
+t 
+select communica ion 
+ev1ces according to 
+fre~ 
+0pecific applications. 
+We also developed the 
+their. s al layer for a high data transmission rate and 
+physicdiation noise 
+Case studies using the LS400 
+loW ra onducted and excellent results concerning the 
+were ct.lization and data delay time were obtained. 
+bUS U 1 
+f . 
+h 
+ditionally, the effect o wire arness reduction was 
+Ad 
+1 ted and we found that approximately 15% of 
+caicu a 
+. 
+b 
+d 
+d 
+wire harness co_uld 
+e re uce . 
+As the body 
+th~trol system cont1_nues to change and evolve , 
+co ile there is increasing pressure to reduce cost , the 
+w\1 to select an optimal system that can meet all 
+~~~ '/eslgn needs will be a vital issue to be tackled in 
+ttie tuture. 
+ACKNOWLEDGMENTS 
+The authors would like to thank the members 
+of the BEAN developin~ activity for their valuable 
+assistance and cooperation. 
+REFERENCES 
+[1] seiji Nakamura, Toshiaki lsobe, Yuuji, 
+H' abayasi, "The High-Speed lnNehicle Network of 
+10';egrated Control System for Vehicle Dynamics", 
+SAE paper 910463 
+[2] Toshiaki lsobe, Hiroshi Honda, Shigeru 
+Uehara Susumu Akiyama, "A Low-Speed lnNehicle 
+Network for Body Electronics", SAE Paper 920231 
+179 
+1999-01-1278 
+Gateway Application for Automotive Network System "BEAN11 
+Aklhiro Tanaka, Masachika Kamiya and Kazunori Sakai 
+TOYOTA MOTOR CORPORATION 
+copYrlght o 1999 Society of Al.ltomotive Engineer&, Inc. 
+ABSTRACT 
+In applying a LAN to automotive electronics systems, an 
+ptimal protocol has been adopted for each system so 
+~r. such as body electronics syste_m, entertainment sys-
+tem. service system and power train system. As low cost 
+communication protocol "BEAN" (Body Electronics Area 
+Network; SAE paper 970297) adopted to wider range of 
+functions on vehicle, ECU's numbers are increased 
+which have BEAN communication and that is branched to 
+plural communication networks. We have succeeded in 
+rationalization of those network systems with the gateway 
+function on a delegated ECU tor each LAN system on 
+vehicle. And this system also realized the connection to 
+after market products by data exchange through the 
+gateway function, while securing vehicle fail-safe. 
+INTRODUCTION 
+In applying a LAN to automotive electronics systems, 
+these have been developed independently in several 
+technical fields. We have introduced total control net-
+work, which is J1850 type of protocol since 1991 . Since 
+then, we are now developing the standard communica-
+tion protocol that is suitable for high speed and periodi-
+cally timing communication. That aims to simplify the 
+optional connection and harmonized control in between 
+power train system and chassis control system and so 
+on. For entertainment system, its communication tech-
+nology has been developed in order to be common con-
+nection method with the combination by components 
+such as audio and navigation, communication and also 
+after market product connection since 1994. For service 
+system, its development has originally started with the 
+legal requirement on diagnostics. Then it has been 
+improved since 1994 In order to become common con-
+nection to tester tools and enhance diagnostic contents. 
+For body control system, single way communication to 
+the driver's door ECU from body ECU has ~en adopted 
+since 1992 in order to reduce wire harness to the door 
+and function enhancement by information sharing 
+between ECUs. After that plural ECUs havtJ adopted 181 
+Tomohisa KJshigami 
+DENSO CORPORATION 
+bilateral communication in 1994. BEAN has been devel-
+oped and launched in 1997. BEAN is communication pro-
+tocol that is low cost. low quiescent drain to drive and 
+secure response characteristics for less frequent data 
+transmission. 
+By the expansion of BEAN application to auto.motive 
+electronics systems. ECU's numbers are increased which 
+are connect to BEAN communication lines that is 
+branched to plural communication networks. It is also 
+required for after market products to connect to that com-
+munication network. 
+RATIONALITY OF VEHICLE LAN MOUNTED 
+GATEWAY FUNCTION 
+GATEWAY BETWEEN ENTERTAINMENT LAN ANO 
+BODY CONTROL SYSTEM LAN - It's difficult to com· 
+bine entertainment LAN had registration function tor add-
+ing dealer-installed options to body control system LAN 
+was required hi-response and had different . operating 
+power supply. The foilowing to the vehicle control tune- · 
+tions are connected with these two LANs. 
+• Operation of air-conditioner on multi-di$pta~ 
+• lnteractive control of navigation system and engine" 
+• Integration of body control switches and audio controt 
+switches 
+To mount the gatewa)' funct1on on representative ECU 
+that communicated ~tween each LANs enables to 
+reduce communication circuit parts and to decrease 
+communication softwar& load. 
+9ocly C.-.ol CIWNw (."' _..i 
+....._..........,,......~
+_ S_•-LAl'I 
+-..i--
+(h"">'• c_,.1 
+~p.Ul 
+\8£.~l\ ·1 
+Figure 1. An Example of Construction bet'Neen 
+·Entertainment LAN and Body Cc.11trol Svstem · 
+LAN 
+.GATEWAY BETWEEN SERVICE LAN AND BODY 
+CONTROL SYSTEM LAN - To enhance serviceability, it 
+iS essential to improve the diagnostic function. Conven· 
+tionally, there are many cases '" which a diagnostic tool 
+cannot be used tor diagnosing body control ECUs, 
+because of a relatively small system size and cost restrfC. 
+ttons. The matter is as good as after introduction of in· 
+vehicle LAN, Since It's difficult to combine body control 
+system LAN was required hi-response to service LAN 
+was required standard, it's necessary tor connecnng a 
+diagnostic tool to mount communication circuit and wir· 
+ing. tn this case, diagnostic tool is connected with many 
+lANs. By mounting gateway function on representative 
+ECU can be connected diagnostic tool enables communi· 
+cation of diagnostic frame format between the body con· 
+trol system LAN and diagnostic tool, resulting in the 
+foUowing advantages: 
+• Only one ECU has to be connected to the diagnostic 
+tool. It is not necessary, therefore, to ·install addia 
+tional hardware for ~iagnosts result outputs for multi· 
+pfe ECUs. 
+• Service LAN communtc&tion software is not required 
+for each LAN. 
+,
+·. Flgure 2. An Example of Construction between Service 
+LAN and Body Control System LAN 
+GATEWAY BETWEEN BODY CONTROL SYSTEM LAN 
+AND DEALER-JNSTALLED OPTION LAN - Connection 
+of de~le:..mstaJled options is indispensable to satisfy the 
+drversify1~ needs of automobile users. 
+For wiring to 
+each optional ECU. it is necessary to connect joints to 
+the cables of existing switches and actuators. If an in-
+vehicfe LAN is introduced, it is possible to obtain various 
+~ignals thro.ugh the LAN. 
+In conneetion of deater-
+mstaJ~ oPtions, a~rse influence of defective wiring of 
+the vehJCle is considered. It can be avoided by connect· 
+Vl9 gateway function ECU isolated each bus E:Jlectricafly. 
+DESIGN OF GATEWAY FUNCT•ONS 
+Each of the above-mentioned three gateway functton 
+have been designed as fotlow.s. 
+. 
+. . 
+.· ·. s 
+SPECtflCATtON 
+EHTEAT AINMENT 
+SYSTEM LAN 
+OF 
+GATEWAY 
+BETWEEN 
+1AN 
+ANO 
+BODY CONTROL 
+fodiqn of the~ f~ 
+8hould be · . ~. 
+~ 
+- The gateway function 
+from ·both = '" an ECU that requires data 
+· · 
+LAN and body control system 
+182 
+LAN. The toUowJng points should be taken into COl'l&fd ... · . 
+ation in selecting such an ECU: 
+er .. 
+• A~lowance tor gateway processing software load 
+• Reduced traffic in each communication line 
+Jn the above-mentioned application example, data is c .. 
+.·· · 
+centrated Jn the display .. we, have t~erefore decidedo~ 
+mount the gateway tunctton in the display. An exa.Jttpr .. · 
+construction is shown below. 
+· e 
+Climate 
+Control 
+Engine 
+Control 
+Other 
+ECU 
+Body Control System LAN(BEANr. ,. 
+r.:;;;;;:;;;;;;!;;;::;:;;;;wi 
+(including gateway function) 
+Multi· 
+Display 
+Navigation 
+ECU 
+Audio 
+Figure 3. An Example of Construction between BEAN 
+and Entertainment LAN 
+Prgtocol conversion - An example frame conversion . fs 
+presented below. 
+· 
+The entertainment LAN uses IE-BUS protocol. Since the 
+IE-BUS can handle longer data blocks than BEAN, the 
+BEAN frame format is inserted in the data block of the IE-' 
+BUS frame format as shown in Figure 4. to enable the 
+gateway ECU to process all data regardless of content. 
+U:-111.IS PkOTOCOL 
+Acto• mcthiw.I : CSMA/CO 
+Tr..Mn•iw"" ~c l&l~ 
+F 
+. 
+. 
+. tgure 4· An Example of Frame Conversion 
+This type of gateway function has been achieved slmp~; ·. 
+= 
+~N_s access data using the CSMA/CD system, 
+. P ovide close communication speeds and both are 
+::red to handle a relatively small amount of gateway . i 
+j 
+l 
+I
+CAilON OF GATEWAY BETWEEN 
+. 
+5pECIF6 eoDY CONTROL SYSTEM LAN - T~;RVlCE 
+l}N ~N cribeS the method ot transmitting data 
+sec. 
+1ton de;ic tool to a gateway ECU connected to thfrom a 
+diagriol ystern LAN. 
+e body 
+oootro s 
+f 
+i 
+. . . . 
+. 
+-
+Figure 5 
+~pie construction in which a diagnostic too. · 1 ~OW$ 
+.. n eJC3•" 
+d 
+t 
+I ECU 
+18. con.. 
+o-• · d. via Ole bo y con ror 
+. 
+.· 
+· 
+11eete 
+. 
+Servi1;~ I.AN 
+Body <: e>ntrol . 
+~o 9141} 
+BOJy ECU 
+Sydent LAN(ll'EAN) 
+Olhcr 
+eru 
+r---....i noo.. 
+ECU l'>o.2 
+f gure 5.. Ari Example of Construction between BEAN 
+1 
+. 
+and ISO 9141 
+.. 
+easic operations are as follows: 
+1. Request frame for a target ECU is transmitted from 
+the diagnostic tool to the body control ECU. · 
+· · 
+2. The body control ECU converts ISO 9141 frame for-
+rnat to BEAN frame format. 
+, 
+. 
+3, The target ECU transmits data in respo·nse to the 
+request from the diagnostic tool. 
+· 
+4. The body control ECU converts BEAN frame format 
+to ISO 9141 frame format. 
+· 
+5. The diagnostic tool receives the response sent by th& 
+target ECU via the body control ECU. 
+AA example conversion between ISO 91.41 and BEAN · 
+frame formats is shown below. 
+· 
+r 
+10 
+.. 
+' 
+~····· 
+·' 
+·'/· 
+_.-l 
+_ ... 
+UconVort 
+Only perf 
+doe$ 
+Orms aimpl& frame 
+. 
+. i 
+. not ~rocess data 
+. 
+~ion ¥ a r&ley •. and 
+ltlPOrtant •n ,,. 
+according to the content ·••;- ·ict: 
+vtew of ens . 
+• """"''" .. 
+ISO 914 
+uring future expandabiUty. 
+.·.. . . 
+· 1 Protocol 
+t.h9' master, 'Nttere uses· a master and 8*Ne, with a tool as. 
+These two protoeo as B~AN .uses the CSMJVCO system. 
+. 
+(SQ 9141 SPQcif Is diff~r In basic characteristics. The 
+· 
+ECU) resp0nd tes the timing at which a slave (target 
+BEAN, on the~~: 
+~=que~t. fro~. the. master (tool}. For 
+communicatton de 
+~d, it ~ ~utt to sl)'3cify an exact 
+system to access lay time, since it usea the CSMA/CO 
+based master tran:!~ To the request that an ISO 9141-
+r~P<>nd Within 50 
+1 to ~ slave, the slave is reqwted to 
+Figure 5, hOWever ms. 
+~ith the c~truction shown in 
+cannot respond Wi • ~here rs a Poss1bUlty that the slaVe 
+required fOT data trthm t~e ~pacified ttme, due to the time 
+to the ta et E 
+ansrmssl(Jn from the body controt ECU 
+control &:~u. CU, and from the target ECU to the body 
+60 
+10 
+'.' . : 
+Conditions 
+Bus 11ttliialion 
+: 40% 
+Mnsage priOrity : HtglieSt 
+M.t:ssag~ ltilgth :Max(.U ~data} 
+·~·. 
+belay Timi: 
+Average 
+16.3.s 
+. M@immn lO;SmS 
+r.lie 
+~ .· WMleae . . _ 
+91), 
+. -,, 
+''-
+· ... · 
+. . -' . . 
+_: ,
+. "; '. · : 
+' 
+. ~ · · . 
+.' 
+.-:· 
+' 
+> .··: 
+. . ·.~ 
+a -
+z 
+::> . z 
+g ¥ < 
+u 
+< 
+'>#· 
+·~ 
+rt,; 3 
+1 
+>-
+¢' 
+i1 
+"C 
+r· 
+'f 
+2. 
+.. 
+.. 
+loo . 
+. Figu!$ 8~ OperaOOn Latency 
+Figure 6. An Example of Frame Conversion·. 
+u. of negatNe !JWlODH - The seNiCe ·too& ·ha$···tbe.· 
+ISO 9141 frame format comprises l1 byt8S: 3bytes ot 
+tunction of receiving negative response. ~ 
+header and a maximum of B bytes o1 data. Since the 
+response provides the specification tor ~ending 1he 
+BEAN data length is variable to a maximum of 11 byt&S, 
+ume-oul value in cases wh&re a response cannot b9 
+~e entire ISO 9141 frame format can be inch.ided as data 
+transmitted wttrnn the~ 
+Ume. 
+~Cthe BE~N frame format. Except at initialization. the 
+An· &Xample 01 an operation sequence inVOMng ,a .oega. 
+U 881'Vlng as a gateway between ISO 9141 and BEAN 113 · ti\48 f&SPOl\Se Ji shOwn below With ~to 
+F'9'H 9. 
+·' r 
+•I
+· i 
+1. mttiltil.a1ion ·ot 5'rvtoe b\IS. 
+. 
+. request to target ·ECV 
+t. ~ 
+trof ECU (fol target ECtl) 
+3 AespOnM fl'Om bOCfY con 
+. 
+. tiOn rel'loest to target ecu 
+c eommunlC8 
+"" 
+u 
+. 
+· 
+tion b" bOdV control EC 
+S. Gal8W8Y opera 
+r 
+ECU 
+· · · 
+· 
+· 
+trom bOdr eontl'Ol 
+. t. Negative response 
+1 Aesf:)MS8 rrom target ECU 
+. 
+· , . · 
+. 
+.;.;. .. ...., bodY control ECU 
+· 8. GatewaY opant• ...... • .,, 
+... ......,., 
+• 
+. 
+the target ECU • . the ll\NJ 
+Until a response is sent trom d a negative response to 
+=~u:.:~=~~
+0 
+:.0o1 to::~~r t!::=:: 
+trom the target· ECU. Time-Out procnrouAnt IOcidng in the 
+10·each step of the procedure .. to ,.,. .... -
+. 
+·· 
+case oUaifure of any equipment. 
+. : .... .... - . 
+·.·.· . 
+.. .. 
+Diagnostic 
+Tool 
+. 
+. 
+Body 
+ECO 
+R. 
+nse . 
+Tlrget. 
+ECU 
+: : . 
+.... 
+The gateway. function tor diagnostic too1s has been reat-
+it.ed by the abov&inentioned method. 
+. 
+. 
+. 
+. 
+SPECIFICATION Of GATEWAY BETWEEN OEAlER-
+fNSTALLB> OPTION LAN AND BODY CONTAOL 
+· SYSTEMLAN 
+~~con~ 
+the bUs of dealer-jnstallesf OQlions ~ · 
+. !'* section. describes the method of connecting dealer-
+. ~ 
+options to the in-vehicle lAN. Figure 1 o shows 
+·fie construction in-whicie the dealer-installed option 
+LAN connect64:1 with 1he bo<:ty control system LAN via the 
+·91,feway ~ion. We call midget ECU ·that mounted 
+gataaay f\.llCtion for connecting dealer~installed optiQns . 
+i.atuter". . 
+.. · 
+. . . 
+.· .. . . . 
+. 
+.· ... '· . . :.-. 
+.':.: .. 
+•, . 
+. 
+·:· . 
+·_·:· . 
+Engine 
+Other 
+· · ··. ·. j 
+con•~(Vehicle = \'2, I 
+-.1---r----:Bod::y::":C;::o:ntro::;-l :;'.Syst=em:-:'LAN~
+.:':(D:" ...... ~;.( 
+· CliMllt 
+.ContJOl 
+· , 
+Buffer 
+(ineluding gateway function) 
+.,. e!!!scu~
+·~~!!!I ~-lkd~•LAN(B~ < I 
+. >l 
+Other 
+&cu 
+·:-: ·J 
+Fi ure 1 o. An example of Construction between Vehi~e . : . 
+g 
+and Dealer-installed Option.LAN 
+· ·• ·· -
+BEAN has been adopted a~ the communication protOCQl-.-
+tor the dealer-installed optiOn LAN, as well as for the · .. 
+body control system LAN. Basic gateway operation isaa: · 
+fOllOWS. 
+. 
+Gateway from the body control system LAN to the dealer.;· ·:.· 
+installed option LAN 
+· :· · : 
+1. Dealer-Installed option bus buffer receives the BEAN··.: 
+frame format from the body control system LAN. . . ... 
+2.. After changing the destination ID of the BEAN frame : · 
+· 
+format, the bus buffer transmits the format to . the · · 
+dealer-installed option LAN. 
+·· :. 
+Gateway from the dealer-installed option LAN to the body ., 
+eontrol system LAN 
+1. Dealer-Installed option bus buffer receives the BEAN -~· ·. 
+frame fe>rmat from the dealer-installed option LAN. 
+2. The BEAN frame format undergoes a security check. .. 
+3. The frame is reorganized. 
+4. The reorganized frame is ·transmitted · to the- b9dy _: 
+·control system LAN. 
+· ' 
+. .Figure 11 shows an example frame convarslon . .. . ·· . . . ! 
+. 
+. 
+· FigUre 11. An Example of Frame Conversion 
+. 
+-
+. 
+. 
+. 
+. 
+. . 
+The -~~ 
+between the pody control system LAN and··.· 
+the deater-~talled option LAN is designed such that ft .. · 
+can deal with relatively high traffic volume, providing for 
+>< anston of dealer-installed options. When each 
+ruture e P heavy traff lc, frames to be transmitted may 
+i>N .ti~~ each bus buffer. A co~munication data buffer 
+rernB1" 
+arY to prevent the re.mainlng framc:is from being· .. 
+EFFECT OF Gl\fE.WAY. SE"TWEEN ENTERTAtNMENT 
+· LAN ANO 8COV CONTROL SYSTEM LAN .... The .· uJlfitY 
+. ~ gateway between entertainment LAN and body oontrot: 
+is ,,ecess 
+·. . 
+iost. 
+· 
+. 
+t 
+t . 
+-
+lnvesligation 
+ed that, in data tran~mlss1on from the bOdy control 
+re\1981 LAN to the dealeMnstalled option LAN; the num-
+syste~frames remaining in the bus buffer becomes the 
+ber :St when 8 combination of successive long and short 
+!~~es pccurs as shown below. · 
+. 
+. 
+. . . . 
+. ~-.. t$:= 1!) , 14 I ' I , f 
+1 ] 
+=~ . 
+~~I 
+~l, 
+I-:--'-, 
+1.-..L._J~. 
+: \ 
+) 
+. "Mcoittl 
+i 
+, . . 
+. 
+rl -;;°""":::-...,-:-::;..'>:"1-"'.':'cw-. -.. ~-=-..,~--.,.....,,-
+. -_ ;...( _! ....!J · . ·. . 
+figure 12. Data flow in Bus-Buffer 
+. ·. ,• " 
+eased on thi$ find~ng, it h~s be~n determin$d ~at _any . 
+dealer-installed option requires six stages of bus buffer. . . 
+EFFECT OF GATEWAY 
+. 
+· ·. 
+. 
+VEHICLE SYSTEM CONFIGURATION .... Figure ·· ... ·· · 1a 
+shows an example application of the above•rnei'ltter,ted:· 
+gateway functions to an actual vehicle. 
+Flgure 13. An ~ample of System Configuration 
+Gateway function between entertainment tAN and bOdy 
+control system LAN is mounted multi-display ECU. Gate-
+way function between service LAN and body control sys.-
+tern LAN Is mounted body-ECU-No.1. Gateway function 
+between dealer-installed option LAN arid body control 
+system LAN is mounted bus buffer. 
+· ystern LAN, but In Figure 13 shows only one exampteof · 
+:pplying t.o multi-display, is expected expanding. for · 
+xa':"ple, interactive control of navigation system ~ . 
+engine and using speed-data from instrument.·pari&t--
+clusterto navigation system and audio convot. 
+· · 
+EFFECT OF GATEWAY BETwEEN SERVtCE LAN ANO . · 
+SOOY CONTROL SYSTtM LAN - Figure 14 show$ the . 
+reault of a number of ECU can be diagnosed, it\ whiCn 
+compared after introductk>n of gateway be1Ween seMc9 
+. LAN and bQdy control system LAN wtth betote: . 
+. . 
+- · 
+.. ' ·25 ·· 
+. 20 · . . 
+.. · .ti 
+-~ 
+. 
+: ·.· 
+... : . 
+. to ·· 
+N'~ 
+•Ptalicable . 
+Al)p!W:able-
+· llndii;ectt 
+. 
+. 
+. 
+-
+•. · .. 
+..  '.' .'-. : . ·· .. ~ . 
+. 5 . 
+·-·.· '• 
+-, -·. . . . 
+~ 
+~ :. 
+Applicable 
+(Direct} 
+97nJodel 
+98mod~l 
+. 
+. 
+·Figure 14. Number of ECU$ Commurlicating wilh . . .. 
+Diagnostic TOOis 
+· 
+'· . 
+By the introduction of the gateway ~ 
+lsO 914~ . 
+based LANs and the body controf system LAN(BEAN),. 
+10 EClJs can be indirectly connected to the diagnOstic' .· 
+tool. As a result, the m.imber of ECUs ean be dtagnOSaO 
+has incr.eased ~ 8. 
+By implementing the relay function between ISO 914~* 
+based LANs and the bOdy controt system LAN (8EAN)¥ 
+the following functional enhancement has been ~ . · .:
+easily. 
+· 
+· 
+· 
+QianOAAble sbigment mmimatioo on=boird . - By . using 
+the diagnosis connector installed in a comptetely ~- . 
+~- vehicle, it is possible to set eacn ECU conne(t8d .··
+With the LAN memorizing shipment information. !fan. "8: . 
+facility in the vehicle assembly· une, This teature is userut· 
+to minimize parts numbers. of ECUS. 
+· 
+· ACconfing to this shipment intonnation ECUs -~ 
+to the LAN can behave prOpet'ly in aC'COfdance wi$ ·~ 
+· 
+naliOns·lt has shipped. 
+· 
+S11'i®S at d8altrs · rn ACqHdance · wJtb. c;iis1omom'· 
+riQuests {CystOmize tUQCtion) - w~ a 98MC9 toot ~- · 
+!'*ted to a (liagnosis connector ~to 00 9~41"' 
+based LANs, if ECUs are set memonz1ng cl,S&~: 
+lnfQrmation In accordance with customefS' request$: As a 
+. . 
+. 
+the sound volume of the 
+rasuJt it IS possible to chafl99 
+oPf iOnal· tune· 
+alarm ouuer. etc. and to add. or remove 
+.. 
+'tionS 
+. 
+. 
+. ~~ . 19awres can be added to au. ECUs connected to 
+. the LAN if gaf9W8Y tunctiOnS are mounted. 
+· ETWEEN A DEALER· 
+EFFECT OF GATEWAY S 
+BODY CONTROL 
+INSTALLED OPTION LAN AbN~en dealer-installed 
+SYSTEM LAN - By the gateway e 
+N 
+could 
+rol system LA ' we 
+· ap1io!1 LAN ~ 
+bodY c~~dt wiring worl< tor instsltatlon · 
+teduoe the wire-harness cv • 
+. 
+Of 1 remotfHlngine-starter. 
+VARIATE OF GATEWAY OAtA ... The fol!DWingNd:r: 
+snows gateway data among entertainment LA • 
+insteitled optiOO LAN end body control system LAN. 
+. Body CMtrol ~m 
+LAN(BEAN> · 
+di9postie 
+. 
+. 
+3" 
+. . 
+.. 
+. 
+(Oil.·. ~Ila~
+. 
+: . . (total319} 
+uUlillric:IJ uu 
+bit d.sta 
+~ 
+. 
+75" 
+F"9Jf9 15. GaleWaY Data Volume 
+Ther8 are 319 kinds of data in body control system l;.AN. 
+G8'eWay data are 45 kind ot entertainment l.AN data and · · 
+54 kind of dealer-installed option LAN data 
+. 
+FUTURE TASKS 
+·. ·1. _It Js anticlp~ted ~t gateway function handling ECUs 
+· 
+~ 
+will be increased with LAN application 
+~· An<tthe processing load of ECU for com-
+.. · municatJOo becomes higher according to the iocre· 
+sed ~unication data. It is predictable that an 
+. t®lusIW gateway function ECU could be required to 
+~P 
+to apply for valiant vehicles as it is possible 
+. . . .ave $~ar~ and hardware development cost on 
+the CO?~onal ECU to additionally add on 
+Ti. 
+. 
+e>ecil:tSIW ECU ........ ,1,4 
+• 
+• 
+I J 1US 
+· . .....wu be achteved both high reliability 
+and a>st reauctoo by the drastic IC customizatiOn. . 
+2·. 
+·~ 
+~icie manufacturers adopted the. 
+. 
+P:otoco!s for LAN th 
+. 
+. . 
+" own 
+.11ep: n is r 
+, ese ar~ standard1zmg step by 
+. ..a..:.-.-'-- ecommended to improve the autom""•-
+-"'~ system archrti 
+. . ""'"P . 
+w,. f~ 
+. 
+. ~e 
+t1t degree with ga• . 
+. 
+.· . 
+adoption lo avoid the Pf'otoeol modmca~ ... 
+186 
+. 
+·n short term with enormous de\,..1 
+_, 
+-~~
+-
+. 
+expenditure. 
+. 
+. 
+""'11 
+. 
+wlll be ·necessary to protect vehicle info . . : 
+3. :akage and improv~ ran.-safe capability -de~~ . 
+· utside bUS connection, 1.e. ITS bus, and e h cl Of!. 
+~ent of com~unication ~nformation. We wm: 8l1c9. . 
+gateway function r:nore 1n. order to establish fl~ . 
+function and security function. 
+""'11 __ .· 
+CONCLUSION 
+Gateway functions that exchange data among thre&. .• : ::_· 
+ndent LAN which are body control, entertainment~ ... 
+f91 and diagnostics system has been developed ~ 
+· 
+:nctlon makes easier '?' EC Us to ado.pt LAN com'm ''. 
+cation with saving cost i~cr~ase to avoi~ each ECU Ull~ . 
+nects to plural communrcat1on bus, while ECU nurn~ 
+are increased which are conn~ct ~o different LAN syst 8f& ·· 
+The method for data communrcat1on on body control ~- · · 
+to outside through gateway function has also been d 
+oped. ":his met~od has brought after mar~et proctuc~ .. 
+reduce installation work!~ad at deale~ with maintain· . 
+the same fail-safe capab1hty as before installation. 
+!Ilg .· 
+These gateway function has realized whole vehicle n l .· · · 
+work system which effectively applies the each netw~ .. · 
+merit and adopt own strategy for each system. 
+ACKNOWLEDGMENTS 
+. . . =···!·' 
+. 
+- ·.:· . 
+The authors would like to thank the members of the ·. · 
+BEAN developing activity for their valuable assistartc'e ·. 
+and cooperation. 
+· · 
+. REFERENCES 
+:··'· 
+... 
+1. Hiroshi Honda, Shlgeru Uehara, Kazunori Sakal, Tekio.,.'. 
+Akatsuka, Susumu Akiyama, "Body El~ronlcs Arna. Nel• ·. 
+·work(BEAN)", SAE paper 970297 
+· 
+.·····• 1 
+•,'/ .. I 
+· ... 
+. 
+. ·. I 
+:., .'. ... ··1 
+. :· .... :·. 
+. 
+· • .. 
+• , 
+;· 
+. . 
+. "• . 
+·.: .. · 
+. .. · 
+. . . 
+. 
+. . 
+. . . .: 
+. 960117 
+Real-Time Software for In-Vehicle Communication 
+ABSTRACT 
+This pa.per describes the architecture ar.\d .. the 
+·mplementation of a software for the communication 
+~tween networked in-vehicle ECUs. 
+The communication software is based upon a real-
+time multitasking operatin~ system. The operating 
+system and the commurncat1on software form an· 
+appHcation-independent platform for the implemen-
+tation of distributed ECU software. 
+The software architecture consists of several 
+communication layers and a station management 
+module. The communication layers provide network 
+driver, data transfer services and an application 
+interface that is independent of the used network 
+protocol. The station 
+management 
+module is 
+responsible for configuration and initialization of the 
+communication controller, error detection during 
+operation and error handling. 
+The modula r structure of the archi1ecture supports 
+the simple adaptation of the software to different bus 
+systems 
+and 
+communication 
+controllers. 
+The 
+network-independent application interface frees the · 
+programmer from knowing the details of the used 
+communication network and supports the reuse of 
+application software in diftterent projects. The 
+. software is part of the diesel engine management. in 
+production cars. 
+The paper 
+presents the 
+architecture of 
+the 
+com~unication software, the operating system, the 
+se~ices of the different communication layers, the 
+station management module and the results from the 
+implementation of the communication software . 
+Hana.-J6rg Mathony and Stefan Poliiidna 
+Aotle,, 8oedl .QmbH 
+. .· .. · 
+·. 
+. . . ' 
+. .. · ... . 
+. . . . . 
+.. : ·'. ' , · 
+1. · · Introduction 
+Serial d~ buses are increasingly. befng used tor 1he 
+networking ot in-vehicle electronic corruor. units.· 
+Protocols such as the C.ontrotler Area .tietwofk 
+(CAN) and the ~ehicle Area Metwori< {VAN) have 
+now . been . standardized and are supported · by 
+several semiconductor manufactuf'efS. A wide variety 
+of components is available. today to impleme.nt the . 
+CAN protocol in hardware. Software support for 
+networt<ed ECUs, however,. is still in its infancy. 
+Harmonization of sottw~re interfaces and definition 
+of additional communication functions 
+(netW<>rtc 
+management tor example) has been done in the 
+frame of the OSEK project (Open Systems and 
+Interfaces for Electronics in Cars) [1}. Specifications. 
+of services and interfaces for real--time executives. 
+communication and network management are now . 
+available [2] and wm be. used in vanou$ pilot ·p.rotects. 
+· This paper describes 1he results of a proJect wtUch . 
+aimed to create reusable communicatK>n software. 
+The work was based on the architecture model 
+described in [3}. The software developed represents 
+a concrete implementation of the atcill&ectule · · 
+proposed in [31 and cent.om'IS with . the .QSE1( 
+speCmcatioo. 
+· 
+2. 
+Requirements and design goals . 
+The aim of the profect was the deWlopment of reat-
+time communication software· for data exchange 
+between the components of diStributed tCUs. The·. · · 
+software platfo.rm used in these E CUs ts a 
+multitasking cperating system. Thft opef8lrng s~ 
+A.)jlresents a programming aoo runtime environment. 
+on the basis of wt'Uch the apptieation software i6 
+· inlptemented Irr the form of a modulaNltrudured se• 
+1a1 · 

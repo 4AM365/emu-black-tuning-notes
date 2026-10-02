@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="idleActiveAirflow" storage="ubyte" width="8" height="5" data="21 21 21 21 21 21 21 21 2B 2B 2B 2B 2B 2B 2B 2B 35 35 35 35 35 35 35 35 46 46 46 46 46 46 46 46 50 50 50 50 50 50 50 50 "/>
+  </tables>
+</project>

@@ -1,0 +1,10 @@
+log,mode,rows_total,rows_kept,op_min,op_max
+20260613_1141.csv,target,17298,1671,0.062,8.375
+cold idle dip again.csv,target,358,0,4.062,6.125
+cold idle dip again 3 all channels.csv,target,1120,1,1.688,6.562
+died_hot_return_to_idle_again.csv,target,1314,0,0.0,7.75
+crank_fail_0729.csv,target,393,0,0.0,0.188
+key_data.csv,proxy,17199,2183,0.062,8.375
+Cold oil reference.csv,target,13419,6878,0.0,8.0
+oil compensation test with hot restart and varied hot idle targets.csv,target,16706,3200,0.0,8.5
+oil data after 25 minutes.csv,target,11935,3109,1.688,6.438

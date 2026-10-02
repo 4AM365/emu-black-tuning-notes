@@ -384,6 +384,14 @@ Each of the 23 software pages has its own notes page (rich tuning pages where we
 - **▸ `idleTargetBins`** (5×1)
 - `cyclingIdleActivationInput`, `cyclingIdleAirflow`, `cyclingIdleAirflowApplyToDBW`, `cyclingIdleFuelCutOfs`, `cyclingIdleFuelEnrichment`, `cyclingIdleIgnitionAngle`, `cyclingIdleMode`, `cyclingIdleRPMCut`, `cyclingIdleRPMResume`, `idleACRPMIncrease`, `idleAboveVSSTargetIncrease`, `idleAirDCOverrided`, `idleAirFlowIntegralLimitMax`, `idleAirFlowIntegralLimitMin`, `idleAirFlowKD`, `idleAirFlowKI`, `idleAirFlowKP`, `idleAirPIDOutMax`, `idleAirPIDOutMin`, `idleClutchEnablesClosedLoop`, `idleClutchTrgtRPMIncrease`, `idleCoolantFanCorr`, `idleCutCutType`, `idleCutIntegralLimitMax`, `idleCutIntegralLimitMin`, `idleCutKI`, `idleCutKP`, `idleDBWBlendPoint`, `idleDBWTargetMax`, `idleDBWTargetMin`, `idleDCCorrActivationInput`, `idleDCCorrBehaviour`, `idleDCCorrXAxisType`, `idleDCCorrYAxisType`, `idleEnterMode`, `idleEnterModeFunction`, `idleFrequency`, `idleIgnitionControlType`, `idleIgnitionIntegralLimitMax`, `idleIgnitionIntegralLimitMin`, `idleIgnitionKD`, `idleIgnitionKI`, `idleIgnitionKP`, `idleIncreaseTargetAboveVSS`, `idleInvertOutput`, `idleKD`, `idleKeepSteperPowerdOverMAPValue`, `idleMaxCutPercent`, `idleMinMapToActivate`, `idleNeutralEnablesClosedLoop`, `idleOffIfTPSOver`, `idleOnIfTPSBelow`, `idleOpenLoopOverVss`, `idleOverrideAirDC`, `idlePIDUpdateInterval`, `idlePWMOutput`, `idlePWMOutput2`, `idleRAMPDownDecayRate`, `idleRAMPDownOffset`, `idleReverse`, `idleStepperNumSteps`, `idleTargetRampDelay`, `idleUseV3OutToActivatePID`, `idleValveMaxDC`, `idleValveMinDC`, `idleValveType`
 
+> **⚠ Confirmed misfile — `idlePIDUpdateInterval` does not belong to this page.** It is listed here
+> only because of its `idle*` name prefix (see the Source caveat at the top: page assignment is
+> derived from symbol names). It is **absent from the EMU Idle pages entirely**, undocumented in the
+> v3 help, and sits in the XML at line 433 among `starterOutput` / `enableBuzzerOnStartup` /
+> `canBusTerminator` — ~350 lines from the real idle PID block (784–808). Measured loop rate is
+> ~40 ms, so the symbol is a v2 relic or unexposed internal. Treat it as **not an Idle tunable**:
+> [idle.md → Airflow PID](idle.md). A worked reminder that name-prefix filing can be wrong.
+
 ## Functions  ·  83
 
 

@@ -29,6 +29,7 @@ The canonical copy of each skill is **this repo** — the Claude skills director
 | [emu-black-temp-sensor-recal](emu-black-temp-sensor-recal/SKILL.md) | Rebuild a mis-curved custom temp sensor by resampling a known-good curve → corrected `.emubt`. | [temp_sensor_recal.py](emu-black-temp-sensor-recal/scripts/temp_sensor_recal.py) |
 | [emu-black-idle-stability](emu-black-idle-stability/SKILL.md) | Idle target-tracking + stability from RPM (bias/RMS, CoV, hunt frequency), per regime/setpoint. | [idle_stability.py](emu-black-idle-stability/scripts/idle_stability.py) |
 | [emu-black-idle-drift](emu-black-idle-drift/SKILL.md) | Attribute a hot-soak idle drift to PID vs charge-temp (airflow split + per-channel trend/correlation). | [idle_drift_attribution.py](emu-black-idle-drift/scripts/idle_drift_attribution.py) |
+| [emu-black-idle-pid-gain](emu-black-idle-pid-gain/SKILL.md) | Identify the airflow PID's stability margin from a logged oscillation → measured `idleAirFlowKP`, ultimate gain Ku / period Tu, gain margin, and a decay-ratio-vs-kP sweep. Use when idle hunts or rings and the question is "what should kP be?". | [idle_pid_gain.py](emu-black-idle-pid-gain/scripts/idle_pid_gain.py) |
 | [emu-black-lambda-tracking](emu-black-lambda-tracking/SKILL.md) | Lambda tracking quality (measured vs target %), bias + spread by MAP bin; A/B map comparison. | [lambda_tracking.py](emu-black-lambda-tracking/scripts/lambda_tracking.py) |
 | [emu-black-knock-cov](emu-black-knock-cov/SKILL.md) | Combustion-CoV proxy from knock-voltage scatter (detrended, transitions only); A/B map comparison. | [knock_chatter_cov.py](emu-black-knock-cov/scripts/knock_chatter_cov.py) |
 | [emu-black-ve-lambda-verify](emu-black-ve-lambda-verify/SKILL.md) | veTable × lambda_target product test — confirms the VE dose carries the lambda enrichment (no boost-knee dip). | [verify_ve_vs_lambda.py](emu-black-ve-lambda-verify/scripts/verify_ve_vs_lambda.py) |
@@ -57,6 +58,7 @@ VE smoothing:     emu-black-log  (corrections)  →  emu-black-ve-smooth  →  e
 | `supra/tunes/*.csv` | Log snapshots associated with a tune session |
 | `notes/` | First-principles derivations, tuning principles, build observations |
 | `supra/notes/` | Supra-specific notes (mass-flow estimator quirks, etc.) |
+| `supra/reports/` | Dated, self-contained analysis reports (HTML page + data + scripts), indexed in `supra/reports/README.md` |
 | `scripts/` | Standalone repo-level utility scripts (OCR, corpus cleanup, etc.) — NOT tune/log analysis |
 | `supra/scripts/` | (now empty) — the former Supra analysis scripts were **generalized into the log-analysis skills above**. New reusable analyses should be a skill, not a script here; truly one-off Supra-only scratch can still live here. |
 | `C:\Code\car-projects\emubt_breakout\` | CSV round-trip tools for editing existing `.emubt` files in a spreadsheet |

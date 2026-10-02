@@ -1,0 +1,3133 @@
+
+
+===== [aristo_pinout p.1] =====
+2JZ‐GTE VVTi JZS161 Aristo Engine Wiring
+1. Introduction
+2. JZS161 Toyota Aristo 2JZ‐GTE Engine ECU Part Numbers
+3. JZS161 Toyota Aristo 2JZ‐GTE VVTi Engine ECU Pinout
+4. JZS161 Toyota Aristo 2JZ‐GTE VVTi Engine Loom to Body Loom Pinout
+i. JZS161 Toyota Aristo 2JZ‐GTE VVTi 90980‐11531 Engine Loom to Body Loom Plug
+﴾White﴿
+ii. JZS161 Toyota Aristo 2JZ‐GTE VVTi 90980‐11527 Engine Loom to Body Loom Plug
+﴾White﴿
+iii. JZS161 Toyota Aristo 2JZ‐GTE VVTi 90980‐11710 Engine Loom to Body Loom Plug
+﴾White﴿
+5. JZS161 Toyota Aristo 2JZ‐GTE VVTi Wiring Diagrams
+i. JZS16x Electrical Wiring Diagram Book 6748505
+ 
+Introduction
+This page provides information in regards to 2JZ­GTE VVTi engine wiring as found in the Japanese JZS161 Toyota Aristo.
+ 
+JZS161 Toyota Aristo 2JZ‐GTE Engine ECU Part Numbers
+Toyota Part Number
+Dates 
+Transmission 
+ 89661­3A470
+08/1997 to 06/2000
+Automatic Transmission 
+ 89666­30180
+07/2000 to 12/2004
+Automatic Transmission 
+ 
+Note that the later revision engine ECU has an engine immobilizer inbuilt to the engine ECU.
+ 
+JZS161 Toyota Aristo 2JZ‐GTE VVTi Engine ECU Pinout
+ 
+Plug
+Pin
+Symbol
+Definition
+Input /
+What
+Why
+How
+Link
+
+
+===== [aristo_pinout p.2] =====
+Output
+B1
+1
+#30
+No. 3 Injector
+Output
+This pin is used to control the No.3 fuel
+injector.
+The fuel injectors are electronically
+controlled by the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the fuel injector ON.  The fuel
+injector should be wired with one
+side of the solenoid connected to
+battery voltage (Ignition switched)
+and one side of the fuel injector
+connected to this ECU pin.
+ 
+B1
+2
+#40
+Cyl 4 Injector Driver
+Output
+This pin is used to control the No.4 fuel
+injector.
+The fuel injectors are electronically
+controlled by the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the fuel injector ON.  The fuel
+injector should be wired with one
+side of the solenoid connected to
+battery voltage (Ignition switched)
+and one side of the fuel injector
+connected to this ECU pin.
+ 
+B1
+3
+#50
+Cyl 5 Injector Driver
+Output
+This pin is used to control the No.5 fuel
+injector.
+The fuel injectors are electronically
+controlled by the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the fuel injector ON.  The fuel
+injector should be wired with one
+side of the solenoid connected to
+battery voltage (Ignition switched)
+and one side of the fuel injector
+connected to this ECU pin.
+ 
+B1
+4
+#60
+Cyl 6 Injector Driver
+Output
+This pin is used to control the No.6 fuel
+injector.
+The fuel injectors are electronically
+controlled by the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the fuel injector ON.  The fuel
+injector should be wired with one
+side of the solenoid connected to
+battery voltage (Ignition switched)
+and one side of the fuel injector
+connected to this ECU pin.
+ 
+B1
+5
+VSV1
+Intake Air Bypass Valve Vacuum
+Switching Valve
+Output
+This pin is used to control the VSV which is
+used to open / close the Intake Air Bypass
+Valve that is a component of the sequential
+turbo system.
+The Intake Air Control Valve allows
+pressurised air to exit the rear
+turbocharger allowing it to fully
+come online as part of the
+sequential turbo system.
+This pin is connected to Ground
+inside the ECU as required to turn
+the Intake Air Control Valve VSV
+ON allowing pressurised intake air
+to open the Intake Air Control
+Valve.  One side of the VSV should
+be wired to this pin and one side
+of VSV should be wired to battery
+voltage (Main EFI Relay switched).
+ 
+B1
+6
+MOL
+Main Oil Level Switch
+Input
+This pin is used to detect low engine oil
+level.
+This sensor is used for low oil level
+indication for the dash with the data
+being sent via the Multiplex network
+to the dash.   It is unknown if this
+switch plays any part in the engine
+control algorithms.
+This pin connects to an oil level
+switch that is installed at the
+sump on the front, lower, intake
+side of the engine to detect low
+engine oil level.  One side of the
+oil level switch should be wired to
+this pin and one side of oil level
+switch should be wired to ground
+ 
+
+
+===== [aristo_pinout p.3] =====
+(common ground located at the
+intake manifold).
+B1
+7
+M­
+ETCS­i  Motor
+Output
+This pin is used to control the electronic
+throttle control motor.
+The throttle is controlled by an
+electric motor that is controlled by
+the engine ECU.  Having the throttle
+controlled by the engine ECU allows
+idle speed control, traction control,
+cruise control, etc to be built directly
+into the engine ECU simplifying the
+system.
+This pin is used together with the
+M+ pin to power the electric
+motor to allow it to be opened and
+closed by the engine ECU as
+required.  The ETCS­i clutch must
+be engaged for the electric motor
+to be able to open or close the
+throttle.  The M+ and M­ pins are
+triggered by the engine ECU in a
+PWM fashion.
+ 
+B1
+8
+M+
+ETCS­i  Motor
+Output
+This pin is used to control the electronic
+throttle control motor.
+The throttle is controlled by an
+electric motor that is controlled by
+the engine ECU.  Having the throttle
+controlled by the engine ECU allows
+idle speed control, traction control,
+cruise control, etc to be built directly
+into the engine ECU simplifying the
+system.
+This pin is used together with the
+M­ pin to power the electric motor
+to allow it to be opened and
+closed by the engine ECU as
+required.  The ETCS­i clutch must
+be engaged for the electric motor
+to be able to open or close the
+throttle.  The M+ and M­ pins are
+triggered by the engine ECU in a
+PWM fashion.
+ 
+B1
+9
+ME01
+ETCS­i Ground
+Input
+Ground
+Used to supply a Ground path to
+allow current to flow.  A separate
+ground is used for the electronic
+throttle control system to reduce
+noise introduced between systems.
+This pin connects to Ground or the
+battery negative.
+ 
+B1
+10
+G2
+Intake Camshaft Position Sensor
+Input
+This pin is used to detect the location of
+the intake camshaft.
+The engine ECU needs to know the
+position of the intake camshaft for
+variable intake camshaft position
+control, the camshaft position
+sensor provides this information.
+This pin connects to the camshaft
+position sensor located to the rear
+of the intake side of the engine
+head which outputs 3 pulse
+(reluctor pulses) per camshaft
+revolution.
+ 
+B1
+11
+IGT
+Ignition Trigger Cyl 1 & Cyl 6
+Output
+This pin is used to control the ignition for
+cylinders 1 & 6.
+The ignition timing is electronically
+controlled by the engine ECU.
+This pin is connected to +5V
+inside the engine ECU as required
+to trigger engine ignition.  Ignition
+is  triggered on the high (+5V) to
+low (0V) transition.
+ 
+B1
+12
+IGT2
+Ignition Trigger Cyl 5 & Cyl 2
+Output
+This pin is used to control the ignition for
+cylinders 5 & 2.
+The ignition timing is electronically
+controlled by the engine ECU.
+This pin is connected to +5V
+inside the engine ECU as required
+to trigger engine ignition.  Ignition
+is  triggered on the high (+5V) to
+low (0V) transition.
+ 
+B1
+13
+IGT3
+Ignition Trigger Cyl 3 & Cyl 4
+Output
+This pin is used to control the ignition for
+cylinders 3 & 4.
+The ignition timing is electronically
+controlled by the engine ECU.
+This pin is connected to +5V
+inside the engine ECU as required
+to trigger engine ignition.  Ignition
+is  triggered on the high (+5V) to
+low (0V) transition.
+ 
+B1
+14
+/
+/
+/
+/
+/
+/
+ 
+
+
+===== [aristo_pinout p.4] =====
+B1
+15
+PMC
+Pressure Modulation Control
+(Wastegate) Vacuum Switching Valve
+Output
+This pin is used to control the VSV which
+controls the turbo wastegate on the front
+turbo.  This VSV allows the engine ECU to
+attempt to control boost pressure.
+The Wastegate Control Valve allows
+exhaust gas to pre­spool the rear
+turbocharger prior to it coming
+online as part of the sequential
+turbo system.
+This pin is connected to Ground
+inside the ECU as required to turn
+the Pressure Modulation Control
+valve which is more commonly
+called the wastegate control valve
+ON allowing pressurised intake air
+to be diverted away from the
+mechanical wastegate actuator. 
+When this VSV is ON the
+mechanical wastegate actuator
+will not operate and the wastegate
+will not open, this will result in a
+very large amount of boost
+pressure being generated by the
+turbochargers.  One side of the
+VSV should be wired to this pin
+and one side of VSV should be
+wired to battery voltage (Main EFI
+Relay switched).
+ 
+B1
+16
+/
+/
+/
+/
+/
+/
+ 
+B1
+17
+OCV­
+VVTi Solenoid
+Output
+This pin is used to control the solenoid that
+controls position of the intake camshaft.
+Controlling the position of the intake
+camshaft can be used to improve
+performance and fuel economy.
+This pin is used together with the
+OCV+ pin to power a solenoid that
+allows engine oil pressure to be
+used to vary the position of the
+intake camshaft.  The OCV+ and
+OCV­ pins are triggered by the
+engine ECU in a PWM fashion.
+ 
+B1
+18
+OCV+
+VVTi Solenoid
+Output
+This pin is used to control the solenoid that
+controls position of the intake camshaft.
+Controlling the position of the intake
+camshaft can be used to improve
+performance and fuel economy.
+This pin is used together with the
+OCV­ pin to power a solenoid that
+allows engine oil pressure to be
+used to vary the position of the
+intake camshaft.  The OCV+ and
+OCV­ pins are triggered by the
+engine ECU in a PWM fashion.
+ 
+B1
+19
+CL­
+ETCS­i  Clutch
+Output
+This pin is used to control the electronic
+throttle control clutch.
+The throttle is controlled by an
+electric motor that is controlled by
+the engine ECU however there is a
+clutch that is controlled by the
+engine ECU that must be engaged
+for the electric motor to be able to
+move the throttle.  If the engine
+ECU detects an issue with the ETCS­
+i system it will disable the clutch as
+a safety feature.
+This pin is used together with the
+CL+ pin to power the clutch that
+allows the electric motor to open
+and close engine throttle.  The
+ETCS­i clutch must be engaged for
+the electric motor to be able to
+open or close the throttle.
+ 
+B1
+20
+CL+
+ETCS­i  Clutch
+Output
+This pin is used to control the electronic
+throttle control clutch.
+The throttle is controlled by an
+electric motor that is controlled by
+the engine ECU however there is a
+clutch that is controlled by the
+engine ECU that must be engaged
+for the electric motor to be able to
+This pin is used together with the
+CL­ pin to power the clutch that
+allows the electric motor to open
+and close engine throttle.  The
+ETCS­i clutch must be engaged for
+ 
+
+
+===== [aristo_pinout p.5] =====
+move the throttle.  If the engine
+ECU detects an issue with the ETCS­
+i system it will disable the clutch as
+a safety feature.
+the electric motor to be able to
+open or close the throttle.
+B1
+21
+E01
+ECU Ground
+Input
+Ground
+Used to supply a Ground path to
+allow current to flow.
+This pin connects to Ground or the
+battery negative.
+ 
+B1
+22
+NE­
+Crankshaft & Intake Camshaft Position
+Sensor Ground
+Input
+This pin is used to provide a Ground to
+detect the speed and location of the engine
+crankshaft and intake camshaft.
+The engine ECU needs to know the
+position of the engine so that it can
+accurately provide fuel and ignition.
+This pin connects to the engine
+crankshaft position sensor and the
+intake camshaft position sensor.
+ 
+B1
+23
+NE+
+Crankshaft Position Sensor
+Input
+This pin is used to detect the speed and
+location of the engine crankshaft.
+The engine ECU needs to know the
+position of the engine so that it can
+accurately provide fuel and ignition.
+This pin connects to the engine
+crankshaft position sensor located
+to the lower front of the exhaust
+side of the engine near the
+alternator which outputs 36­2
+pulses (reluctor pulses) per engine
+crankshaft revolution.
+ 
+B1
+24
+/
+/
+/
+/
+/
+/
+ 
+B1
+25
+IGF
+Igniter Verification Signal
+Input
+This is pin is used to detect if ignition has
+taken place successfully.
+If no ignition is occurring and fuel
+injection continues the spark plugs
+can be fouled and backfires can
+occur in the exhaust, the igniter
+sends a signal to inform the engine
+so that it can stop fuel injection if
+successful ignition is not detected.
+This pin is connected to Ground
+by the Igniter for a short period of
+time after a successful ignition
+event has been detected.
+ 
+B1
+26
+RL
+Alternator Charge Light Output (L)
+Input
+This pin is used to detect the status of the
+alternator regulators charge light output.
+The alternator charge light output is
+used for indication of the alternator
+charging status for the dash with
+the data being sent via the Multiplex
+network to the dash.   It is unknown
+if this input plays any part in the
+engine control algorithms.
+This pin connects to the alternator
+regulator charge status output
+and is grounded by the alternator
+regulator to indicate that the
+alternator is not charging.  In
+normal operation this pin should
+be open circuit.
+ 
+B1
+27
+KNK2
+No.2 Knock Sensor (Rear)
+Input
+This pin is used to measure engine knock.
+Engine knock can occur if too much
+ignition timing and poor fuel are
+present, as engine knock can
+damage an engine the engine ECU
+used a knock sensor to detect and
+compensate for knock if is 
+detected.
+This pin connects to the signal
+output of the knock sensor which
+is mounted under the intake
+manifold, to the rear of the engine
+and screwed into the side of the
+engine block.  The knock sensor is
+Grounded via the engine block. 
+8.1kHz is the normal mode
+vibration.
+ 
+B1
+28
+KNK1
+No.1 Knock Sensor (Front)
+Input
+This pin is used to measure engine knock.
+Engine knock can occur if too much
+ignition timing and poor fuel are
+present, as engine knock can
+damage an engine the engine ECU
+used a knock sensor to detect and
+compensate for knock if is 
+detected.
+This pin connects to the signal
+output of the knock sensor which
+is mounted under the intake
+manifold, to the front of the
+engine and screwed into the side
+of the engine block.  The knock
+sensor is Grounded via the engine
+ 
+
+
+===== [aristo_pinout p.6] =====
+block.  8.1kHz is the normal mode
+vibration.
+B1
+29
+LCKI
+Airconditioning Compressor Lock
+Sensor
+Input
+This pin is used to detect the speed of the
+airconditioning compressor.
+This speed sensor can be used to
+detect if the airconditioning
+compressor seizes or becomes
+disconnected, in which case the
+engine ECU will disable the
+airconditioning compressor to avoid
+further damage.
+This pin connects to the
+airconditioning compressor speed
+sensor located at the bottom of
+the airconditioning compressor. 
+The other side of the
+airconditioning compressor speed
+sensor should be connected to
+ground.
+ 
+B1
+30
+GEO1
+ETCS­i Motor Shielding
+Output
+This pin is used to shield the wires used to
+control the electronic throttle control
+electric motor.
+Operation of the electronic throttle
+control electric motor can generate
+a significant amount of electrical
+noise, shielding of the wires has
+been used to reduce the amount of
+electrical noise that is transmitted
+into other systems.
+This pin is connected to ground
+inside the engine ECU and
+connects to the shield that covers
+the wires (M+ and M­) that are
+used to control the electronic
+throttle control electric motor.
+ 
+B1
+31
+E02
+ECU Ground
+Input
+Ground
+Used to supply a Ground path to
+allow current to flow.
+This pin connects to Ground or the
+battery negative.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Plug
+Pin
+Symbol
+Definition
+Input /
+Output
+What
+Why
+How
+Link
+B2
+1
+/
+/
+/
+/
+/
+/
+ 
+B2
+2
+VC
+Sensor Power
+Output
+This pin is used to supply +5V power to the
+throttle position and MAP sensors.
+The throttle position and MAP
+sensors require regulated and
+constant +5V to operate.
+This pin outputs regulated +5V to
+the throttle position sensors and
+the MAP sensor.
+ 
+B2
+3
+VSV2
+Exhaust Gas Control Valve Vacuum
+Switching Valve
+Output
+This pin is used to control the VSV which is
+used to open / close the Exhaust Gas
+Control Valve that is a component of the
+sequential turbo system.
+The Exhaust Gas Control Valve
+allows exhaust gas to exit the rear
+turbocharger allowing it to fully
+come online as part of the
+sequential turbo system.
+This pin is connected to Ground
+inside the ECU as required to turn
+the Exhaust Gas Control Valve
+VSV ON allowing pressurised
+intake air to open the Exhaust Gas
+Control Valve.  One side of the
+VSV should be wired to this pin
+and one side of VSV should be
+wired to battery voltage (Main EFI
+Relay switched).
+ 
+B2
+4
+HT
+Oxygen Sensor Heater
+Output
+This pin is used to control the heater for
+the exhaust gas oxygen sensor.
+The oxygen sensor requires a
+certain temperature to start
+operating, to allow this temperature
+to be reached quickly and allow the
+oxygen sensor to start operation the
+sensor is heated.
+This pin connects to Ground inside
+the engine ECU as required to
+turn the oxygen sensor heater
+on.  One side of the oxygen
+sensor heater should be wired to
+this pin and one side of oxygen
+sensor heater should be wired to
+battery voltage (Main EFI Relay
+switched).
+ 
+B2
+5
+#10
+Cyl 1 Injector Driver
+Output
+This pin is used to control the No.1 fuel
+injector.
+The fuel injectors are electronically
+controlled by the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the fuel injector ON.  The fuel
+ 
+
+
+===== [aristo_pinout p.7] =====
+injector should be wired with one
+side of the solenoid connected to
+battery voltage (Ignition switched)
+and one side of the fuel injector
+connected to this ECU pin.
+B2
+6
+#20
+Cyl 2 Injector Driver
+Output
+This pin is used to control the No.2 fuel
+injector.
+The fuel injectors are electronically
+controlled by the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the fuel injector ON.  The fuel
+injector should be wired with one
+side of the solenoid connected to
+battery voltage (Ignition switched)
+and one side of the fuel injector
+connected to this ECU pin.
+ 
+B2
+7
+PRG
+Evaporative Emission Control Vacuum
+Switching Valve
+Output
+This pin is used to control the VSV which is
+used to allow fuel vapour from the charcoal
+canister to enter the intake manifold and
+enter the engine.
+Fuel vapours from the fuel tank are
+captured in the charcoal canister to
+protect the environment, the PRG
+VSV is used to allow these captured
+emissions to be burnt during normal
+engine operation as determined by
+the engine ECU.
+This pin is connected to Ground
+inside the ECU as required to turn
+the Evaporative Emissions Control
+Valve VSV ON allowing fuel
+emissions to pass to the intake
+manifold into the engine.  One
+side of the VSV should be wired to
+this pin and one side of VSV
+should be wired to battery voltage
+(Main EFI Relay switched).
+ 
+B2
+8
+MOPS
+Main Oil Pressure Switch
+Input
+This pin is used to sense low engine oil
+pressure.
+This sensor is the low oil pressure
+switch for the dash with the data
+being sent via the Multiplex network
+to the dash.  It is unknown if this
+switch plays any part in the engine
+control algorithms.
+This pin connects to a pressure
+switch that is installed at the oil
+filter assembly on the lower,
+intake side of the engine to
+measure engine oil pressure.  The
+oil pressure switch is grounded via
+the engine block.
+ 
+B2
+9
+PIM
+Pressure Intake Manifold (MAP
+Sensor)
+Input
+This pin is used to determine the manifold
+air pressure (MAP).
+Manifold air pressure is used for
+control of the sequential turbo
+system as well as boost cut.
+This pin connects to the signal
+output of the MAP sensor which
+contains a small sensor to
+measure air pressure.  A small
+vacuum hose connects the MAP
+sensor to the intake after the
+throttle body.
+ 
+B2
+10
+VG
+Engine Airflow
+Input
+This pin is used to determine the engine
+airflow.
+Engine airflow is a primary
+component in the fuel injection
+control algorithm.  If the engine
+airflow is known then the amount of
+fuel required to achieve a desired
+air fuel ratio can be calculated by
+the engine ECU.
+This pin connects to the signal
+output of the airflow sensor.  The
+airflow sensor is located in the
+engine intake piping just after the
+airfilter.
+ 
+B2
+11
+/
+/
+/
+/
+/
+/
+ 
+B2
+12
+OX
+Oxygen Sensor
+Input
+This pin is used to determine the exhaust
+gas air fuel ratio.
+The engine ECU will aim for an air
+fuel ratio near stoichiometric
+(neither rich or lean) to enhance
+This pin connects to the signal
+output of the oxygen sensor that
+is mounted in the exhaust.  The
+factory oxygen sensor is a 'narrow
+ 
+
+
+===== [aristo_pinout p.8] =====
+fuel economy under periods of low
+load.
+band' oxygen sensor that outputs
+approximately 0V when the air
+fuel ratio is lean and
+approximately 1V when the air
+fuel ratio is rich.  The engine ECU
+will aim to keep the engine
+running at stoichiometric by
+alternating between very slightly
+rich and very slightly lean
+conditions, as the sensor is only a
+narrow band sensor this is a
+practical way to achieve (or very
+close to) the desired
+stoichiometric air fuel ratio.
+B2
+13
+N
+Automatic Transmission Neutral Gear
+Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the
+Neutral position.  This signal is also sent via
+the Multiplex network to the dash for
+display.
+The engine ECU needs to
+energise/de­energise the automatic
+transmission solenoids to select the
+correct gear.
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+automatic transmission shifter is in
+the 'N' position.
+ 
+B2
+14
+THW
+Water Temperature Sensor
+Input
+This pin is used to measure the
+temperature of the engine coolant exiting
+the engine.
+The engine coolant temperature has
+a significant effect on the engines
+operation, for example requiring
+more fuel during 'warm up'
+conditions.  This sensor is also the
+water temperature sensor for the
+dash with the data being sent via
+the Multiplex network to the dash.
+This pin connects to a thermistor
+that is installed at the engine
+coolant water outlet to the
+radiator on the front, upper,
+exhaust side of the engine to
+measure engine coolant
+temperature.  One side of the
+thermistor should be wired to this
+pin and one side of the thermistor
+should be wired to the engine ECU
+pin E2 (Ground).
+ 
+B2
+15
+VPA
+Throttle Position Sensor  (Demand
+Position Sensor)
+Input
+This pin is used to effectively detect the
+position of the accelerator pedal which
+reflects the operators desired throttle
+position.
+The operators desired throttle
+position is a useful parameter for
+engine operation, particularly in
+transient conditions such as
+acceleration.
+This pin measures the variable
+voltage from one of the outputs
+from the position sensor that
+measures how depressed the
+accelerator pedal is.  The position
+sensor has two outputs (VPA and
+VPA2) with different responses
+that allow the engine ECU to
+perform diagnostics during normal
+operation.
+ 
+B2
+16
+VPA2
+Throttle Position Sensor (Demand
+Position Sensor)
+Input
+This pin is used to effectively detect the
+position of the accelerator pedal which
+reflects the operators desired throttle
+position.
+The operators desired throttle
+position is a useful parameter for
+engine operation, particularly in
+transient conditions such as
+acceleration.
+This pin measures the variable
+voltage from one of the outputs
+from the position sensor that
+measures how depressed the
+accelerator pedal is.  The position
+sensor has two outputs (VPA and
+VPA2) with different responses
+that allow the engine ECU to
+ 
+
+
+===== [aristo_pinout p.9] =====
+perform diagnostics during normal
+operation.
+B2
+17
+E1
+ECU Ground
+Input
+Ground.
+Used to supply a Ground path to
+allow current to flow.
+This pin connects to Ground or the
+battery negative.
+ 
+B2
+18
+E2
+Sensor Ground
+Output
+Sensor ground.
+The throttle position, airflow, air and
+water temperature and MAP sensors
+have a separate ground to ensure
+clear signals.
+This pin is connected to sensor
+Ground inside the engine ECU.  Do
+not connect this pin to chassis
+Ground.
+ 
+B2
+19
+EVG
+Airflow Meter Ground
+Input
+Airflow meter signal ground.
+The airflow meter sensor has a
+separate signal ground to ensure a
+clear signal.
+This pin is connected to sensor
+Ground inside the engine ECU.  Do
+not connect this pin to chassis
+Ground.
+ 
+B2
+20
+2
+Automatic Transmission 2nd Gear
+Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the 2nd
+position.  This signal is also sent via the
+Multiplex network to the dash for display.
+The engine ECU needs to
+energise/de­energise the automatic
+transmission solenoids to select the
+correct gear.
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+automatic transmission shifter is in
+the '2' position.
+ 
+B2
+21
+L
+Automatic Transmission 1st Gear
+Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the L
+position.  This signal is also sent via the
+Multiplex network to the dash for display.
+The engine ECU needs to
+energise/de­energise the automatic
+transmission solenoids to select the
+correct gear.
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+automatic transmission shifter is in
+the 'L' position.
+ 
+B2
+22
+THA
+Air Temperature Sensor
+Input
+This pin is used to measure the
+temperature of the engine intake air.
+The engine air temperature has an
+effect on the air density so should
+be measured so the correct air
+density can be calculated.
+This pin connects to a thermistor
+that is installed in the airflow
+sensor The airflow sensor is
+located in the engine intake piping
+just after the airfilter.
+ 
+B2
+23
+VTA
+Throttle Position Sensor (Actual
+Throttle Position Sensor)
+Input
+This pin is used to detect the actual
+position of the throttle.
+The actual throttle position allows
+the engine ECU to set the throttle to
+a know position based on the
+desired throttle position and the
+engine ECUs desired programming.
+This pin measures the variable
+voltage from one of the outputs
+from the position sensor that
+measures the actual throttle
+position.  The position sensor has
+two outputs (VTA and VTA2) with
+different responses that allow the
+engine ECU to perform diagnostics
+during normal operation.
+ 
+B2
+24
+VTA2
+Throttle Position Sensor (Actual
+Throttle Position Sensor)
+Input
+This pin is used to detect the actual
+position of the throttle.
+The actual throttle position allows
+the engine ECU to set the throttle to
+a know position based on the
+desired throttle position and the
+engine ECUs desired programming.
+This pin measures the variable
+voltage from one of the outputs
+from the position sensor that
+measures the actual throttle
+position.  The position sensor has
+two outputs (VTA and VTA2) with
+different responses that allow the
+engine ECU to perform diagnostics
+during normal operation.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+===== [aristo_pinout p.10] =====
+Plug
+Pin
+Symbol
+Definition
+Input /
+Output
+What
+Why
+How
+Link
+B3
+1
+S1
+Automatic Transmission No.1 Shift
+Solenoid
+Output
+This pin is used to control the automatic
+transmission No.1 shift solenoid.
+The automatic transmission gear
+selection is controlled by electronic
+solenoids.
+This pin outputs battery voltage to
+turn the No.1 shift solenoid ON as
+required.  The No.1 shift solenoid
+is ON in gears 1 & 2.  The other
+side of the No.1 shift solenoid is
+Grounded inside the automatic
+transmission.
+ 
+B3
+2
+S2
+Automatic Transmission No.2 Shift
+Solenoid
+Output
+This pin is used to control the automatic
+transmission No.2 shift solenoid.
+The automatic transmission gear
+selection is controlled by electronic
+solenoids.
+This pin outputs battery voltage to
+turn the No.2 shift solenoid ON as
+required .  The No.2 shift solenoid
+is ON in gears 2 & 3.  The other
+side of the No.2 shift solenoid is
+Grounded inside the automatic
+transmission.
+ 
+B3
+3
+SD
+Automatic Transmission Shift Solenoid
+Output
+?
+?
+?
+ 
+B3
+4
+NCO+
+Automatic Transmission Over Drive
+Direct Clutch Speed Sensor
+Input
+This pin is used to detect the speed of the
+automatic transmission O/D input shaft.
+Detection of the automatic
+transmission OD input shaft speed
+can be used to improve shift timing
+and ensure smooth gear shifts.
+This pin connects to the OD speed
+sensor located on the left, front
+side of the automatic transmission
+and outputs a number of pulses
+(reluctor pulses) per revolution of
+the OD direct clutch drum.
+ 
+B3
+5
+SP2+
+Speed Sensor
+Input
+This pin is used to determine vehicle speed.
+Vehicle speed is used in idle control,
+automatic transmission shift control,
+cruise control, speed limiting etc.  
+Note: The speed signal for the dash
+is NOT received via the Multiplex /
+this signal. The dash speed signal
+comes from the ABS ECU (SP1).
+This pin connects to the speed
+sensor located on the left, rear
+side of the automatic transmission
+and outputs 12 pulses (reluctor
+pulses) per revolution of the
+automatic transmission output
+shaft.
+ 
+B3
+6
+S4
+Automatic Transmission Shift Solenoid
+Output
+?
+?
+?
+ 
+B3
+7
+SLU+
+Automatic Transmission Lock Up
+Solenoid
+Output
+This pin is used to control the automatic
+transmission lock up torque converter
+control solenoid which is used to enable
+torque converter lock up.
+The automatic transmission lock up
+torque converter is controlled by an
+electronic solenoid.
+This pin in association with the
+SLU­ pin outputs battery voltage
+to turn the lock up torque
+converter solenoid ON.
+ 
+B3
+8
+SLN+
+Automatic Transmission Accumulator
+Back Pressure Solenoid
+Output
+This pin is used to control the automatic
+transmission accumulator back pressure
+control solenoid.
+The automatic transmission
+accumulator back pressure is
+controlled by an electronic solenoid.
+This pin in association with the
+SLN­ pin outputs Pulse Width
+Modulated (PWM) battery voltage
+to turn the accumulator back
+pressure control solenoid ON.
+ 
+B3
+9
+SLT+
+Automatic Transmission Line Pressure
+Control Solenoid
+Output
+This pin is used to control the automatic
+transmission line pressure control solenoid.
+The automatic transmission line
+pressure is controlled by an
+electronic solenoid.
+This pin in association with the
+SLT­ pin outputs Pulse Width
+Modulated (PWM) battery voltage
+to turn the line pressure control
+solenoid ON.
+ 
+B3
+10
+NCO­
+Automatic Transmission Over Drive
+Direct Clutch Speed Sensor
+Input
+This pin is used to detect the speed of the
+automatic transmission O/D input shaft.
+Detection of the automatic
+transmission OD input shaft speed
+This pin connects to the OD speed
+sensor located on the left, front
+side of the automatic transmission
+ 
+
+
+===== [aristo_pinout p.11] =====
+can be used to improve shift timing
+and ensure smooth gear shifts.
+and outputs a number of pulses
+(reluctor pulses) per revolution of
+the OD direct clutch drum.
+B3
+11
+SP2­
+Speed Sensor
+Input
+This pin is used to determine vehicle speed.
+Vehicle speed is used in idle control,
+automatic transmission shift control,
+cruise control, speed limiting etc.  
+Note: The speed signal for the dash
+is NOT received via the Multiplex /
+this signal. The dash speed signal
+comes from the ABS ECU (SP1).
+This pin connects to the speed
+sensor located on the left, rear
+side of the automatic transmission
+and outputs 12 pulses (reluctor
+pulses) per revolution of the
+automatic transmission output
+shaft.
+ 
+B3
+12
+VSV3
+Exhaust Bypass Valve Vacuum
+Switching Valve
+Output
+This pin is used to control the VSV which is
+used to open / close the Exhaust Bypass
+Valve that is a component of the sequential
+turbo system.
+The Exhaust Bypass Valve allows
+exhaust gas to pre­spool the rear
+turbocharger prior to it coming
+online as part of the sequential
+turbo system.
+This pin is connected to Ground
+inside the ECU as required to turn
+the Exhaust Bypass Valve VSV ON
+allowing pressurised intake air to
+open the Exhaust Bypass Valve. 
+One side of the VSV should be
+wired to this pin and one side of
+VSV should be wired to battery
+voltage (Main EFI Relay switched).
+ 
+B3
+13
+SLU­
+Automatic Transmission Lock Up
+Solenoid
+Output
+This pin is used to control the automatic
+transmission lock up torque converter
+control solenoid which is used to enable
+torque converter lock up.
+The automatic transmission lock up
+torque converter is controlled by an
+electronic solenoid.
+This pin in association with the
+SLU+ pin outputs battery voltage
+to turn the lock up torque
+converter solenoid ON.
+ 
+B3
+14
+SLN­
+Automatic Transmission Accumulator
+Back Pressure Solenoid
+Output
+This pin is used to control the automatic
+transmission accumulator back pressure
+control solenoid.
+The automatic transmission
+accumulator back pressure is
+controlled by an electronic solenoid.
+This pin in association with the
+SLN+ pin outputs Pulse Width
+Modulated (PWM) battery voltage
+to turn the accumulator back
+pressure control solenoid ON.
+ 
+B3
+15
+SLT­
+Automatic Transmission Line Pressure
+Control Solenoid
+Output
+This pin is used to control the automatic
+transmission line pressure control solenoid.
+The automatic transmission line
+pressure is controlled by an
+electronic solenoid.
+This pin in association with the
+SLT+ pin outputs Pulse Width
+Modulated (PWM) battery voltage
+to turn the line pressure control
+solenoid ON.
+ 
+B3
+16
+FPU
+Fuel Pressure Up Vacuum Switching
+Valve
+Output
+This pin is used to control the VSV which is
+used to increase fuel pressure during hot
+soak starting.
+To reduce the possibility of fuel
+vapour formation in the fuel rail
+during starting from hot soak
+conditions the Fuel Pressure Up VSV
+is used to increase the fuel rail
+pressure for a short period of time
+after hot soak starting.
+This pin is connected to Ground
+inside the ECU as required to turn
+the Fuel Pressure Up VSV ON
+which vents the fuel pressure
+regulator reference to atmosphere
+resulting in increased fuel rail
+pressure.  One side of the VSV
+should be wired to this pin and
+one side of VSV should be wired
+to battery voltage (Main EFI Relay
+switched).
+ 
+B3
+17
+OIL
+Automatic Transmission Oil
+Temperature Sensor
+Input
+This pin is used to measure the automatic
+transmission oil temperature.
+The automatic transmission oil
+temperature has a significant effect
+on the automatic transmissions
+operation, the engine ECU can
+compensate if the automatic
+This pin connects to a thermistor
+that is installed inside the
+automatic transmission to
+measure the automatic
+transmission oil temperature.  One
+ 
+
+
+===== [aristo_pinout p.12] =====
+transmission oil temperature is
+measured.
+side of the thermistor should be
+wired to this pin and one side of
+the thermistor should be wired to
+the engine ECU pin E2 (Ground).
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Plug
+Pin
+Symbol
+Definition
+Input /
+Output
+What
+Why
+How
+Link
+F59
+1
+/
+/
+/
+/
+/
+/
+ 
+F59
+2
+STA
+Starter Signal
+Input
+This pin is used to determine if the engine
+is being cranked.
+The engine ECU can take action to
+allow the engine to start easier if it
+is aware that the engine is trying to
+be started.
+This pin is connected to
+battery voltage when the
+ignition switch is in CRANK
+position.
+ 
+F59
+3
+FCUT
+Fuel Cut
+Output?
+This pin is used to monitor the FPC fuel
+pump control signal?
+It is believed that this pin is used as
+a safety check to confirm that the
+FPC signal and the engine ECU is
+functioning correctly.  It is believed
+that if abnormal pulses or voltage
+are detected on this pin that fuel
+pump and engine operation will be
+stopped?
+This pin is connected to the FPC
+pin.  Note: 2000­07 onwards
+models only, earlier models do not
+have this pin wired.
+ 
+F59
+4
+SFTU
+Automatic Transmission Shift Up
+Input
+This pin is used to detect the drivers
+request to shift the automatic transmission
+up a gear from the steering wheel controls,
+when the automatic transmission shifter is
+in the 'M' position.
+Driver control of the automatic
+transmission.
+This pin is connected to ground
+when the switch to shift the
+automatic transmission up a gear
+is activated, the ECU pin is open
+circuit when the switch is not
+activated.
+ 
+F59
+5
+TC
+Test Connector
+Input
+This pin is used to select the test mode
+during which diagnostic codes are flashed
+on the check engine light.
+Used to help in diagnosing issues.
+This pin is connected to Ground to
+enable test mode.
+ 
+F59
+6
+STP
+Stop Light Switch
+Input
+This pin is used to detect when the brake
+pedal is depressed.
+Used to disable the automatic
+transmission lock up torque
+converter, exit deceleration fuel cut,
+cruise control etc.
+This pin is connected to battery
+voltage when the brake pedal is
+depressed, the ECU pin is open
+circuit when the brake pedal is not
+depressed.
+ 
+F59
+7
+3
+Automatic Transmission M (Manual)
+Gear Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the 'M'
+(Manual) position. In the Manual position
+the automatic transmission gear position is
+controlled by the engine ECU pins SFTU
+and SFTD. This signal is also sent via the
+Multiplex network to the dash for display.
+The engine ECU needs to
+energise/de­energise the automatic
+transmission solenoids to select the
+correct gear.
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+automatic transmission shifter is in
+the 'M' position.
+ 
+F59
+8
+/
+/
+/
+/
+/
+/
+ 
+F59
+9
+/
+/
+/
+/
+/
+/
+ 
+F59
+10
+TAM
+Ambient Air Temperature Sensor
+Input
+This pin is used to measure the
+temperature of the ambient air.
+It is suspected that this sensor
+measures the temperature of the
+ambient air for the climate control,
+etc systems with the data being
+sent via the Multiplex network to
+This pin connects to a thermistor
+that is installed at the far front of
+the car.  One side of the
+thermistor should be wired to this
+pin and one side of the thermistor
+ 
+
+
+===== [aristo_pinout p.13] =====
+the dash.  It is unknown if this
+sensor plays any part in the engine
+control algorithms.
+should be wired to the engine ECU
+pin E2 (Ground).
+F59
+11
+ST1­
+Brake Signal Switch
+Input
+This pin is used to detect when the brake
+pedal is depressed.
+It is suspected that this pin is
+primarily responsible for exiting
+cruise control.  As the engine ECU is
+used for cruise control a failsafe
+detection method of brake pedal
+state via a dual contact brake switch
+is used.  It is unknown if this switch
+plays any other part in the engine
+control algorithms.
+This pin is disconnected from
+battery voltage when brake pedal
+is depressed, the ECU pin is
+connected to battery voltage
+when the brake pedal is not
+depressed.
+ 
+F59
+12
+PRE2
+Airconditioning Pressure Switch 2
+Input
+This pin is used to detect when the
+airconditioning system pressure is too
+high?/too low?/other?
+As final control of the
+airconditioning compressor is
+determined by the engine ECU it is
+logical to have the system healthy
+switches (airconditioning
+compressor speed, system
+pressures, etc) go to the engine
+ECU to ensure that the
+airconditioning system is controlled
+correctly.
+This pin is connected to ground
+when the switch is activated, the
+ECU pin is open circuit when the
+switch is not activated.  It is
+suspected that when this switch is
+activated the airconditioning
+compressor will not be able to be
+engaged.
+ 
+F59
+13
+ACMG
+Airconditioning Magnetic Clutch Relay
+Trigger
+Output
+This pin is used to turn the airconditioning
+magnetic clutch relay ON.
+ECU control of the airconditiong
+enables the airconditioning to be
+turned off during hard acceleration,
+etc.
+This pin is Grounded by the ECU
+as required to turn the
+airconditioning magnetic clutch
+relay ON.  One side of the
+airconditioning magnetic clutch
+relay coil should be wired to this
+pin and one side of the
+airconditioning magnetic clutch
+relay coil should be connected to
+battery voltage (Ignition switched)
+and one side of the relay coil
+connected to this ECU pin.
+ 
+F59
+14
+SFTD
+Automatic Transmission Shift Down
+Input
+This pin is used to detect the drivers
+request to shift the automatic transmission
+down a gear from the steering wheel
+controls, when the automatic transmission
+shifter is in the 'M' position.
+Driver control of the automatic
+transmission.
+This pin is connected to ground
+when the switch to shift the
+automatic transmission down a
+gear is activated, the ECU pin is
+open circuit when the switch is
+not activated.
+ 
+F59
+15
+/
+/
+/
+/
+/
+/
+ 
+F59
+16
+R
+Automatic Transmission Reverse Gear
+Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the
+reverse position.  This signal is also sent via
+the Multiplex network to the dash for
+display.
+The engine ECU needs to
+energise/de­energise the automatic
+transmission solenoids to select the
+correct gear.
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+automatic transmission shifter is in
+the 'R' position.
+ 
+F59
+17
+D
+Automatic Transmission Drive Gear
+Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the
+drive position.  This signal is also sent via
+The engine ECU needs to
+energise/de­energise the automatic
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+ 
+
+
+===== [aristo_pinout p.14] =====
+the Multiplex network to the dash for
+display.
+transmission solenoids to select the
+correct gear.
+automatic transmission shifter is in
+the 'D' position.
+F59
+18
+TH+
+Engine Coolant Temperature Sensor
+Input
+This pin is used to measure the
+temperature of the engine coolant in the
+lower tank of the radiator.
+The temperature of the engine
+coolant in the lower tank of the
+engine radiator is used to control
+the speed of the engine cooling
+fan.  As the temperature of the
+coolant increases the speed of the
+engine cooling fan increases.
+This pin connects to a thermistor
+that is installed in the lower tank
+of the engine radiator.  One side
+of the thermistor should be wired
+to this pin and one side of the
+thermistor should be wired to the
+engine ECU pin TH­.
+ 
+F59
+19
+/
+/
+/
+/
+/
+/
+ 
+F59
+20
+TACH
+Tachometer
+Input?
+The exact function of this pin is unknown.
+The exact function of this pin is
+unknown.
+This pin is connectes to the Igniter
+IG­ pin and the dash tacho input
+pin.
+ 
+F59
+21
+PRE
+Airconditioning Pressure Switch
+Input
+This pin is used to detect when the
+airconditioning system pressure is too high
+or too low.
+As final control of the
+airconditioning compressor is
+determined by the engine ECU it is
+logical to have the system healthy
+switches (airconditioning
+compressor speed, system
+pressures, etc) go to the engine
+ECU to ensure that the
+airconditioning system is controlled
+correctly.
+This pin is connected to ground
+when the system pressure is
+healthy, the ECU pin is open
+circuit when the system pressure
+is not healthy.  It is suspected that
+when the system pressure is not
+healthy the airconditioning
+compressor will not be able to be
+engaged.
+ 
+F59
+22
+TH­
+Engine Coolant Temperature Sensor
+Input
+This pin is used to measure the
+temperature of the engine coolant in the
+lower tank of the radiator.
+The temperature of the engine
+coolant in the lower tank of the
+engine radiator is used to control
+the speed of the engine cooling
+fan.  As the temperature of the
+coolant increases the speed of the
+engine cooling fan increases.
+This pin connects to a thermistor
+that is installed in the lower tank
+of the engine radiator.  One side
+of the thermistor should be wired
+to this pin and one side of the
+thermistor should be wired to the
+engine ECU pin TH+.
+ 
+F59
+23
+CCS
+Cruise Control Switch
+Input
+This pin is used to detect the pressing of
+the cruise control switches (SET, RES, ON­
+OFF, CANCEL)
+The cruise control operation is built
+into the engine ECU and makes use
+of the electronically controlled
+throttle body to achieve this
+function.
+This pin is connected to battery
+voltage inside the engine ECU via
+a pull up resistor.  The various
+cruise control switches are
+connected to ground via specific
+pull down resistors when the
+switches are activated to form a
+voltage divider.  The resultant
+voltage generated by the voltage
+dividers is detected by the engine
+ECU to set the cruise control as
+required.
+ 
+F59
+24
+/
+/
+/
+/
+/
+/
+ 
+F59
+25
+REC
+Fan Control 
+Output
+This pin is used to control the speed of the
+engine cooling fan.
+The speed of the engine cooling fan
+is determined by the temperature of
+the engine coolant in the lower tank
+of the radiator.
+This pin is used together with the
+REC2 pin to control the speed of
+the engine cooling fan via the Fan
+Controller.  The REC and REC2
+ 
+
+
+===== [aristo_pinout p.15] =====
+pins are triggered by the engine
+ECU in a PWM fashion.
+F59
+26
+P
+Automatic Transmission Park Gear
+Position Indicator
+Input
+This pin is used to determine if the
+automatic transmission shifter is in the park
+position.  This signal is also sent via the
+Multiplex network to the dash for display.
+The engine ECU needs to
+energise/de­energise the automatic
+transmission solenoids to select the
+correct gear.
+This pin is connected to battery
+voltage by the automatic shifter
+position switch when the
+automatic transmission shifter is in
+the 'P' position.
+ 
+F59
+27
+MPX2
+Multiplex Communications to
+Airconditioning ECU
+Output
+This pin is used to transmit data between
+different vehicle modules.
+Much of the data that is collected by
+the engine ECU and other modules
+can and is used in other modules
+throughout the vehicle.  E.g. the
+engine ECU sends the water
+temperature signal to the dash, the
+automatic transmission shifter
+position signals, etc  via the
+Multiplex network.
+The Multiplex network transmits
+data via serial.
+ 
+F59
+28
+MPX1
+Multiplex Communications to Multiplex
+Network Body Computer No.1
+Input
+This pin is used to transmit data between
+different vehicle modules.
+Much of the data that is collected by
+the engine ECU and other modules
+can and is used in other modules
+throughout the vehicle.  E.g. the
+engine ECU sends the water
+temperature signal to the dash, the
+automatic transmission shifter
+position signals, etc  via the
+Multiplex network.
+The Multiplex network transmits
+data via serial.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Plug
+Pin
+Symbol
+Definition
+Input /
+Output
+What
+Why
+How
+Link
+F60
+1
+BATT
+Battery Power
+Input
+This pin is used to supply constant battery
+power to the ECU.
+Constant battery power allows the
+engine ECU to retain error codes,
+fuel trims, etc.
+This pin is connected to
+battery voltage at all times via
+the 25A EFI fuse.
+ 
+F60
+2
+/
+/
+/
+/
+/
+/
+ 
+F60
+3
+/
+/
+/
+/
+/
+/
+ 
+F60
+4
+DI
+Diagnostic Indication (Fuel Pump
+Control)
+Input
+This pin is used to determine if the Fuel
+Pump ECU is healthy.
+This pin lets the engine ECU know if
+the Fuel Pump ECU is healthy, if the
+Fuel Pump ECU is not healthy the
+engine ECU stops the output on the
+FPC pin.
+This pin is connected to battery
+voltage when the Fuel Pump ECU
+is healthy, the pin is open circuit
+when Fuel Pump ECU is not
+healthy.
+ 
+F60
+5
+FPC
+Fuel Pump Control
+Output
+This pin is used to signal the desired fuel
+pump speed to the Fuel Pump ECU.
+The fuel pump speed can be
+reduced at low load conditions to
+make the fuel quieter and improve
+fuel pump longevity.
+This pin outputs a 0V to 5V Pulse
+Width Modulated (PWM) signal
+which is connected to the Fuel
+Pump ECU to control fuel pump
+speed.
+ 
+F60
+6
+W
+Engine Warning Light (Check Engine
+Light)
+Output
+This pin is used to turn ON / OFF the check
+engine light.
+The check engine light comes on to
+inform of a detected engine issue.
+This pin is Grounded by the ECU
+as required to turn the Check
+Engine Light ON.  The check
+engine light should be wired with
+one side of the light connected to
+ 
+
+
+===== [aristo_pinout p.16] =====
+battery voltage (Ignition
+Switched) and one side of the
+light connected to this ECU pin. 
+Light ON = Error Condition, light
+OFF = Normal.
+F60
+7
++BM
+ETCS­i Power
+Input
+This pin is used to supply constant battery
+power to the ECU for the electronic throttle
+control system.
+Used to supply power for the
+electronic throttle control system.
+This pin is connected to
+battery voltage at all times via
+the 15A ETCS fuse.
+ 
+F60
+8
++B2
+EFI Main Relay Switched Power
+Input
+This pin is used to supply switched battery
+power to the ECU.
+Used to supply power.
+This pin is connected to
+battery voltage when the
+Main EFI Relay is energised to
+supply power to the ECU.  The
+Main EFI Relay is triggered by
+the engine ECU pin M­REL
+pin. 
+ 
+F60
+9
+IGSW
+Ignition Switch
+Input
+This pin is used to determine if the ignition
+is ON.
+The engine ECU is turned on by this
+signal.
+This pin is connected to
+battery voltage when the
+ignition switch is in RUN and
+CRANK positions.
+ 
+F60
+10
+M­REL
+EFI Main Relay Trigger
+Output
+This pin is used to turn ON the Main EFI
+Relay which feeds power to the fuel pump,
+engine ECU, engine VSVs and O2 sensor
+heater circuits, etc.
+ECU control of the main power relay
+allows the ECU to remain powered
+up after engine shutdown.
+This pin is connected to
+battery voltage inside the ECU
+as required to turn the Main
+EFI Relay ON when the
+ignition switch is ON.  Note
+that this pin continues to
+output voltage for a few
+second after the ignition has
+been switched off to allow the
+ISCV to be fully opened by the
+ECU for the next engine start. 
+One side of the Main EFI Relay
+coil should be connected to
+this pin and one side of the
+Main EFI Relay coil should be
+connected to Ground.
+ 
+F60
+11
+SIL
+OBDII
+Output
+This pin is used to provide OBDII diagnostic
+information.
+Many engine parameters can be
+monitored via the OBDII interface,
+which maybe particularly helpful in
+diagnosing issues that maybe
+present in the engine control
+system.
+The ISO 9141­2 K­Line standard is
+used to provide OBDII information
+via serial.
+ 
+F60
+12
+/
+/
+/
+/
+/
+/
+ 
+F60
+13
+TRC+
+ABS & TRC & VSC ECU Serial Data
+Input
+It is believed that this pin is used to
+communicate data via serial from the ABS,
+TRC and VSC ECU to the engine ECU.
+It is believed that the ABS, TRC and
+VSC control systems can act to
+modify the engine control as
+required by requesting the engine
+ECU to reduce engine torque etc via
+closing the throttle, modifying
+engine ignition or fuelling.  It is
+Differential serial data is
+transmitted via the TRC+ and
+TRC­ pins.
+ 
+
+
+===== [aristo_pinout p.17] =====
+believed that this data connections
+allows this control to take place.
+F60
+14
+ENG+
+ABS & TRC & VSC ECU Serial Data
+Output
+It is believed that this pin is used to
+communicate data via serial from the
+engine ECU to the ABS, TRC and VSC ECU.
+It is believed that the ABS, TRC and
+VSC control systems can act to
+modify the engine control as
+required by requesting the engine
+ECU to reduce engine torque etc via
+closing the throttle, modifying
+engine ignition or fuelling.  It is
+believed that this data connections
+allows this control to take place.
+Differential serial data is
+transmitted via the ENG+ and
+ENG­ pins.
+ 
+F60
+15
+NEO
+Slave Engine Speed Sensor
+Output
+This pin is used to supply a copy of the
+engine speed (NE) signal to the ABS, TRC
+and VSC  ECU.
+Engine speed is a useful parameter
+for ABS, TRC and VSC control.
+This pin connects to the ABS, TRC
+and VSC ECU pin NEO.
+ 
+F60
+16
++B
+Switched Battery Power
+Input
+This pin is used to supply switched battery
+power to the ECU.
+Used to supply power.
+This pin is connected to
+battery voltage when the
+Main EFI Relay is energized to
+supply power to the ECU.  The
+Main EFI Relay is triggered by
+the engine ECU pin M­REL
+pin. 
+ 
+F60
+17
+/
+/
+/
+/
+/
+/
+ 
+F60
+18
+REC2
+Fan Control 
+Output
+This pin is used to control the speed of the
+engine cooling fan.
+The speed of the engine cooling fan
+is determined by the temperature of
+the engine coolant in the lower tank
+of the radiator.
+This pin is used together with the
+REC2 pin to control the speed of
+the engine cooling fan via the Fan
+Controller.  The REC and REC2
+pins are triggered by the engine
+ECU in a PWM fashion.
+ 
+F60
+19
+/
+/
+/
+/
+/
+/
+ 
+F60
+20
+TRC­
+ABS & TRC & VSC ECU Serial Data
+Output
+It is believed that this pin is used to
+communicate data via serial from the ABS,
+TRC and VSC ECU to the engine ECU.
+It is believed that the ABS, TRC and
+VSC control systems can act to
+modify the engine control as
+required by requesting the engine
+ECU to reduce engine torque etc via
+closing the throttle, modifying
+engine ignition or fuelling.  It is
+believed that this data connections
+allows this control to take place.
+Differential serial data is
+transmitted via the TRC+ and
+TRC­ pins.
+ 
+F60
+21
+ENG­
+ABS & TRC & VSC ECU Serial Data
+Input
+It is believed that this pin is used to
+communicate data via serial from the
+engine ECU to the ABS, TRC and VSC ECU.
+It is believed that the ABS, TRC and
+VSC control systems can act to
+modify the engine control as
+required by requesting the engine
+ECU to reduce engine torque etc via
+closing the throttle, modifying
+engine ignition or fuelling.  It is
+believed that this data connections
+allows this control to take place.
+Differential serial data is
+transmitted via the ENG+ and
+ENG­ pins.
+ 
+F60
+22
+EC
+PRE and PRE2 Switches Ground
+Input
+Ground.
+Used to supply a Ground path to
+allow current to flow.  It is believed
+This pin connects to Ground or the
+battery negative.
+ 
+
+
+===== [aristo_pinout p.18] =====
+that a separate ground is used for
+the PRE and PRE2 switch inputs due
+to the location of the PRE and PRE2
+switches.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Plug
+Pin
+Symbol
+Definition
+Input /
+Output
+What
+Why
+How
+Link
+F84
+1
+/
+/
+/
+/
+/
+/
+ 
+F84
+2
+/
+/
+/
+/
+/
+/
+ 
+F84
+3
+/
+/
+/
+/
+/
+/
+ 
+F84
+4
+/
+/
+/
+/
+/
+/
+ 
+F84
+5
+/
+/
+/
+/
+/
+/
+ 
+F84
+6
+/
+/
+/
+/
+/
+/
+ 
+F84
+7
+/
+/
+/
+/
+/
+/
+ 
+F84
+8
+/
+/
+/
+/
+/
+/
+ 
+F84
+9
+EOM
+GND
+Input
+Ground.
+Used to supply a Ground path to
+allow current to flow.
+This pin connects to Ground or the
+battery negative.
+ 
+F84
+10
+KSW
+Key Inserted
+Input
+This pin is used to detect if the vehicle key
+has been inserted into the ignition barrel.
+As part of the engine immobilization
+system insertion of the key can be
+used to trigger the process to verify
+the key matches correctly.
+This pin is connected to ground
+when the key is inserted into the
+ignition barrel.  The ECU pin is
+open circuit when the key s not
+inserted into the ignition barrel.
+ 
+F84
+11
+/
+/
+/
+/
+/
+/
+ 
+F84
+12
+/
+/
+/
+/
+/
+/
+ 
+F84
+13
+/
+/
+/
+/
+/
+/
+ 
+F84
+14
+/
+/
+/
+/
+/
+/
+ 
+F84
+15
+/
+/
+/
+/
+/
+/
+ 
+F84
+16
+/
+/
+/
+/
+/
+/
+ 
+F84
+17
+/
+/
+/
+/
+/
+/
+ 
+F84
+18
+/
+/
+/
+/
+/
+/
+ 
+F84
+19
+/
+/
+/
+/
+/
+/
+ 
+F84
+20
+IMLD
+Immobilizer LED
+Output
+This pin is used to illuminate the
+immobilizer LED.
+The immobilizer LED is used to
+indicate the status of the vehicle
+immobilization system.
+This pin is connected to battery
+voltage to turn the immobilizer
+LED ON. 
+ 
+F84
+21
+TXCT
+Key Amplifier
+Output
+This pin connects to the key amplifier.  The
+exact function is unknown.
+Part of the vehicle immobilization
+system.
+The exact function of this pin is
+unknown.
+ 
+F84
+22
+RXCK
+Key Amplifier
+Input
+This pin connects to the key amplifier.  The
+exact function is unknown.
+Part of the vehicle immobilization
+system.
+The exact function of this pin is
+unknown.
+ 
+F84
+23
+CODE
+Key Amplifier
+Input
+This pin connects to the key amplifier.  The
+exact function is unknown.
+Part of the vehicle immobilization
+system.
+The exact function of this pin is
+unknown.
+ 
+F84
+24
+/
+/
+/
+/
+/
+/
+ 
+F84
+25
+/
+/
+/
+/
+/
+/
+ 
+
+
+===== [aristo_pinout p.19] =====
+F84
+26
+/
+/
+/
+/
+/
+/
+ 
+ 
+JZS161 Toyota Aristo 2JZ‐GTE VVTi Engine Loom to Body Loom Pinout
+ 
+JZS161 Toyota Aristo 2JZ‐GTE VVTi 90980‐11531 Engine Loom to Body Loom Plug ﴾White﴿
+This plug is located at the front, passenger side of the engine bay and mates with male connector 90980­11530.
+Plug
+Pin
+Symbol
+Definition
+Input / Output
+(To engine = Input)
+(From engine =
+Output)
+Description
+Link
+BF1
+1
+/
+/
+/
+/
+ 
+BF1
+2
+Engine ECU: E2
+Ambient Temperature
+Sensor Ground
+Output
+The body loom side of this pin connects to the ambient temperature sensor thermistor
+mounted at the far front of the car.
+The engine loom side of this pin connects to the engine ECU pin E2 to provide a ground for
+the ambient temperature sensor.
+ 
+BF1
+3
+Engine Mounted Diagnostic
+Connector: AB
+SRS Airbag Power
+Input
+The body loom side of this pin connects to the SRS airbag control ECU AB pin.
+The engine loom side of this pin connects to the diagnostic connector mounted on the side of
+the engine.
+Note: Pre 2000­07 models only, later models do not have this pin wired.
+ 
+BF1
+4
+/
+/
+/
+/
+ 
+BF1
+5
+Engine Mounted Diagnostic
+Connector: TS
+4WS ECU: TS
+Test Enable
+Input
+The body loom side of this pin connects to a number of control module TS input pins.
+The engine loom side of this pin connects to the diagnostic connector mounted on the side of
+the engine.
+ 
+BF1
+6
+Engine ECU: R
+Reverse Gear Automatic
+Transmission Position
+Output 
+The body loom side of this pin needs to be connected to the engine ECU R input pin
+and the reverse lights.
+ 
+
+
+===== [aristo_pinout p.20] =====
+Switch Indicator
+The engine loom side of this pin connects to automatic transmission shifter position switch
+mounted on the automatic transmission and outputs battery voltage when the automatic
+transmission shifter is in the R position.
+BF1
+7
+ 
+Alternator Battery Voltage
+Sense
+Input
+The body loom side of this pin needs to be connected to the battery via a 5A fuse.
+The engine loom side of this pin connects to the alternator S pin.
+ 
+BF1
+8
+Proportional Power Steering ECU:
+SOL+
+Proportional Power Steering
+Solenoid
+Input
+The body loom side of this pin connects to the proportional power steering ECU SOL+ pin.
+The engine loom side of this pin connects to the proportional power steering solenoid located
+on the power steering pump.
+ 
+BF1
+9
+Proportional Power Steering ECU:
+SOL­
+Proportional Power Steering
+Solenoid
+Input
+The body loom side of this pin connects to the proportional power steering ECU SOL­ pin.
+The engine loom side of this pin connects to the proportional power steering solenoid located
+on the power steering pump.
+ 
+BF1
+10
+Engine Mounted Diagnostic
+Connector: WA
+ABS & VSC ECU: WA
+ABS
+Input
+The body loom side of this pin connects to the ABS control ECU WA pin and also the ABS light
+mounted in the dash.
+The engine loom side of this pin connects to the diagnostic connector mounted on the side of
+the engine.  Note that there is a shorting link inserted between terminals WA and WB of the
+diagnostic connector.
+ 
+BF1
+11
+Engine Mounted Diagnostic
+Connector: WB
+ABS & VSC ECU: WB
+ABS
+Output
+The body loom side of this pin connects to the ABS relay.
+The engine loom side of this pin connects to the diagnostic connector mounted on the side of
+the engine.  Note that there is a shorting link inserted between terminals WA and WB of the
+diagnostic connector from factory.
+ 
+BF1
+12
+Engine Mounted Diagnostic
+Connector: TC
+Engine ECU: TC
+ABS & VSC ECU: TC
+4WS ECU: TC
+Test Connector
+Input
+The body loom side of this pin connects to the TC pin on a number of control modules.
+The engine loom side of this pin connects to the diagnostic connector mounted on the side of
+the engine.
+Note: Pre 2000­07 models only, later models do not have this pin wired.
+ 
+ 
+ 
+JZS161 Toyota Aristo 2JZ‐GTE VVTi 90980‐11527 Engine Loom to Body Loom Plug ﴾White﴿
+This plug is located at the front, passenger side of the engine bay and mates with male connector 90980­11596.
+
+
+===== [aristo_pinout p.21] =====
+ 
+Plug
+Pin
+Symbol
+Definition
+Input / Output
+(To engine = Input)
+(From engine =
+Output)
+Description
+Link
+BF2
+1
+Engine ECU: ACMG 
+Air Conditioning Magnetic
+Clutch Relay Trigger Signal 
+Output 
+The body loom side of this pin needs to be connected to the AC magnetic clutch
+relay coil negative.
+The engine loom side of this pin connects to the engine ECU ACMG pin.
+ 
+BF2
+2
+Engine ECU: P
+Park Gear Automatic
+Transmission Position
+Switch Indicator
+Output 
+The body loom side of this pin needs to be connected to the engine ECU P input pin.
+The engine loom side of this pin connects to automatic transmission shifter position switch
+mounted on the automatic transmission and outputs battery voltage when the automatic
+transmission shifter is in the P position.
+ 
+BF2
+3
+/
+/
+/
+/
+ 
+BF2
+4
+/
+/
+/
+/
+ 
+BF2
+5
+/
+/
+/
+/
+ 
+BF2
+6
+ 
+Power to Coils and Igniter
+Input
+The body loom side of this pin needs to be connected to battery voltage via the
+ignition switch when the ignition is in the RUN and CRANK positions to switch
+battery voltage to the coils and igniter.
+The engine loom side of this pin connects to the coil and igniter power supply pins.
+ 
+BF2
+7
+ 
+Power to Fuel Injectors
+Input
+The body loom side of this pin needs to be connected to battery voltage via the
+ignition switch when the ignition is in the RUN and CRANK positions to switch
+battery voltage to the fuel injectors.
+The engine loom side of this pin connects to the fuel injector power supply pins.
+ 
+BF2
+8
+ 
+Starter Motor Relay
+Switched Power
+Input
+The body loom side of this pin needs to be connected to the starter motor relay
+switched power output which switches battery voltage to the starter motor to turn
+ 
+
+
+===== [aristo_pinout p.22] =====
+it on. 
+The engine loom side of this pin connects to the starter motor.  The starter motor is grounded
+via the engine block.  
+Refer to pins BF3­4 and BF3­5 for further information regarding the starter / starter relay
+circuit.
+BF2
+9
+Engine ECU: +B, +B2
+Main EFI Relay Switched
+Power
+Input
+The body loom side of this pin needs to be connected to main EFI relay switched
+power output which switches battery voltage to the engine ECU, VSVs, etc.  The
+main EFI relay is switched via the engine ECU M­REL output pin.
+The engine loom side of this pin connects to the engine ECU, VSVs, etc power supply pins.
+ 
+BF2
+10
+/
+/
+/
+/
+ 
+ 
+ 
+JZS161 Toyota Aristo 2JZ‐GTE VVTi 90980‐11710 Engine Loom to Body Loom Plug ﴾White﴿
+This plug is located at the front, passenger side of the engine bay and mates with male connector 90980­11709.
+ 
+ 
+Plug
+Pin
+Symbol
+Definition
+Input / Output
+(To engine = Input)
+(From engine =
+Output)
+Description
+Link
+BF3
+1
+/
+/
+/
+/
+ 
+BF3
+2
+Engine ECU: TACH
+Engine Mounted Diagnostic
+Connector: IG­
+Tachometer Output from
+Igniter
+Output
+The body loom side of this pin needs to be connected to the dash tachometer input
+and the engine ECU TACH input pin.
+ 
+BF3
+3
+Engine ECU: D
+Drive Gear Automatic
+Transmission Position
+Switch Indicator
+Output 
+The body loom side of this pin needs to be connected to the engine ECU D input pin.
+The engine loom side of this pin connects to automatic transmission shifter position switch
+ 
+
+
+===== [aristo_pinout p.23] =====
+mounted on the automatic transmission and outputs battery voltage when the automatic
+transmission shifter is in the D position.
+BF3
+4
+Engine ECU: STA
+Starter Motor Relay Trigger
+Signal
+Output
+The body loom side of this pin needs to be connected to the starter motor relay coil
+to turn it on when the ignition switch is in CRANK position and the automatic
+transmission park / neutral switch is closed ­ that is the automatic transmission
+selector is in the park / neutral position. 
+The engine loom side of this pin is connected to the  automatic transmission park / neutral
+position switch and also the engine ECU STA pin.
+Refer to pin BF3­5 for further information.
+ 
+BF3
+5
+ 
+Starter Signal
+Input
+The body loom side of this pin needs to be connected to battery voltage when the
+ignition switch is in CRANK position. 
+The engine loom side of this pin connects to one side of the automatic transmission park /
+neutral switch to provide power to the automatic transmission shifter position switch.
+Refer to pin BF3­4 for further information.
+ 
+BF3
+6
+/
+/
+/
+/
+ 
+BF3
+7
+Engine ECU: E1
+Ground
+Output
+The body loom side of this pin connects to the ground for the cruise control switch assembly.
+The engine loom side of this pin connects to the engine ECU E1 pin which is Grounded at the
+intake manifold.
+ 
+BF3
+8
+/
+/
+/
+/
+ 
+BF3
+9
+ 
+Ignition Switched Power
+Input
+The body loom side of this pin needs to be connected to ignition switched power
+source that supplies battery voltage when the ignition is in the RUN and CRANK
+Positions.
+The engine loom side of this pin connects switched battery voltage to the alternator, automatic
+transmission position switch and the reverse lights.
+ 
+ 
+ 
+JZS161 Toyota Aristo 2JZ‐GTE VVTi Wiring Diagrams
+
+
+===== [aristo_pinout p.24] =====
+ 
+ 
+
+
+===== [aristo_pinout p.25] =====
+
+
+===== [aristo_pinout p.26] =====
+
+
+===== [aristo_pinout p.27] =====
+
+
+===== [aristo_pinout p.28] =====
+ 
+
+
+===== [aristo_pinout p.29] =====
+ 
+ 
+
+
+===== [aristo_pinout p.30] =====
+
+
+===== [aristo_pinout p.31] =====
+ 
+
+
+===== [aristo_pinout p.32] =====
+ 
+
+
+===== [aristo_pinout p.33] =====
+
+
+===== [aristo_pinout p.34] =====
+
+
+===== [aristo_pinout p.35] =====
+
+
+===== [aristo_pinout p.36] =====
+ 
+JZS16x Electrical Wiring Diagram Book 6748505
+JZS16x Electrical Wiring Diagram Book 6748505.pdf
+ 
+ 
+ 
+
+
+===== [aristo_pinout p.37] =====
+Views: 

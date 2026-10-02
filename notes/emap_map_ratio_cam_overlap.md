@@ -4,6 +4,7 @@
 > Companions: [vvt.md](vvt.md) (MBT coupling), [valve_timing_dynamic_compression.md](valve_timing_dynamic_compression.md)
 > (kinematics + DCR math), [boost.md](boost.md) (pre-turbine backpressure economics).
 > Measurement tool: `skills/emu-black-emap-map-ratio/` (ratio table binned into veTable cells).
+> **Channel status — corrected 2026-09-28: the sensor is alive.** `backpressureInput` = 205 is **`CAN Analog 6`** (CAN Switchboard), not ECU `Analog 6`: the 200-series indices are CAN analogs (`oilPressureInput` 204 = `CAN Analog 5`, r 0.999; `prethrottleBoostInput` 203 = `CAN Analog 4`; `customTemperatureInput1` 202 = `CAN Analog 3`). In `EMU_BLACK_V3\Supra\fullchannels.csv` (09-19 19:38) `Back pressure` tracks `CAN Analog 6` at r = 0.977 on pressurised samples, idles at 0.47 V (≈ 0 bar gauge) and reads 0.281 bar at MAP > 130 kPa. ECU `Analog 6` reading 0.000 V is just an unused pin. The earlier "no signal since 08-24" status (written 09-19) read the wrong channel; the hard 0.000 in idle-only logs (`whencold`, `losingit`) is atmospheric gauge rounding to zero, not a fault. The line damper can be judged from any log with a boost pull.
 
 ## 1. The ratio decides which way gas flows during overlap
 
@@ -112,6 +113,109 @@ Whether that trade is optimal depends on the goal; for a flat 450–500 ft-lb
 street curve it is the right shape. Watch: no boost data above ~5700 rpm yet —
 if the ratio climbs back toward 1 at redline/135 kPa, the turbine is running
 out of margin exactly where EGT peaks.
+
+### 2.1 Re-measure after the DBW boost-region rework (2026-07-18)
+
+Single log, `backpressure measurement smooth.csv` (11,630 running samples, 57
+cells at n≥20, only 374 samples above MAP 110 — thin in boost, so treat as a
+confirmation pass, not a replacement for the 12-log 07-10 dataset). Plot:
+`supra/notes/emap_map_ratio_20260718.png`.
+
+| region (MAP abs) | 85–105 | 105–135 | 135–165 | ≥165 |
+|---|---|---|---|---|
+| median EMAP/MAP | 1.10 | 0.97 | 0.89 | 0.88 |
+| median EMAP (abs) | 100 | 113 | 133 | 149 |
+
+Crossover holds and sits **slightly lower than 07-10** at the bottom of boost
+(0.97–0.98 near MAP 108–123 vs 1.00–1.03 before; 0.87–0.88 at 167 vs 0.91).
+Direction is consistent with the DBW rework: holding a given MAP with a more
+open throttle means the compressor supplies less of that MAP against less
+throttle ΔP, so the turbine takes a smaller PR to get there. Magnitude
+(~0.03–0.05) is at the edge of the 0.03–0.08 log-to-log agreement already
+recorded above — real-looking, not yet separable from noise on one log.
+
+**Floor artifact — do not over-read the vacuum columns.** The channel is gauge
+and quantized 1/32 bar, so off-boost EMAP pins at exactly 100 kPa abs
+(0 counts) in every region below MAP ~105. The left-side ratios (2.9 at MAP
+35, 6.0 at MAP 20 overrun) are therefore `100/MAP` by construction with ±3.1
+kPa of unresolvable headroom, not a resolved measurement of EMAP.
+
+### 2.1b Crossover is LOST above ~6000 rpm (2026-07-19) — resolves the §2 open item
+
+`boost0719.csv` (23,617 samples, 24 boost events, 1,251 above MAP 105 — the
+first log with real top-end boost coverage). Plot:
+`supra/notes/emap_map_ratio_20260719.png`. Band medians confirm 07-10/07-18
+(0.97 at 105–135, 0.90 at 135–165, 0.87 above 165), but pooled by RPM at
+MAP>140:
+
+| RPM | 4000–4800 | 4800–5400 | 5400–6000 | **6000–7100** |
+|---|---|---|---|---|
+| ratio | 0.88 | 0.87 | 0.90 | **1.04** |
+| n | 172 | 159 | 83 | 42 |
+
+§2 said to watch for exactly this ("if the ratio climbs back toward 1 at
+redline/135 kPa, the turbine is running out of margin exactly where EGT
+peaks"). It does. Peak EMAP 183 kPa abs at MAP 173.
+
+**Transient artifact ruled out.** The obvious confound is lift-off (MAP
+collapses fast, EMAP lags high). All three cuts of the RPM≥6000 boost samples
+agree: steady |dMAP/dt|<30 kPa/s → 1.01, rising-RPM → 1.05, fast-falling →
+1.02, across 6 independent events.
+
+**Strength:** n=42 pooled; no individual veTable cell up there reaches n≥20,
+so the binned table's top rows stay blank and this finding lives only in the
+pooled band. Needs deliberate top-gear pulls held past 6000 to firm up.
+
+**Consequence for `cam1AdvTbl`:** the §8 proposal schedules the top-RPM boost
+cells on the assumption of crossover. That assumption fails above ~6000. Cut
+advance (overlap) in the >6000 boost columns until the extra pulls confirm or
+overturn — reversion there lands where EGT peaks and knock margin is thinnest.
+
+### 2.2 What drives the ratio UP (the inverse of §2's argument)
+
+§2 explains why a *falling* ratio isn't falling restriction. The mirror
+question — "is a high ratio just an unwastegated turbine at choke?" — is a
+common and only partly-right framing. Both named conditions do raise the
+ratio, but they are special cases.
+
+Turbine PR follows from the power balance:
+
+```
+ṁ_c·cp_a·T1/η_c·(PR_c^0.286 − 1)  =  ṁ_t·cp_e·T3·η_t·(1 − PR_t^−0.248)
+```
+
+Solving for PR_t, the ratio rises with: (1) **turbine flow capacity too small
+for the mass flow** — dominant, and it bites well before choke; (2) **η_t off
+peak** (bad U/C blade-speed ratio — a small turbine at high flow is off-peak
+*and* near choke, which is why the two get conflated); (3) **low T3** — less
+available energy per unit mass; (4) **high compressor demand** (PR_c up, η_c
+down). Choke is the asymptote of (1): flow goes insensitive to PR, so EMAP
+climbs steeply for nothing.
+
+**Wastegate framing must be inverted.** The gate is a *parallel flow path*,
+not an EMAP reducer:
+
+- Gate shut is **normal below target**, not a fault — every spool event runs
+  all flow through the turbine. That is exactly where this build's ratio is
+  worst (spool 1.1–1.25 vs 0.88 at target). Nothing wrong there.
+- Gate open does **not** guarantee low EMAP. An undersized gate port/valve is
+  itself the restriction at high flow — that is boost creep, presenting as
+  high EMAP with the gate commanded fully open. What matters is total
+  effective flow area at the turbine inlet (turbine + gate) vs mass flow.
+
+**Keep two distinct problems separate:** the *ratio* governs gas direction
+during overlap (reversion vs scavenge — the cam question); *absolute* EMAP
+governs pumping work (PMEP, piston pushing against backpressure on the
+exhaust stroke) regardless of ratio. On this build absolute EMAP rises with
+boost (~13 kPa gauge at MAP 117 → ~49 at MAP 168) while the ratio falls.
+Both true, no contradiction.
+
+Bell anchors (`corpus/maximum_boost.md`): judging A/R "requires measurement of
+exhaust manifold pressure, or turbine inlet pressure, and comparison with
+boost pressure"; too-small A/R shows as "fading power in the upper third of
+the engine's rev range"; and the cost chain is explicit — more turbine inlet
+pressure "creates more reversion, which creates more combustion chamber heat,
+which reduces charge densities."
 
 ## 3. The single-phaser coupling: one knob moves two things
 
@@ -530,8 +634,35 @@ data + peak EGT + pump-fill DCR exposure.
    LSA 114 (§3); DCR column pinned (§6).
 3. Extend `vvtiMapBins10` above 130 kPa so the 107 and 135 kPa boost targets
    get distinct cam cells before scheduling overlap there.
+   **Not a defect — a deliberate resolution choice (Will, 2026-07-19.)** The
+   130 column already applies to every point above 130 kPa, so it *is* the
+   boost schedule; extending the axis only buys resolution *across* boost
+   levels. Will will move it when he wants resolution there. The 2.5° sitting
+   in those columns is an unmapped region, not a misconfiguration — do not
+   re-flag it as one. Separately: the cruise high-advance block (MAP 69–93,
+   2333–4333 rpm) is never entered under boost; keep cruise-dilution strategy
+   out of boost/turbo-sizing analysis.
+   **Unverified:** `cam1AdvTbl`'s X axis is *assumed* to be `vvtiMapBins10`
+   (MAP). `vvtiTPSBins10` (0–100) also exists and no axis selector was found
+   in the tune or `docs/emu-black-help/VVT.md`. Confirm in EMU before trusting
+   any column labelling in §7/§8.
 4. Confirm the sensor tap location is pre-turbine (the power-balance check in
    §2 says the numbers are consistent with pre-turbine; a post-turbine tap
    would make the crossover reading trivial and the §4 conclusions void).
-5. High-RPM rows (>5700) have no boost samples yet — log a 4th-gear pull to
-   redline before extending advance above ~5300 rpm.
+5. ~~High-RPM rows (>5700) have no boost samples yet~~ — **partially done
+   2026-07-19** (§2.1b): 42 pooled samples at RPM≥6000/MAP>140 show the ratio
+   back at ~1.04, i.e. crossover lost at redline. Still below per-cell n≥20;
+   log 2–3 deliberate top-gear pulls held past 6000 to firm it up. **Do not
+   extend advance above ~5300 rpm until then** — the §8 proposal assumes
+   crossover that the data says isn't there.
+6. Lambda vs target under boost (2026-07-19, `boost0719.csv`): running rich of
+   target by 5.2% median, but the error thins monotonically with RPM (−9.5% at
+   3500–4500 → +1.6% at 5500–7100) — a `veTable` RPM-slope issue, not an
+   offset. Cannot yet attribute any of it to the DBW boost-region rework: the
+   two pre-rework logs disagree by more than the pre/post difference (n=24 and
+   n=38), and `boost0719.csv` lacks `Ethanol content` on a flex-fuel car. Add
+   `Ethanol content` + `Short term trim` to the logged channel set.
+7. Boost runs ~13 kPa under target at steady high load (67 vs 77) with
+   `Boost DC` 43% median / 90% peak — not saturated, so unused PID authority,
+   not a wastegate flow limit. Bears on §2.2: the measured ratios are at
+   *actual* boost, below what the targets ask for.

@@ -54,6 +54,7 @@ Physics/principle deep-dives the pages link into (not software pages):
 - [knock_sensor_baseline_vs_cylinder_uniformity.md](knock_sensor_baseline_vs_cylinder_uniformity.md) — knock variance as a uniformity proxy
 - [lambda_target_vs_load.md](lambda_target_vs_load.md) · [flex_fuel_ethanol_compensation_blend.md](flex_fuel_ethanol_compensation_blend.md) · [ve_ethanol_table_charge_cooling.md](ve_ethanol_table_charge_cooling.md) · [per_cylinder_trim_ffim_distribution.md](per_cylinder_trim_ffim_distribution.md)
 - [throttle_feel.md](throttle_feel.md) · [throttle_body_thermal_growth.md](throttle_body_thermal_growth.md) · [stuck_throttle_protection_brake_boost.md](stuck_throttle_protection_brake_boost.md)
+- [oil_temp_vs_coolant_airflow_reference.md](oil_temp_vs_coolant_airflow_reference.md) — why oil is an additional idle-air correction, not a coolant replacement; heat-exchanger boundary
 - [exhaust_noise_tuning.md](exhaust_noise_tuning.md) — what sets the exhaust note (source × filter); material/bore/cam/resonator levers
 - [piston_valve_clearance_cam_advance.md](piston_valve_clearance_cam_advance.md) — V-P clearance geometry; stock 2JZ-GTE ~9.5mm (non-interference); GSC S2 full-lift exposure & cam-advance tolerance
 - [hood_removal_charge_temps.md](hood_removal_charge_temps.md) · [denso-coils.md](denso-coils.md)

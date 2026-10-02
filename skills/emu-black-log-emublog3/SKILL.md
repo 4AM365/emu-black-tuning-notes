@@ -90,9 +90,32 @@ python scripts/inspect_emublog3.py path/to/log.emublog3
 Prints decompressed size, first 256 bytes hex, and reports any obvious
 candidate record sizes based on simple periodicity tests.
 
+## Supra layout SOLVED (2026-10-02) — use `scripts/supra_decode_504.py`
+
+`supra_decode_504.read(path)` returns a DataFrame for any Supra LogAutosave file from **2026-01-01 through 2026-09-29**
+(every file in that span is `12 + n×504` bytes decompressed and passes RPM/MAP/EGT sanity). Files from
+**2026-10-01 on** (after the firmware upgrade that day) use a different layout and decode as garbage; use their CSV exports.
+
+How it was pinned: find the CSV's exact RPM sequence in the raw stream (40-sample window, u16 at every byte offset),
+which gives the record alignment (RPM = u16 at byte 63 of the 504-byte record), then linear-fit every CSV channel against
+every u8/i8/u16/i16 field over the aligned rows. Two independent pairs agreed byte-for-byte:
+`drive_home_today.csv` ↔ `20260408_1700_24.emublog3` (record offset 7281) and
+`all-channel-reference.csv` ↔ `20260530_1022_00.emublog3` (offset 1). Every channel in the decoder fits at R² ≥ 0.9999,
+including the slow ones the 05-31 attempt couldn't get (EGT, CLT, IAT, ethanol, injector trims):
+RPM u16@63, MAP u16@66/256, Boost u8@97, TPS u16@71/10, PPS u16@75/10, CLT u8@191, IAT u16@98/256, EGT 1/2 u16@106/108,
+Injectors PW u16@120×0.01613, Idle target u16@111, Boost Target u16@162/256, Boost DC u16@160/512, Ignition angle i8@95/2,
+Ethanol u16@195/512, STFT i8@128/16−4, Idle state u16@379/256, Data changing u16@473/32768, Lambda 1 u16@449/1024,
+Lambda is valid u8@363/12, Knock voltage peak cyl N u8@(404+N)×5/255, Injector N trim u8@(226+N).
+Not stable between the April and May configs: Vehicle Speed / Driven axle speed (moved), Idle control active — don't decode those.
+The knock-flag and knock-retard channels were constant in both pairs, so they are not mapped.
+
+The earlier lesson stands: a single-log value correlation is unreliable. What made this work is the exact RPM alignment
+first, then fits on aligned rows, then a second pair from a different month to confirm.
+
 ## Honest status
 
-- **Working today**: gzip envelope, inspect tool, schema discovery framework, parse-with-schema execution.
+- **Working today**: gzip envelope, inspect tool, schema discovery framework, parse-with-schema execution,
+  and the pinned Supra layout above.
 - **Requires bootstrap**: the schema discovery tool is heuristic — when it works it produces a reusable
   schema, but it has not been validated against many ECU log configurations. Expect to iterate on a few
   pairs the first time you use it for a particular EMU setup.

@@ -19,6 +19,7 @@ What this covers / The rules / Key numbers / When to care.
 - [Sport (launch control / 2-step)](sport.md) — launch-control gating, V2 vs V3 symbols, why Andrew's 2-step arms intermittently
 - [Tables switching (flex-fuel blend)](tables_switching.md) — derive the blend curve from fuel scale; tune endpoints, never the blend
 - [Engine protection](engine_protection.md) — PPS-referenced layers first, permissive brake box — this car brake-boosts
+- [CAN, Serial — topology and termination](can_serial.md) — two 120 Ω total, 30 cm stubs, and the 60 Ω check that catches every mistake
 
 ## Principles, diagnostics, and hardware
 
@@ -44,14 +45,15 @@ What this covers / The rules / Key numbers / When to care.
 - [Spark delta for the cam + compression change](spark_delta_cam_cr_change.md) — both changes add advance, +4° light-load corner tapering to +2°
 - [Throttle body thermal growth](throttle_body_thermal_growth.md) — how much hot-idle correction TB expansion physics actually justifies
 - [Denso / Toyota coil reference](denso-coils.md) — coil part numbers, dwell limits, and connectors for standalone builds
+- [Functions](functions.md) — user functions as virtual inputs (Fn n = 19 + n in the XML), empty operators use slots, False delay as a debounce, XML byte layout
 - [Tune feature tree](tune_feature_tree.md) — every tunable symbol filed under the software's 23 pages (catalog pointer)
 
 ## Already tight — read the original
 
 These canonical notes are under ~25 lines and need no digest:
 [hood_removal_charge_temps](../hood_removal_charge_temps.md) ·
-[log](../log.md) · [functions](../functions.md) · [other](../other.md) ·
-[outputs](../outputs.md) · [can_serial](../can_serial.md) ·
+[log](../log.md) · [other](../other.md) ·
+[outputs](../outputs.md) ·
 [traction_control](../traction_control.md) · [timers](../timers.md) ·
 [nitrous](../nitrous.md) · [gauges](../gauges.md) · [dsg_gearbox](../dsg_gearbox.md)
 

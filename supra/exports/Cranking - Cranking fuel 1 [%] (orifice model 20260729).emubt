@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1.0">
+  <tables>
+    <symbol name="crankingCorrTbl" storage="u12" width="8" height="5" data="86 66 4B 32 20 11 5 1 79 5C 44 2D 1C F 5 1 64 4D 39 26 18 D 4 1 50 3D 2D 1E 13 A 3 1 43 33 26 19 10 8 3 1 "/>
+  </tables>
+</project>

@@ -13,3 +13,4 @@
 - A flat, smooth baseline at max power is the acoustic fingerprint of health. Watch variance as a uniformity metric — it flags a cylinder near the edge before any spike appears.
 
 **When to care:** after changing per-cylinder fuel trims, and whenever the knock baseline starts walking at high load — chase fuel distribution before blaming the sensor or pulling timing.
+

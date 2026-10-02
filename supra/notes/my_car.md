@@ -28,9 +28,14 @@
 - Sketchy Russian Torsen diff
 
 # Electronics
-- EMU Black
+- EMU Black — **hardware revision F, CPU G** (owner-read from the About window,
+  2026-08-28). Pre-"P" hardware: the three built-in switch inputs (black plug
+  terminals 10, 23, 36) are **not** independent and accept **sensor ground only**;
+  anything else on one of them can corrupt the readings of the others
+  (`docs/emu-black-help/Sensorsandinputs.md` :841, :1252). Bears directly on
+  `ac_request_input_noise.md` §4c.
 - ECUMaster CAN Switchboard for sensors
-- GS430 throttle body
+- Throttle body: Toyota/Denso DBW, **Lexus ES330 part no. 22030-20060** (junkyard unit; corrected from "GS430" by Will 2026-09-19). Plate stamped "H", material **unknown** — not assumed stainless.
 - GS430 throttle pedal
 
 # Build Constants

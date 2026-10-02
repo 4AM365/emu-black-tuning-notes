@@ -30,8 +30,10 @@ intake-manifold maldistribution, where the rear cylinders run lean and hot).
    hottest). A tight spread = uniform combustion; a high outlier = a lean/hot
    cylinder.
 3. **Per-injector trims** — reads back any active `Injector N trim` channels so you
-   can see what correction is already applied. (Note: this channel reports flow
-   scaling, not the per-cylinder fuel-trim *table* output.)
+   can see what correction is already applied. On the Supra these channels carry the
+   per-cylinder fuel-trim table output (100 = none, 107 = +7 %; verified 2026-10-02
+   against `fuelTrimNTable`), so they also date when a trim went live. (An earlier note here said the
+   channel was flow scaling, not the trim-table output. The logs show otherwise.)
 
 ## Usage
 

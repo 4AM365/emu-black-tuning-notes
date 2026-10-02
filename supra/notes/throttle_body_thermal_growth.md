@@ -1,16 +1,18 @@
-# Throttle body thermal growth — Supra worked example (GS430 TB)
+# Throttle body thermal growth — Supra worked example (ES330 TB, 22030-20060)
 
 Build-specific worked numbers behind the airflow-correction sanity check. The car-agnostic method, formulas, and material reference live in [`notes/throttle_body_thermal_growth.md`](../../notes/throttle_body_thermal_growth.md). This file holds **this build's** geometry, the per-RPM operating points, and the comparison against the implemented `idleCustomCorrection` table.
 
-## Material assumptions (this build's GS430 TB)
+## Material assumptions (this build's TB — Lexus ES330 22030-20060, corrected from "GS430" 2026-09-19)
+
+> **Plate material is unknown** (Will, 2026-09-19): the blade is stamped "H"; it is not established as stainless, and brass alloys can look like anything. The stainless row below is an *assumption* kept for the worked numbers. If the blade is brass (α ≈ 20), the differential drops to ~1.5 and the whole clearance-growth effect shrinks ~3×; if nickel silver, ~5.3. Identify before leaning on this note.
 
 | Part | Material | α (×10⁻⁶ /°C) |
 |---|---|---|
 | Bore | A356 cast aluminum | **21.5** |
-| Plate | 304 stainless steel | **17.0** |
+| Plate | 304 stainless steel (**assumed — unverified**) | **17.0** |
 | Differential | (bore − plate) | **4.5** |
 
-(If the actual GS430 blade turns out to be nickel-silver like the Bosch DV-E reference in the generic note, the differential is ~5.3 instead of 4.5 — slightly stronger, same direction.)
+(If the actual blade turns out to be nickel-silver like the Bosch DV-E reference in the generic note, the differential is ~5.3 instead of 4.5 — slightly stronger, same direction.)
 
 ## Geometry (this TB)
 

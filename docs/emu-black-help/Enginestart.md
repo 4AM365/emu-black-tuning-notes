@@ -217,7 +217,7 @@ This table allows for the implementation of the so-called Anti-flood strategy, w
 This table defines the throttle angle (in the case of DBW) or the position of the stepper motor or DC solenoid controlling the airflow during the __Cranking__ state.
 
 A higher value corresponds to more airflow being delivered to the engine during startup.
-It should be noted that in the case of electronic throttle, a value of 0% indicates opening the throttle to the Idle/Airflow/Actuator/DBW target min value, and a value of 100% indicates the Idle/Airflow/Actuator/DBW target max value ({1})
+It should be noted that in the case of electronic throttle, a value of 0% indicates opening the throttle to the Idle/Airflow/Actuator/DBW target min value, and a value of 100% indicates the Idle/Airflow/Actuator/DBW target max value (Actuator)
 
 In the case of an electronic throttle, the **__cranking air flow %**__ affects the throttle position within the range from **__DBW Target min**__ to **__DBW target max**__. For PWM solenoids, it ranges from **__Min DC**__ to **__Max DC**__, and for stepper motors, it falls within the **__Stepper step range**__.
 
