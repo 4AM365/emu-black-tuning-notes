@@ -43,7 +43,7 @@ Source: 119 LogAutosave `.emublog3` files, 2026-03-01 → 09-29 (~25 h running),
 | boost > 1.5× / > 2× | 4.83 / 0.580 | 3.10 / 0.192 |
 
 - Idle: cyl 6 and cyl 4 dropped (cyl 4 0.20 → 0.04 % at 1.5×); untrimmed cyl 1 rose (0.98 → 3.79 %). Spiky idle drives clustered Apr 20 – May 1.
-- Boost: engine-wide drop (> 2×: cyl 1 0.99 → 0.19, cyl 3 0.42 → 0.03, cyl 4 0.26 → 0.14, cyl 6 0.58 → 0.19 %), trimmed and untrimmed cylinders alike. Boost overshoot (below) is unrelated to the knock peaks (Will, 2026-10-02).
+- Boost: engine-wide drop (> 2×: cyl 1 0.99 → 0.19, cyl 3 0.42 → 0.03, cyl 4 0.26 → 0.14, cyl 6 0.58 → 0.19 %), trimmed and untrimmed cylinders alike. Boost overshoot is unrelated to the knock peaks (Will, 2026-10-02).
 - Cruise: peaks rose on cyl 6 and cyl 1, 3, 4 (> 2×: cyl 4 0.007 → 0.42 %). Unexplained; see the per-cylinder/dwell follow-up below.
 - Knock-voltage CoV (`emu-black-knock-cov` method, no-knock gate unavailable in binary): MAP > 100 kPa 24.1 → 21.5 %; > 130 kPa 24.1 → 21.0 %.
 - Knock counts in the CSV exports: two all year, both after the trim, both flagged on cyl 1.
@@ -54,7 +54,7 @@ Source: 119 LogAutosave `.emublog3` files, 2026-03-01 → 09-29 (~25 h running),
 
 **EGT, cyl6 − cyl3 (`EGT 2` − `EGT 1`), °C**, MAP held in band 2 s, overrun excluded (idle MAP<45 & RPM<1400; light 25–60; cruise 60–95; transition 95–130; boost > 130): idle +42 → +18, light +44 → +9, cruise +31 → −1, transition +21 → −14, boost +12 → −26.
 
-**Boost** (pulls = Boost > 20 kPa for ≥ 0.5 s): before 198 pulls, median peak 51 kPa, max 136 kPa against `Boost Target` max 116 (overshoot common); after 49 pulls, median 54, max 89 against target max 99 (peaks at or under target). Unrelated to the knock-peak result (Will). What changed in boost control isn't in any export (no pre-trim XML; boost PID disabled in every export since 05-22).
+**Boost levels** are not compared: boost control is the product of other factors, so a before/after boost comparison says nothing about the trim (Will, 2026-10-02).
 
 ## Per-cylinder knock and dwell follow-up (2026-10-02)
 

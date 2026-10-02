@@ -191,22 +191,11 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 <h2 class="part">3 · Context</h2>
 
 <section id="s-egt">
-  <div class="eyebrow">3a · Exhaust gas temperature</div>
+  <div class="eyebrow">Exhaust gas temperature</div>
   <h2>Cyl 6 − cyl 3 EGT by load band</h2>
   <p>What the trim was set to fix. <code>EGT 2</code> − <code>EGT 1</code>, sample-weighted; whiskers span the per-drive means. MAP held in band for 2 s, overrun excluded.</p>
   <div class="legend" id="legEgt"></div>
   <div class="chart"><div id="egt"></div></div>
-</section>
-
-<section id="s-boost">
-  <div class="eyebrow">3b · Boost</div>
-  <h2>How boost levels changed</h2>
-  <p>Each dot is one pull. Before the trim, pulls often overshot target, with peaks to 136 kPa against targets up to 116. After it, peaks sit at or under target and top out at 89 kPa.</p>
-  <div class="legend" id="legBoost"></div>
-  <div class="grid2">
-    <div class="chart"><div class="ctitle">Peak boost by date (kPa gauge)</div><div id="boostDate"></div></div>
-    <div class="chart"><div class="ctitle">Peak vs target per pull (kPa gauge)</div><div id="boostTgt"></div></div>
-  </div>
 </section>
 
 <section id="s-method">
@@ -420,20 +409,6 @@ driveTimeline("mdrive", Q.misfire_drive, "rich2", { y: [0, 1], yt: [0, 0.25, 0.5
     });
   });
   hoverPoints(f, pts);
-})();
-
-/* 3b boost */
-(function () {
-  document.getElementById("legBoost").innerHTML = [0, 1].map(g => `<span><i class="k${g}"></i>${G[g]}</span>`).join("");
-  const P = DATA.pulls; const x0 = DAY("20260301"), x1 = DAY("20261001");
-  const f = frame(document.getElementById("boostDate"), { w: 440, h: 300, m: { l: 44, r: 10 }, x: [x0, x1], y: [20, 140], yl: "Peak boost (kPa)", xt: mticks(x0, x1), xf: mfmt, yt: [20, 50, 80, 110, 140], aria: "Peak boost per pull by date" });
-  switchLine(f); const pts = [];
-  P.forEach((p, i) => { const x = f.X(DAY(p.f)) + ((i * 37) % 9 - 4) * 0.5, y = f.Y(p.peak); const c = el("circle", { cx: x, cy: y, r: 3.5, class: (p.g === 9 ? "" : "d" + p.g) + " ring" }, f.g); if (p.g === 9) c.style.fill = "var(--muted)"; pts.push([x, y, `<b>${p.f}</b><br>peak ${p.peak} kPa, target ${p.tgt}<br>pedal ${p.pps} %, ${p.dur} s in boost`]); });
-  hoverPoints(f, pts);
-  const g2 = frame(document.getElementById("boostTgt"), { w: 440, h: 300, m: { l: 44, r: 10 }, x: [20, 120], y: [20, 140], xl: "Logged Boost Target max (kPa)", yl: "Peak boost (kPa)", xt: [20, 40, 60, 80, 100, 120], yt: [20, 50, 80, 110, 140], aria: "Peak boost against target per pull" });
-  el("line", { x1: g2.X(20), y1: g2.Y(20), x2: g2.X(120), y2: g2.Y(120), class: "zero" }, g2.g); txt(g2.g, g2.X(118), g2.Y(118) + 14, "peak = target", "lbl2", "end");
-  const pts2 = []; P.forEach(p => { const x = g2.X(p.tgt), y = g2.Y(p.peak); const c = el("circle", { cx: x, cy: y, r: 3.5, class: (p.g === 9 ? "" : "d" + p.g) + " ring" }, g2.g); if (p.g === 9) c.style.fill = "var(--muted)"; pts2.push([x, y, `<b>${p.f}</b><br>peak ${p.peak} kPa, target ${p.tgt}`]); });
-  hoverPoints(g2, pts2);
 })();
 
 /* 4 data table */
