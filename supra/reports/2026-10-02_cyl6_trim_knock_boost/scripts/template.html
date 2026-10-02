@@ -91,19 +91,19 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 <div class="answers">
   <div class="answer">
     <span class="q">Question 1 · Did knock sensor peaks reduce after the trim?</span>
-    <span class="a">Yes at idle and in boost. No at cruise.</span>
+    <span class="a">Yes at idle. Not measurably in boost. No at cruise.</span>
     <ul>
-      <li>Idle, cyl 6 readings above 2× normal: <b>0.066 % → 0.015 %</b> of samples (−78 %). Cyl 4 fell too.</li>
-      <li>Boost, cyl 6 above 2×: <b>0.58 % → 0.19 %</b> (−67 %). Every cylinder fell in boost, so this part is engine-wide.</li>
-      <li>Cruise, cyl 6 above 2×: 0.048 % → 0.42 %. Peaks rose, on cyl 6 and on cyl 1, 3 and 4.</li>
+      <li>Idle, cyl 6 readings above 2× its normal level: <b>0.049 % → 0.006 %</b> of samples (−88 %). Extreme idle peaks fell on every channel; cyl 6 and cyl 4 had the most and lost the most.</li>
+      <li>Boost, in the cells both periods cover: cyl 6 unchanged (0.52 % → 0.53 %); cyl 1 and cyl 3 fell. Only 0.8 min of comparable boost after the trim.</li>
+      <li>Cruise, cyl 6: 0.056 % → 0.35 %. Peaks rose on every cylinder.</li>
     </ul>
   </div>
   <div class="answer">
     <span class="q">Question 2 · Did misfire at idle reduce after the trim?</span>
     <span class="a">Yes.</span>
     <ul>
-      <li>Rich lambda blips at idle (more than 0.02 λ below the 0.6 s median): <b>0.158 → 0.075 per minute</b> (−53 %). Bigger than 0.03 λ: 0.105 → 0.033 (−69 %).</li>
-      <li>Blips of 0.01 λ or less, which are sensor-noise scale, didn't change.</li>
+      <li>Rich lambda blips at idle (more than 0.02 λ below the 0.6 s median): <b>0.144 → 0.052 per minute</b> (−64 %). Bigger than 0.03 λ: 0.089 → 0.017 (−81 %).</li>
+      <li>Blips of 0.01 λ or less, which are sensor-noise scale, didn't change. The first 2 minutes after each engine start are left out.</li>
       <li>There is no misfire channel. A misfire reads rich on this wideband, so rich blips are the proxy. Idle RPM isn't used because of the throttle-body problems.</li>
     </ul>
   </div>
@@ -114,22 +114,24 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 <section id="s-exc">
   <div class="eyebrow">1a · Knock voltage peak cyl 6</div>
   <h2>How often cyl 6 jumps above normal</h2>
-  <p>Each line shows the share of samples where <code>Knock voltage peak cyl 6</code> is more than <i>k</i> times the median for its 250 rpm × 10 kPa cell, for every <i>k</i> from 1.25 to 3. One median per cell, pooled over all three periods. A line lower and to the left means fewer and smaller peaks. Log scale; points at zero are drawn on the floor.</p>
+  <p><b>What "normal" means.</b> For each cylinder, the median of its <code>Knock voltage peak cyl N</code> in the same 250 rpm × 10 kPa cell during the same period (before or after). Only cells that both periods visited for at least 8 s count. Each line shows the share of samples more than <i>k</i> times that normal, for every <i>k</i> from 1.25 to 3. Log scale; points at zero sit on the floor.</p>
+  <p><b>Does a baseline shift fake the result?</b> No. In the shared cells, each cylinder's median and its noise spread (median absolute deviation) are the same before and after to within one 0.02 V step of the channel. Counting peaks against a pooled median, against each period's own median, or as multiples of that period's own noise spread gives the same answer at idle and cruise (table below).</p>
   <div class="legend" id="legExc"></div>
   <div class="grid3" id="excPanels"></div>
-  <p class="note">Idle = idle PID active (<code>Idle state</code> 2), CLT ≥ 80 °C. Cruise = MAP 30–95 kPa, 1500–4000 rpm. Boost = MAP 105–175 kPa, 3500–6000 rpm, the range both periods reach. Coverage, before / after: warm idle 4.4 h / 4.2 h, cruise 6.9 h / 3.1 h, boost in this band 8.4 min / 2.4 min.</p>
+  <p class="note">Idle = idle PID active (<code>Idle state</code> 2), CLT ≥ 80 °C. Cruise = MAP 30–95 kPa, 1500–4000 rpm. Boost = MAP 105–175 kPa, 3500–6000 rpm. Coverage in shared cells, before / after: warm idle 4.4 h / 4.2 h, cruise 6.9 h / 3.1 h, boost 2.2 min / 0.8 min.</p>
+  <details open><summary>Cyl 6 peaks under three definitions of normal</summary><div class="tbl" id="tblNorm"></div></details>
 </section>
 
 <section id="s-cyl">
   <div class="eyebrow">1b · Trimmed vs untrimmed cylinders</div>
-  <h2>At idle the drop follows the trim</h2>
-  <p>Share of samples above 1.5× normal for every knock channel. Trim at the time: cyl 1–2 none, cyl 3 +1–2 %, cyl 4 +3–5 %, cyl 5 +5–7 %, cyl 6 +7–9 %. Cyl 1 is the control.</p>
+  <h2>Every channel, before and after</h2>
+  <p>Share of samples above 1.5× normal for every knock channel. Trim at the time: cyl 1–2 none, cyl 3 +1–2 %, cyl 4 +3–5 %, cyl 5 +5–7 %, cyl 6 +7–9 %. Each channel has its own noise floor, so compare a cylinder with itself, not with its neighbours.</p>
   <div class="legend" id="legCyl"></div>
   <div class="grid2">
     <div class="chart"><div class="ctitle">Warm idle (% above 1.5×)</div><div id="cylIdle"></div></div>
     <div class="chart"><div class="ctitle">Boost (% above 1.5×)</div><div id="cylBoost"></div></div>
   </div>
-  <p class="note">In boost, cyl 1 and cyl 3 fell as much as cyl 6, so the boost drop isn't specific to the trimmed cylinders. At idle, untrimmed cyl 1 went the other way (0.98 → 3.79 %).</p>
+  <p class="note">Idle: at 1.5× the trimmed cylinders fell while untrimmed cyl 1 rose (0.82 → 1.18 %); above 2× every channel fell. Boost: cyl 1 and cyl 3 fell, cyl 6 didn't, on 0.8 min of comparable data after the trim.</p>
 </section>
 
 <section id="s-kdrive">
@@ -162,14 +164,14 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
   <p>A misfire reads rich on this wideband. Count of rich blips per minute of steady warm idle: runs where <code>Lambda 1</code> drops below its centred 0.6 s (15-sample) rolling median by more than the size on the x axis, while lambda is valid. Steady idle = idle PID active, throttle closed, RPM slew under 300 rpm/s, CLT ≥ 80 °C, at least 4 s (the <code>emu-black-idle-stability</code> gate). Log scale.</p>
   <div class="legend" id="legDips"></div>
   <div class="chart"><div class="ctitle">Rich lambda blips per minute vs blip size</div><div id="lean"></div></div>
-  <p class="note">Blips of 0.01 λ or less didn't change; that is sensor-noise scale. From 0.015 λ up the rate fell 35–69 %. Idle RPM isn't used here: throttle-body problems dominate it over this period.</p>
+  <p class="note">Blips of 0.01 λ or less didn't change; that is sensor-noise scale. From 0.015 λ up the rate fell 36–81 %. The first 2 minutes after each engine start are excluded. Idle RPM isn't used here: throttle-body problems dominate it over this period.</p>
   <details><summary>Table view</summary><div class="tbl" id="tblMis"></div></details>
 </section>
 
 <section id="s-trace">
   <div class="eyebrow">2b · What it looks like</div>
   <h2>Thirty seconds of warm idle lambda, before and after</h2>
-  <p>For each period, the drive whose rate of rich blips bigger than 0.02 λ is closest to that period's average, middle 30 s of its longest steady stretch.</p>
+  <p>For each period, the drive whose rate of rich blips bigger than 0.02 λ is closest to that period's average, using a 30 s window at least 5 min after the engine started, with lambda valid throughout and a constant idle target.</p>
   <div class="grid2" id="traces"></div>
 </section>
 
@@ -199,6 +201,7 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
     <li>Fuel differs between the two groups. Before = pump fuel (Mar 1–29) then E57; after = E57 (May 4–10), E25, then E14 from Aug 22. Ethanol suppresses knock, so lower ethanol after the trim works against the knock result, not for it.</li>
     <li>Other work happened over the same months (idle airflow, VE, lambda settings, ignition smoothing in June). The idle knock result has a built-in control (cyl 1); the misfire proxies don't.</li>
     <li>25 Hz logging can't see individual firings at idle (~55 per second), and the wideband smooths them further. A rich blip is the outline of a misfire, not a count of them.</li>
+    <li>Normal knock = median of the same cylinder in the same 250 rpm × 10 kPa cell during the same period; a cell counts only if both periods spent at least 8 s there.</li>
     <li>Knock-voltage CoV in boost (<code>emu-black-knock-cov</code> method, MAP &gt; 100 kPa): 24.1 → 21.5 %. Two knock counts appear in the CSV exports all year, both after the trim and both on cyl 1.</li>
   </ul>
   <div class="tbl" id="tblData"></div>
@@ -301,6 +304,14 @@ function logCurves(container, series, o) {
   });
 })();
 
+/* 1a normalization table */
+(function () {
+  const N = DATA.pn.filter(r => r.cyl === 6), regs = [["idle", "Warm idle"], ["cruise", "Cruise"], ["boost", "Boost"]];
+  const rows = regs.map(([k, lab]) => { const b = N.find(r => r.reg === k && r.g === 0), a = N.find(r => r.reg === k && r.g === 1);
+    return [lab, `${b.med.toFixed(2)} / ${a.med.toFixed(2)}`, `${b.mad.toFixed(3)} / ${a.mad.toFixed(3)}`, `${b.pooled20.toFixed(3)} → ${a.pooled20.toFixed(3)}`, `${b.own20.toFixed(3)} → ${a.own20.toFixed(3)}`, `${b.z10.toFixed(3)} → ${a.z10.toFixed(3)}`]; });
+  table("tblNorm", ["Cyl 6", "Median V before / after", "Noise spread (MAD) V", "% > 2× pooled median", "% > 2× own median", "% > 10 MAD above own median"], rows);
+})();
+
 /* 1b per cylinder (>1.5x = index of 1.5 in ks) */
 (function () {
   legend("legCyl", [0, 1]);
@@ -372,7 +383,7 @@ driveTimeline("kdrive", Q.knock_drive.filter(r => r.reg === "idle"), "p20", { y:
   const host = document.getElementById("traces");
   Q.idle_traces.forEach(s => {
     const g = s.g, c = document.createElement("div"); c.className = "chart";
-    c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="l k${g}"></i>${s.f} · ${s.rate.toFixed(3)} rich blips &gt; 0.02 λ per min</span></span></div>`; host.appendChild(c);
+    c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="l k${g}"></i>${s.f} · ${s.since == null ? "drive in progress" : s.since.toFixed(0) + " min after start"} · ${s.rate.toFixed(3)} rich blips &gt; 0.02 λ per min</span></span></div>`; host.appendChild(c);
     const tmax = 30;
     const l = frame(c, { w: 420, h: 240, m: { l: 50, b: 36, r: 10, t: 10 }, x: [0, tmax], y: [0.8, 1.05], yt: [0.8, 0.85, 0.9, 0.95, 1.0], xl: "Time (s)", yl: "Lambda 1", aria: "Idle lambda trace" });
     let segs = [[]]; s.t.forEach((t, i) => { if (s.lam[i] == null) { if (segs.at(-1).length) segs.push([]); } else segs.at(-1).push([l.X(t), l.Y(Math.max(0.8, Math.min(1.05, s.lam[i])))]); });

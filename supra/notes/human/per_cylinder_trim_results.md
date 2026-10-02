@@ -9,8 +9,8 @@
 **Pre-trim context:** the EGT delta shrank as load rose (+44 °C cruise → +12 °C boost) — that load-dependence means real FFIM airflow maldistribution, not a fixed sensor offset. A one-time probe swap between 3 and 6 is the only way to separate any residual probe offset.
 
 **Before/after (2026-10-02, 119 decoded autosaves, binary split at the trim):** trim went live **May 4 2026, 17:25–17:38**. Before = Mar 1 → May 4, after = May 4 → Sep 29.
-- Knock peaks, cyl 6 > 2× normal: idle 0.066 → 0.015 % (cyl 4 fell too, untrimmed cyl 1 rose); boost 0.58 → 0.19 % (every cylinder fell); cruise 0.048 → 0.42 % (rose).
-- Idle misfire proxy (a misfire reads RICH; idle RPM unusable because of the TB issues): rich lambda blips > 0.02 λ 0.158 → 0.075 /min (−53 %), > 0.03 λ −69 %.
+- Knock peaks, cyl 6 > 2× its own normal (same cylinder, same cell, same period; shared cells only; baseline and noise spread unchanged): idle 0.049 → 0.006 % (every channel's extreme idle peaks fell); boost unchanged (0.52 → 0.53 %, only 0.8 min comparable after; cyl 1 and 3 fell); cruise 0.056 → 0.35 % (rose).
+- Idle misfire proxy (a misfire reads RICH; idle RPM unusable because of the TB issues; restart minutes excluded): rich lambda blips > 0.02 λ 0.144 → 0.052 /min (−64 %), > 0.03 λ −81 %.
 - EGT cyl6 − cyl3: light +44 → +9 °C, cruise +31 → −1 °C, idle +42 → +18 °C.
 - The earlier CSV-only pass (no idle or knock change) was wrong. Boost levels aren't compared: boost control depends on other factors.
 Charts: `supra/reports/2026-10-02_cyl6_trim_knock_boost/report.html`.

@@ -17,6 +17,10 @@ sys.path.insert(0, os.path.join(HERE, "..", "..", "..", "..", "skills", "emu-bla
 import idle_stability as IS
 
 A, F = pickle.load(open(os.path.join(HERE, "..", "data", "eb_all.pkl"), "rb"))
+# seconds since the engine last started in this file (RPM < 200 = stopped); a file that opens already running counts as long-running
+A = A.sort_values(["file", "TIME"])
+last_stop = A.TIME.where(A.RPM < 200).groupby(A.file, observed=True).ffill()
+A["since_start"] = (A.TIME - last_stop).fillna(1e6)
 A = A[A.RPM > 500].copy()
 t6, eth = A["Injector 6 trim"], A["Ethanol content"]
 A["g"] = -1
@@ -34,12 +38,18 @@ A.loc[fuel & (A.reg == "") & A.MAP.between(30, 95) & A.RPM.between(1500, 4000), 
 A.loc[fuel & (A.reg == "") & (A.RPM < 1400) & (A["Idle state"] == 2) & (A.CLT >= 80), "reg"] = "idle"
 S = A[A.reg != ""].copy()
 S["rc"] = (S.RPM // 250).astype(int); S["mc"] = (S.MAP // 10).astype(int)
+# "Normal" = median of that cylinder's knock voltage in its cell (region x RPM 250 x MAP 10 kPa) during the SAME period.
+# Only cells both periods visit for >= 200 samples (8 s) count, so a baseline shift or an operating-point mix can't
+# manufacture peaks (Will, 2026-10-02). peak_normalization.py shows pooled / own / MAD definitions agree.
+cnt = S.groupby(["reg", "rc", "mc", "g"]).size().unstack("g")
+good = cnt[(cnt[0] >= 200) & (cnt[1] >= 200)].index
+S = S.set_index(["reg", "rc", "mc"]); S = S[S.index.isin(good)].reset_index()
 KS = [round(x, 2) for x in np.arange(1.25, 3.01, 0.25)]
 exc = []
 for c in range(1, 7):
-    r = S[K[c - 1]] / S.groupby(["reg", "rc", "mc"])[K[c - 1]].transform("median")
+    r = S[K[c - 1]] / S.groupby(["reg", "rc", "mc", "g"])[K[c - 1]].transform("median")
     for (rg, g), rr in r.groupby([S.reg, S.g]):
-        exc.append(dict(reg=rg, g=int(g), cyl=c, n=int(len(rr)), pct=[round(100 * float((rr > k).mean()), 4) for k in KS]))
+        exc.append(dict(reg=rg, g=int(g), cyl=c, n=int(len(rr)), min=round(len(rr) / 1500, 1), pct=[round(100 * float((rr > k).mean()), 4) for k in KS]))
     if c == 6: S["r6"] = r
 OUT["knock"] = dict(ks=KS, rows=exc)
 # per drive, cyl 6, idle and boost, share above 2x
@@ -50,54 +60,69 @@ for (f, rg), d in S.groupby(["file", "reg"], observed=True):
 OUT["knock_drive"] = pd_rows
 
 # ---- idle misfire proxies
-DS = [5, 10, 15, 20, 25, 30, 40, 50]                # RPM dip depth, rpm
+DS = [5, 10, 15, 20, 25, 30, 40, 50]                # RPM dip depth, rpm (computed, not used as a misfire metric)
 XS = [0.005, 0.01, 0.015, 0.02, 0.03, 0.04, 0.06]   # rich blip size, lambda
+START_GATE_S = 120    # idle counted only from 2 min after engine start (restart minutes excluded; Will 2026-10-02)
+TRACE_GATE_S = 300    # example traces only from 5 min after start
 def runs_over(mask):
     m = np.asarray(mask, bool)
     return int(np.sum(m[1:] & ~m[:-1]) + (1 if len(m) and m[0] else 0))
-tot = {g: dict(min=0.0, dips=np.zeros(len(DS)), lmin=0.0, lean=np.zeros(len(XS))) for g in (0, 1)}
-drives = []
-for f, d in A.groupby("file", observed=True):
-    d = d.sort_values("TIME").reset_index(drop=True)
-    dt = 0.04
+def idle_mask(d, gate):
     tdt = d.TIME.diff(IS.RATE_K); slew = (d.RPM.diff(IS.RATE_K) / tdt.where(tdt > 0)).abs()
     tc = np.nanpercentile(d.TPS, IS.TPS_CLOSED_PCT)
-    m = (d["Idle state"] == 2) & (d.TPS <= tc + IS.TPS_MARGIN) & d.RPM.between(IS.RPM_LO, IS.RPM_HI) & (slew.fillna(0) <= IS.RATE_MAX) & (d.CLT >= IS.WARM_CLT)
-    tw = max(3, int(round(IS.TREND_S / dt)) | 1)
-    fd = dict(min=0.0, dips=np.zeros(len(DS)), lmin=0.0, lean=np.zeros(len(XS)), g=[])
-    for a, b in IS.runs(m.fillna(False), dt):
-        seg = d.iloc[a:b + 1]
-        rpm = seg.RPM.values.astype(float)
-        res = rpm - pd.Series(rpm).rolling(7, center=True, min_periods=1).median().values
-        lam = seg["Lambda 1"].values.astype(float); lv = seg["Lambda is valid"].values > 0.5
-        lres = lam - pd.Series(lam).rolling(15, center=True, min_periods=1).median().values
-        mins = len(seg) * dt / 60; g = int(seg.g.mode()[0])
-        dips = np.array([runs_over(res < -x) for x in DS], float)
-        lean = np.array([runs_over(lv & (lres < -x)) for x in XS], float)   # rich blips (key kept as 'lean' for the page)
-        lmin = lv.sum() * dt / 60
-        for T in (tot[g], fd):
-            T["min"] += mins; T["dips"] += dips; T["lmin"] += lmin; T["lean"] += lean
-        fd["g"].append(g)
-    if fd["min"] >= 1:
-        drives.append(dict(f=f, g=int(pd.Series(fd["g"]).mode()[0]), min=round(fd["min"], 1),
-                           dip15=round(fd["dips"][DS.index(15)] / fd["min"], 2), dip25=round(fd["dips"][DS.index(25)] / fd["min"], 3),
-                           rich2=round(fd["lean"][XS.index(0.02)] / fd["lmin"], 3) if fd["lmin"] >= 1 else None))
-OUT["misfire"] = dict(ds=DS, xs=XS, groups=[dict(g=g, min=round(T["min"], 1), lmin=round(T["lmin"], 1),
-                      dips=[round(v / T["min"], 3) for v in T["dips"]], lean=[round(v / T["lmin"], 3) for v in T["lean"]]) for g, T in tot.items()])
+    return ((d["Idle state"] == 2) & (d.TPS <= tc + IS.TPS_MARGIN) & d.RPM.between(IS.RPM_LO, IS.RPM_HI)
+            & (slew.fillna(0) <= IS.RATE_MAX) & (d.CLT >= IS.WARM_CLT) & (d.since_start >= gate)).fillna(False)
+def misfire(gate):
+    tot = {g: dict(min=0.0, dips=np.zeros(len(DS)), lmin=0.0, lean=np.zeros(len(XS))) for g in (0, 1)}
+    drives = []
+    for f, d in A.groupby("file", observed=True):
+        d = d.reset_index(drop=True); dt = 0.04
+        fd = dict(min=0.0, dips=np.zeros(len(DS)), lmin=0.0, lean=np.zeros(len(XS)), g=[])
+        for a, b in IS.runs(idle_mask(d, gate), dt):
+            seg = d.iloc[a:b + 1]
+            rpm = seg.RPM.values.astype(float)
+            res = rpm - pd.Series(rpm).rolling(7, center=True, min_periods=1).median().values
+            lam = seg["Lambda 1"].values.astype(float); lv = seg["Lambda is valid"].values > 0.5
+            lres = lam - pd.Series(lam).rolling(15, center=True, min_periods=1).median().values
+            mins = len(seg) * dt / 60; g = int(seg.g.mode()[0])
+            dips = np.array([runs_over(res < -x) for x in DS], float)
+            lean = np.array([runs_over(lv & (lres < -x)) for x in XS], float)   # rich blips (key kept as 'lean' for the page)
+            lmin = lv.sum() * dt / 60
+            for T in (tot[g], fd):
+                T["min"] += mins; T["dips"] += dips; T["lmin"] += lmin; T["lean"] += lean
+            fd["g"].append(g)
+        if fd["min"] >= 1:
+            drives.append(dict(f=f, g=int(pd.Series(fd["g"]).mode()[0]), min=round(fd["min"], 1),
+                               dip15=round(fd["dips"][DS.index(15)] / fd["min"], 2), dip25=round(fd["dips"][DS.index(25)] / fd["min"], 3),
+                               rich2=round(fd["lean"][XS.index(0.02)] / fd["lmin"], 3) if fd["lmin"] >= 1 else None))
+    groups = [dict(g=g, min=round(T["min"], 1), lmin=round(T["lmin"], 1), dips=[round(v / T["min"], 3) for v in T["dips"]],
+                   lean=[round(v / T["lmin"], 3) for v in T["lean"]]) for g, T in tot.items()]
+    return groups, drives
+groups, drives = misfire(START_GATE_S)
+groups0, _ = misfire(0)
+OUT["misfire"] = dict(ds=DS, xs=XS, groups=groups, gate_s=START_GATE_S, ungated=groups0)
 OUT["misfire_drive"] = drives
-# example idle traces: for each period, the drive whose >50 rpm dip rate is closest to its period's pooled rate; first 30 s of its longest steady segment
+# example traces: per period, the drive whose >0.02 rich-blip rate is closest to the period rate and that has a
+# 30 s window >= 5 min after start with lambda valid throughout and a constant idle target; middle of the longest such run
 D = pd.DataFrame(drives); traces = []
 for g in (0, 1):
-    target = OUT["misfire"]["groups"][g]["lean"][XS.index(0.02)]
-    f = D[(D.g == g) & (D["min"] >= 3) & D.rich2.notna()].assign(dd=lambda x: (x.rich2 - target).abs()).sort_values("dd").f.iloc[0]
-    d = A[A.file == f].sort_values("TIME").reset_index(drop=True)
-    tdt = d.TIME.diff(IS.RATE_K); slew = (d.RPM.diff(IS.RATE_K) / tdt.where(tdt > 0)).abs()
-    tc = np.nanpercentile(d.TPS, IS.TPS_CLOSED_PCT)
-    m = (d["Idle state"] == 2) & (d.TPS <= tc + IS.TPS_MARGIN) & d.RPM.between(IS.RPM_LO, IS.RPM_HI) & (slew.fillna(0) <= IS.RATE_MAX) & (d.CLT >= IS.WARM_CLT)
-    a0, b0 = max(IS.runs(m.fillna(False), 0.04), key=lambda r: r[1] - r[0])
-    mid = (a0 + b0) // 2; s = d.iloc[max(a0, mid - 375):min(b0, mid + 375) + 1]   # middle 30 s
-    traces.append(dict(g=g, f=f, rate=float(D[D.f == f].rich2.iloc[0]), t=(s.TIME - s.TIME.iloc[0]).round(2).tolist(), rpm=s.RPM.astype(int).tolist(),
-                       tgt=s["Idle target"].astype(int).tolist(), lam=[(round(float(v), 3) if ok > 0.5 else None) for v, ok in zip(s["Lambda 1"], s["Lambda is valid"])], k6=s[K[5]].round(3).tolist()))
+    target = groups[g]["lean"][XS.index(0.02)]
+    for f in D[(D.g == g) & D.rich2.notna()].assign(dd=lambda x: (x.rich2 - target).abs()).sort_values("dd").f:
+        d = A[A.file == f].reset_index(drop=True)
+        m = idle_mask(d, TRACE_GATE_S) & (d["Lambda is valid"] > 0.5)
+        best = None   # qualifying window furthest from engine start
+        for a0, b0 in IS.runs(m, 0.04):
+            if b0 - a0 < 750: continue
+            for st in range(a0, b0 - 750 + 1, 125):
+                w = d.iloc[st:st + 751]
+                if w["Idle target"].nunique() == 1 and (w.g == g).all():
+                    since = float(w.since_start.iloc[0])
+                    if best is None or since > best[1]: best = (st, since)
+        if best: break
+    st = best[0]; s = d.iloc[st:st + 751]
+    traces.append(dict(g=g, f=f, rate=float(D[D.f == f].rich2.iloc[0]), since=(round(float(s.since_start.iloc[0]) / 60, 1) if s.since_start.iloc[0] < 1e5 else None), t=(s.TIME - s.TIME.iloc[0]).round(2).tolist(),
+                       rpm=s.RPM.astype(int).tolist(), tgt=s["Idle target"].astype(int).tolist(),
+                       lam=[(round(float(v), 3) if ok > 0.5 else None) for v, ok in zip(s["Lambda 1"], s["Lambda is valid"])], k6=s[K[5]].round(3).tolist()))
 OUT["idle_traces"] = traces
 json.dump(OUT, open(os.path.join(HERE, "..", "data", "questions.json"), "w"), separators=(",", ":"))
 
