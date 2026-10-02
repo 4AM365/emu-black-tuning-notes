@@ -105,7 +105,7 @@ including the slow ones the 05-31 attempt couldn't get (EGT, CLT, IAT, ethanol, 
 RPM u16@63, MAP u16@66/256, Boost u8@97, TPS u16@71/10, PPS u16@75/10, CLT u8@191, IAT u16@98/256, EGT 1/2 u16@106/108,
 Injectors PW u16@120×0.01613, Idle target u16@111, Boost Target u16@162/256, Boost DC u16@160/512, Ignition angle i8@95/2,
 Ethanol u16@195/512, STFT i8@128/16−4, Idle state u16@379/256, Data changing u16@473/32768, Lambda 1 u16@449/1024,
-Lambda is valid u8@363/12, Knock voltage peak cyl N u8@(404+N)×5/255, Injector N trim u8@(226+N).
+Lambda is valid u8@363/12, Knock voltage peak cyl N u8@(404+N)×5/255, Injector N trim u8@(226+N), Lambda target u16@269×0.000625, Dwell Time u8@118×0.05 ms, Battery voltage u16@100/37, Ignition From Table u16@146/512.
 Not stable between the April and May configs: Vehicle Speed / Driven axle speed (moved), Idle control active — don't decode those.
 The knock-flag and knock-retard channels were constant in both pairs, so they are not mapped.
 

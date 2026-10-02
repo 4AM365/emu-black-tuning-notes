@@ -9,13 +9,11 @@ import knock_chatter_cov as KC
 
 A, F = pickle.load(open(os.path.join(HERE, "..", "data", "eb_all.pkl"), "rb"))
 A = A[A.RPM > 500].copy()
-GROUPS = ["Before · E57 (Mar 29 – May 4)", "After · E57 (May 4 – 10)", "After · later (May 11 – Sep 29)"]
+GROUPS = ["Before trim (Mar 1 – May 4)", "After trim (May 4 – Sep 29)"]
 t6, eth = A["Injector 6 trim"], A["Ethanol content"]
 A["g"] = -1
-A.loc[(t6 == 100) & (eth > 45), "g"] = 0
-A.loc[(t6 > 100) & (eth > 45), "g"] = 1
-A.loc[(t6 > 100) & (eth < 45), "g"] = 2
-A.loc[(t6 == 100) & (eth < 20), "g"] = 9          # pre-trim pump fuel (Mar 1-29), tables only
+A.loc[t6 == 100, "g"] = 0      # before: no trim (2026-05-04 17:25 and earlier)
+A.loc[t6 > 100, "g"] = 1       # after: trim live (2026-05-04 17:38 on)
 print(A.groupby("g").agg(min=("RPM", lambda x: round(len(x) / 1500)), files=("file", "nunique"),
                           d0=("day", lambda x: min(x.astype(str))), d1=("day", lambda x: max(x.astype(str)))))
 fuel = A["Injectors PW"] > 0.3
@@ -28,7 +26,7 @@ K = [f"Knock voltage peak cyl {c}" for c in range(1, 7)]
 OUT = {"groups": GROUPS}
 
 # ---- spikes: knock voltage / pooled cell median (cells RPM 250 x MAP 10, baseline pooled over groups 0-2)
-S = A[(A.reg != "") & A.g.isin([0, 1, 2])].copy()
+S = A[(A.reg != "") & A.g.isin([0, 1])].copy()
 spk = []
 for c in K:
     med = S.groupby(["reg", "rc", "mc"])[c].transform("median")
@@ -56,13 +54,13 @@ OUT["spk_bins"] = [dict(g=int(g), bin=int(b), n=int(len(d)), p15=round(100 * flo
                    for (g, b), d in B.groupby(["g", "bb"]) if len(d) >= 50]
 
 # ---- knock cyl6 vs boost: binned distribution, RPM 4000-5500
-Q = A[A.g.isin([0, 1, 2]) & fuel & A.RPM.between(4000, 5500) & (A.MAP >= 95)].copy()
+Q = A[A.g.isin([0, 1]) & fuel & A.RPM.between(4000, 5500) & (A.MAP >= 95)].copy()
 Q["bb"] = np.clip((Q.Boost // 10) * 10, 0, 90).astype(int)
 def q(v): v = np.asarray(v, float); return {k: round(float(np.percentile(v, p)), 3) for k, p in [("p25", 25), ("med", 50), ("p75", 75), ("p95", 95), ("p99", 99)]}
 OUT["bins"] = [dict(g=int(g), bin=int(b), n=int(len(d)), **q(d[K[5]])) for (g, b), d in Q.groupby(["g", "bb"]) if len(d) >= 30]
 # scatter subsample
 rng = np.random.default_rng(1)
-sc = A[A.g.isin([0, 1, 2]) & fuel & (A.Boost > 5) & A.RPM.between(3000, 6500)]
+sc = A[A.g.isin([0, 1]) & fuel & (A.Boost > 5) & A.RPM.between(3000, 6500)]
 pts = []
 for g, d in sc.groupby("g"):
     d = d.sample(min(2500, len(d)), random_state=1)
@@ -71,14 +69,14 @@ OUT["scatter"] = pts
 OUT["scatter_n"] = {int(g): int(len(d)) for g, d in sc.groupby("g")}
 
 # ---- ratio cyl6 / mean(cyl1-5) by MAP
-R = A[A.g.isin([0, 1, 2]) & fuel & A.RPM.between(2000, 5500) & A.MAP.between(20, 190)].copy()
+R = A[A.g.isin([0, 1]) & fuel & A.RPM.between(2000, 5500) & A.MAP.between(20, 190)].copy()
 oth = R[K[:5]].mean(axis=1); R = R[oth > 0.05]; R["ratio"] = R[K[5]] / oth[R.index]
 OUT["ratio"] = [dict(g=int(g), map=int(m) * 10, n=int(len(d)), **q(d.ratio)) for (g, m), d in R.groupby(["g", "mc"]) if len(d) >= 50]
 
 # ---- knock CoV, skill method (detrend RPM250 x MAP10, positive transients); no-knock gate unavailable (channels not in binary)
 cov = []
 for thr in (100, 130):
-    for g in (0, 1, 2):
+    for g in (0, 1):
         frames = []
         for f, d in A[A.g == g].groupby("file", observed=True):
             d = d.sort_values("TIME")
@@ -90,8 +88,8 @@ for thr in (100, 130):
 OUT["cov"] = cov; print(pd.DataFrame(cov))
 
 # ---- idle quality: skill runs()/pool() with an Idle-state-2 + closed-TPS + slew gate, warm (CLT >= 80)
-idle_rows = {0: [], 1: [], 2: []}; per_file = []
-for f, d in A[A.g.isin([0, 1, 2])].groupby("file", observed=True):
+idle_rows = {0: [], 1: []}; per_file = []
+for f, d in A[A.g.isin([0, 1])].groupby("file", observed=True):
     d = d.sort_values("TIME").reset_index(drop=True)
     dt = 0.04
     tdt = d.TIME.diff(IS.RATE_K); slew = (d.RPM.diff(IS.RATE_K) / tdt.where(tdt > 0)).abs()
@@ -127,7 +125,7 @@ PF = pd.DataFrame(per_file); print(PF.groupby("g")[["jit", "hold", "ljit"]].desc
 egt = []
 BANDS = [("idle", 0, 45, 0, 1400), ("light", 25, 60, 1400, 9000), ("cruise", 60, 95, 1400, 9000), ("transition", 95, 130, 1400, 9000), ("boost", 130, 400, 1400, 9000)]
 eg = []
-for f, d in A[A.g.isin([0, 1, 2, 9])].groupby("file", observed=True):
+for f, d in A[A.g.isin([0, 1])].groupby("file", observed=True):
     d = d.sort_values("TIME")
     ok = fuel[d.index] & (d["EGT 1"] > 250) & (d["EGT 2"] > 250) & (d.CLT > 70)
     for b, m0, m1, r0, r1 in BANDS:
@@ -169,12 +167,12 @@ W = P[(P.pps >= 90) & (P.dur >= 1.5)]
 pairs = []
 for pk in (W[W.g == 0].sort_values("peak", ascending=False).head(1).itertuples(),):
     for r0 in pk:
-        cand = W[W.g == 1].assign(dd=(W.peak - r0.peak).abs()).sort_values("dd").head(1)
-        if len(cand): pairs.append(dict(label=f"Hardest full-pedal pull, same fuel: {r0.peak:.0f} kPa ({r0.f[4:6]}-{r0.f[6:8]}) vs {cand.peak.iloc[0]:.0f} kPa ({cand.f.iloc[0][4:6]}-{cand.f.iloc[0][6:8]})",
+        cand = W[W.g == 1].sort_values("peak", ascending=False).head(1)
+        if len(cand): pairs.append(dict(label=f"Hardest full-pedal pull each side: {r0.peak:.0f} kPa ({r0.f[4:6]}-{r0.f[6:8]}) vs {cand.peak.iloc[0]:.0f} kPa ({cand.f.iloc[0][4:6]}-{cand.f.iloc[0][6:8]})",
                                         before=tl(r0._asdict()), after=tl(cand.iloc[0].to_dict())))
 med0 = W[W.g == 0].peak.median()
 r0 = W[W.g == 0].assign(dd=(W.peak - 60).abs()).sort_values("dd").iloc[0]; r1 = W[W.g == 1].assign(dd=(W.peak - r0.peak).abs()).sort_values("dd").iloc[0]
-pairs.append(dict(label=f"Typical full-pedal pull, same fuel: {r0.peak:.0f} kPa ({r0.f[4:6]}-{r0.f[6:8]}) vs {r1.peak:.0f} kPa ({r1.f[4:6]}-{r1.f[6:8]})", before=tl(r0.to_dict()), after=tl(r1.to_dict())))
+pairs.append(dict(label=f"Matched full-pedal pulls near 60–70 kPa: {r0.peak:.0f} kPa ({r0.f[4:6]}-{r0.f[6:8]}) vs {r1.peak:.0f} kPa ({r1.f[4:6]}-{r1.f[6:8]})", before=tl(r0.to_dict()), after=tl(r1.to_dict())))
 OUT["pulls_tl"] = pairs
 
 # ---- file table

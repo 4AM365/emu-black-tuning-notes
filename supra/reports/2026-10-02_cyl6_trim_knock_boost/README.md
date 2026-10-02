@@ -26,4 +26,6 @@ python scripts/decode_autosaves.py   # LogAutosave -> data/eb_all.pkl (gitignore
 python scripts/analyse.py            # -> data/report_data.json (EGT, boost, scatter, pulls, idle jitter)
 python scripts/questions.py          # -> data/questions.json (knock-peak exceedance, idle misfire proxies, traces)
 python scripts/build_html.py         # -> report.html
+python scripts/explore_cyl_dwell.py  # follow-up: per-cylinder knock, dwell, EGT per trim cell -> data/explore.json
+python scripts/explore_checks.py     # follow-up: fuel era, cruise timing shift, dwell vs heat soak (prints only)
 ```

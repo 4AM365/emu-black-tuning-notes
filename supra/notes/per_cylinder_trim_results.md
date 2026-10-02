@@ -32,49 +32,45 @@ Source: 119 LogAutosave `.emublog3` files, 2026-03-01 → 09-29 (~25 h running),
 
 **When the trim went in:** logged `Injector N trim` carries the trim-table output (100 = none). It is 100 on every cylinder through `20260504_1725_09` and 109 (cyl6) / 102 (cyl3) from `20260504_1738_14`: **2026-05-04 between 17:25 and 17:38**. Values moved 102–109 during May 4–11 while Will iterated, then settled.
 
-**Periods (assigned per sample from `Injector 6 trim` and `Ethanol content`):** before E57 = Mar 29 → May 4 (631 min, 57 files); after E57 = May 4 → 10 (174 min, 10 files); after later = May 11 → Sep 29 (416 min, 32 files, E25 then E14); pump fuel Mar 1–29 (290 min) for EGT/boost context only. Ethanol was 56–57 % on both sides of the switch, so before E57 vs after E57 is a same-fuel comparison.
+**Comparison is binary (Will, 2026-10-02):** before = every sample with logged `Injector 6 trim` = 100 (Mar 1 → May 4 17:25, ~15 h running, 57 drives incl. 20 pump-fuel drives in March); after = every sample with trim > 100 (May 4 17:38 → Sep 29, ~10 h, 42 drives). Fuel differs: before = pump fuel then E57; after = E57 (May 4–10), E25, then E14 from Aug 22. Lower ethanol after works against the knock result.
 
-**Knock spikes, `Knock voltage peak cyl 6`** (Will's observation 2026-10-02: "the spikes went away"; the median-based first pass missed it). Spike = sample above 1.5× / 2× the median of its 250 rpm × 10 kPa cell, cell median pooled over all three periods. Idle = `Idle state` 2, CLT ≥ 80; cruise = MAP 30–95, 1500–4000 rpm; boost = MAP 105–175, 3500–6000 rpm.
+**Knock peaks, `Knock voltage peak cyl 6`.** Peak = sample above 1.5× / 2× the median of its 250 rpm × 10 kPa cell (median pooled over both groups). Idle = `Idle state` 2, CLT ≥ 80; cruise = MAP 30–95, 1500–4000 rpm; boost = MAP 105–175, 3500–6000 rpm. Coverage before / after: idle 262 / 253 min, cruise 411 / 188 min, boost 8.4 / 2.4 min.
 
-| cyl 6, % of samples | before E57 | after E57 | after later |
-|---|---|---|---|
-| idle > 1.5× / > 2× | 0.43 / 0.082 | 0.13 / 0.005 | 0.13 / 0.018 |
-| cruise > 1.5× / > 2× | 0.98 / 0.056 | 1.73 / 0.117 | 2.21 / 0.557 |
-| boost > 1.5× / > 2× | 6.00 / 0.773 | 5.64 / 0.289 | 2.20 / 0.170 |
+| cyl 6, % of samples | before | after |
+|---|---|---|
+| idle > 1.5× / > 2× | 0.38 / 0.066 | 0.13 / 0.015 |
+| cruise > 1.5× / > 2× | 0.85 / 0.048 | 2.07 / 0.422 |
+| boost > 1.5× / > 2× | 4.83 / 0.580 | 3.10 / 0.192 |
 
-- Idle: cyl 6 and cyl 4 (the two most-trimmed) dropped (cyl 4 0.23 → 0.04 % at 1.5×); untrimmed cyl 1 rose (0.63 → 1.37 %). The pattern follows the trim. Per drive, the spiky idle stretch was Apr 20 – May 1 (up to 2.2 % / 0.9 %); early April was quiet; no drive after May 4 went above 0.61 % / 0.12 %.
-- Boost: the drop is engine-wide (cyl 1 > 2× 1.38 → 0.72 → 0.14 %, cyl 3 0.64 → 0.15 → 0 %), the same-fuel after set is only 32 s of boost, and boost overshoot stopped at the same time (below). Not attributable to the trim alone.
-- Cruise: spikes went up after the trim, cyl 6 at the same fuel (0.98 → 1.73 %) and every cylinder later (lower ethanol). Unexplained.
-- Median knock voltage vs boost barely moved; the 99th percentile came down (4000–5500 rpm: before 1.55–1.98 V, after later 1.38–1.55 V).
-- Knock-voltage CoV (`emu-black-knock-cov` method, no-knock gate unavailable in the binary): MAP > 100 kPa 25.1 → 20.4 → 21.2 %; MAP > 130 kPa 23.4 → 20.4 → 20.1 %.
-- Knock counts in the CSV exports: two all year, both after the trim, both flagged on cyl 1 (and cyl 5), cyl 6 under 1 V.
+- Idle: cyl 6 and cyl 4 dropped (cyl 4 0.20 → 0.04 % at 1.5×); untrimmed cyl 1 rose (0.98 → 3.79 %). Spiky idle drives clustered Apr 20 – May 1.
+- Boost: engine-wide drop (> 2×: cyl 1 0.99 → 0.19, cyl 3 0.42 → 0.03, cyl 4 0.26 → 0.14, cyl 6 0.58 → 0.19 %), trimmed and untrimmed cylinders alike. Boost overshoot (below) is unrelated to the knock peaks (Will, 2026-10-02).
+- Cruise: peaks rose on cyl 6 and cyl 1, 3, 4 (> 2×: cyl 4 0.007 → 0.42 %). Unexplained; see the per-cylinder/dwell follow-up below.
+- Knock-voltage CoV (`emu-black-knock-cov` method, no-knock gate unavailable in binary): MAP > 100 kPa 24.1 → 21.5 %; > 130 kPa 24.1 → 21.0 %.
+- Knock counts in the CSV exports: two all year, both after the trim, both flagged on cyl 1.
 
-**Idle quality** (`emu-black-idle-stability` method; steady segments gated on `Idle state` 2, closed TPS, slew < 300 rpm/s, CLT ≥ 80; 25 Hz so quality, not COV-of-IMEP):
+**Idle misfire proxy — rich lambda blips** (no misfire channel; `questions.py`). Corrections from Will, 2026-10-02: **a misfire reads RICH on this wideband** (an earlier version counted lean blips — wrong), and **idle RPM (sags, jitter) is not a usable misfire metric** over this period because the throttle-body problems dominate it. Rich blip = `Lambda 1` below a centred 15-sample (0.6 s) rolling median by more than x while lambda is valid; steady warm idle gate as `emu-black-idle-stability` (`Idle state` 2, closed TPS, slew < 300 rpm/s, CLT ≥ 80); 156 / 243 min of steady idle. Per minute, before → after:
+- rich blips > 0.005 / 0.01 / 0.015 / 0.02 / 0.03 / 0.04 / 0.06 λ: 10.87 → 11.78; 1.17 → 1.14; 0.361 → 0.234; 0.158 → 0.075; 0.105 → 0.033; 0.085 → 0.029; 0.072 → 0.025.
+- Reading: blips ≤ 0.01 λ (sensor-noise scale) unchanged; from 0.015 λ up the rate fell 35–69 %. Will reported idle felt better.
 
-| | before E57 | after E57 | after later |
-|---|---|---|---|
-| steady idle, min | 125 | 63 | 180 |
-| RPM jitter (1 s detrended) % | 1.025 | 0.951 | 0.868 |
-| `Lambda 1` jitter % | 0.786 | 0.587 | 0.360 |
-| hold CoV % (includes PID hunt) | 9.74 | 11.43 | 11.20 |
+**EGT, cyl6 − cyl3 (`EGT 2` − `EGT 1`), °C**, MAP held in band 2 s, overrun excluded (idle MAP<45 & RPM<1400; light 25–60; cruise 60–95; transition 95–130; boost > 130): idle +42 → +18, light +44 → +9, cruise +31 → −1, transition +21 → −14, boost +12 → −26.
 
-Will reported idle felt better after the trim; the fast components agree (RPM jitter −7 %, lambda jitter −25 % at the same fuel). The slow hunt didn't improve; that is the airflow PID.
+**Boost** (pulls = Boost > 20 kPa for ≥ 0.5 s): before 198 pulls, median peak 51 kPa, max 136 kPa against `Boost Target` max 116 (overshoot common); after 49 pulls, median 54, max 89 against target max 99 (peaks at or under target). Unrelated to the knock-peak result (Will). What changed in boost control isn't in any export (no pre-trim XML; boost PID disabled in every export since 05-22).
 
-**Idle misfire proxies** (no misfire channel; `questions.py` in the report folder). Same steady-idle gate. RPM sag = run of samples below a centred 7-sample (0.28 s) rolling median by more than d rpm; the short window passes a lost-firing sag but not the ~1 Hz idle hunt (a 1 s window counted hunt troughs, first attempt discarded). Lean blip = `Lambda 1` above a centred 15-sample (0.6 s) median by more than x while lambda is valid. Events per minute of steady idle, before E57 → after E57 → after later:
-- sags > 10 / 15 / 20 / 25 rpm: 3.43 → 1.99 → 3.51; 1.12 → 0.55 → 0.96; 0.51 → 0.24 → 0.47; 0.20 → 0.13 → 0.25. Sags > 30 rpm are rare in every period (< 0.15 /min).
-- lean blips > 0.015 / 0.02 / 0.03 λ: 0.78 → 0.52 → 0.34; 0.48 → 0.32 → 0.10; 0.28 → 0.15 → 0.02.
-- Reading: on the same fuel both proxies fell (sags −37…−54 %, lean blips −33…−48 %). From May 11 the sags returned to about the pre-trim rate while lean blips kept falling; ethanol and idle settings changed in that period.
+## Per-cylinder knock and dwell follow-up (2026-10-02)
 
-**EGT, cyl6 − cyl3 (`EGT 2` − `EGT 1`), °C**, MAP held in band 2 s, overrun excluded (bands as above: idle MAP<45 & RPM<1400; light 25–60; cruise 60–95; transition 95–130):
+Will asked: do the per-cylinder knock data say to trim cylinders differently, or to enrich the whole map, and how much did coil dwell matter? Scripts: `explore_cyl_dwell.py`, `explore_checks.py` in the report folder; binary split at the trim. Tune facts read from `Supra.xml.emub3` (2026-10-02) and the 05-22 export (identical here): `ksInputCylinder1..6` = 1,2,1,2,1,2 (sensor 1 hears cyl 1/3/5, sensor 2 hears 2/4/6); `knockSensorGainCyl1..6` equal; `ignitionTrim1..6` all 0; `knockWindowStart` 20 and `knockWindowDurationEx` 100 (window units not confirmed; the help page's diagram isn't in the repo).
 
-| | pump fuel Mar | before E57 | after E57 | after later |
-|---|---|---|---|---|
-| idle | +43 | +42 | +24 | +16 |
-| light | +56 | +38 | +4 | +11 |
-| cruise | +41 | +27 | +1 | −2 |
-| transition | +25 | +15 | −6 | −16 |
+**Cylinders can't be ranked against each other from knock voltage.** Median level per cylinder differs a lot and doesn't move with the trim (boost: cyl 2 ≈ 1.00 V and cyl 5 ≈ 0.96 V vs cyl 3 ≈ 0.77 V), so each window has its own noise floor; cyl 2 and 5 show the fewest peaks because their floor is highest, not because they burn best. Before/after changes within one cylinder are valid; cross-cylinder rankings are not. The knock data alone can't say which cylinder needs more trim.
 
-**Boost** (logged `Boost`, kPa gauge; pulls = Boost > 20 kPa for ≥ 0.5 s): before the trim pulls regularly overshot target, peaks to 105 kPa on E57 and 136 kPa on pump fuel in March (Mar 16 and 28) against `Boost Target` maxima of 100–116. After the trim, peaks sit at or under target: max 89 kPa (target 99) on E57, 81 kPa later. Median pull peak 51 → 66 → 52 kPa (most pulls are short and spool-limited). So boost came down at the top end around the trim; what changed in boost control is not in any export (no pre-trim XML; boost PID disabled in every export since 05-22).
+**Boost peaks are single-cylinder events tied to timing, not mixture.** 82–90 % of boost peaks hit one cylinder alone in the sample (combustion-like, not a common electrical/mechanical burst). Against same-cell samples, boost peaks (before group) sit at +1.6…+2.7° more `Ignition Angle`, +10…+16 % ethanol, −2.5…−5 °C IAT, and λ error within ±0.014 of the cell (`Lambda 1` − `Lambda target`). By fuel: before E57 cyl 6 0.80 %, before E9 0.32 %, after E57 0.29 %, after E25/E14 0.15–0.21 % (> 2×). The worst boost peaks were the E57 pre-trim drives, which run the ethanol-blend timing.
+
+**Cruise peaks follow timing and ethanol, and arrive as multi-cylinder bursts.** After the trim, cruise cells run +6.2° `Ignition From Table` (+5.8° `Ignition Angle`) vs the same cells before (2000–2500 rpm: before E57 28.5–31°, after E57 35.5–39°, after E25 33–37°, after E14 31.5–35.5°; before E9 20.5–23°). Cruise peaks: before E9 0.03 %, before E57 0.06 %, after E57 0.11 %, after E25 0.38 %, after E14 0.77 % (cyl 6, > 2×), concentrated at 2000–2500 rpm. Only 36–66 % are single-cylinder; the rest co-occur on cyl 1/3/4/6 in the same sample. Against same-cell samples they sit at +6…+8 °C IAT, −9…−12 % ethanol, MAP falling 17–23 kPa/s (cyl 1/3/4), λ +0.01…+0.02 of the cell. The whole cruise region already runs ~0.05 richer than before in the same cells while `Lambda target` rose 0.012 (λ − target median −0.032 after).
+
+**Enrich the whole map?** The data don't point at fuel: boost peaks occur at on-target λ, cruise already runs rich of target, and both peak types line up with ignition advance (and lower ethanol / hotter IAT at cruise). The lever the data point to is timing: the cruise table in the 2000–2500 rpm band and how the ethanol blend pulls it back on low ethanol, plus IAT ignition correction. Will owns that call.
+
+**Trim differently?** The only measured pair is cyl 6 vs cyl 3 EGT. Per trim-table cell (`fuelTrimRPM` × `fuelTrimLoad`, nearest cell, MAP held 2 s), cyl6 − cyl3 °C before → after: 1000/20 +41.6 → +18.0; 1000/75 +36.8 → +13.3; 2000/20 +38.0 → +4.1; 2000/75 +33.3 → +0.8; 4000/20 +56.5 → +25.0; 4000/75 +45.4 → +9.0; 4000/130 +20.4 → −16.4 (no data at 185/240 kPa held 2 s). The trim-difference change between the groups was ~7 % (20 and 75 kPa columns) and ~6.5 % (130 kPa), giving 3.4–5.7 °C per % of trim. Residual / sensitivity = cyl 6 relative to cyl 3: ≈ +5 % at 1000/20 (idle), ≈ +1 % at 2000/20–75, ≈ +6 % at 4000/20, ≈ +2 % at 4000/75, ≈ −3 % at 4000/130. The trim tables are RPM-flat (same row at every `fuelTrimRPM`), but the residual has an RPM shape (at 20 kPa: +18 / +4 / +25 °C at 1000 / 2000 / 4000 rpm). Caveats: idle EGT is low and slow; a fixed probe offset can't be separated without a one-time 3↔6 probe swap; cyl 2/4/5 remain unmeasured.
+
+**Coil dwell.** `Dwell Time` was the same before and after (4.25 ms up to 4000 rpm, 4.05 at 5000, 3.70 → 3.85 at 6000), battery voltage identical (median 13.57 V both), `Overdwell` 0 in the CSV pairs. So dwell can't explain the before/after change. Within a cell dwell moves only ±0.1 ms and is the dwell table following battery voltage (within-cell r = −0.98 with battery V, +0.72 with IAT). Cruise peaks are more frequent in the longest-dwell third (cyl 6 0.69 % vs 0.22 %), but that third is the low-voltage, heat-soaked third; IAT is the more plausible driver. Boost shows no consistent dwell relation. One mechanism remains open: if the knock window really spans 100° from 20° ATDC, the next cylinder's coil charge and spark (120° later minus advance) fall inside it, and coil switching could appear as noise in that window. Confirming the window units in the EMU Sampling page would settle it.
 
 **Superseded first pass (CSV exports only, same day):** concluded the boost ceiling rose after the trim, idle CoV was unchanged and cyl 6 knock was unchanged. All three came from too little pre-trim data (two Apr 8 drives, 15 s of idle, 5 short pulls) and from comparing knock medians instead of spikes. The EGT direction held.
 

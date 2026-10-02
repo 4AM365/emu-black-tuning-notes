@@ -10,7 +10,9 @@ CH = {"RPM":lambda A:u16(A,63), "MAP":lambda A:u16(A,66)/256, "Boost":lambda A:u
       "IAT":lambda A:u16(A,98)/256, "EGT 1":lambda A:u16(A,106), "EGT 2":lambda A:u16(A,108), "Injectors PW":lambda A:u16(A,120)*0.01613,
       "Idle target":lambda A:u16(A,111), "Ignition Angle":lambda A:i8(A,95)/2, "Ethanol content":lambda A:u16(A,195)/512,
       "Short term trim":lambda A:i8(A,128)/16-4, "Idle state":lambda A:u16(A,379)/256, "Data changing":lambda A:u16(A,473)/32768,
-      "Lambda 1":lambda A:u16(A,449)/1024, "Lambda is valid":lambda A:u8(A,363)/12}
+      "Lambda 1":lambda A:u16(A,449)/1024, "Lambda is valid":lambda A:u8(A,363)/12,
+      "Lambda target":lambda A:u16(A,269)*0.000625, "Dwell Time":lambda A:u8(A,118)*0.05, "Battery voltage":lambda A:u16(A,100)/37,
+      "Ignition From Table":lambda A:u16(A,146)/512}
 for c in range(1,7):
     CH[f"Knock voltage peak cyl {c}"]=(lambda c: lambda A:u8(A,404+c)*5/255)(c)
     CH[f"Injector {c} trim"]=(lambda c: lambda A:u8(A,226+c))(c)

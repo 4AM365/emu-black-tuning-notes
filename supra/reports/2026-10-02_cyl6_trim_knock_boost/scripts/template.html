@@ -84,7 +84,7 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 <header>
   <div class="eyebrow">MKIV Supra · 2JZ-GTE · EMU Black log study · 2026-10-02</div>
   <h1>Did the per-cylinder trim cut knock peaks and idle misfire?</h1>
-  <p class="lede">The trim went live on <b>May 4 2026 between 17:25 and 17:38</b>. Ethanol was 56–57 % from Mar 29 to May 10, so the five weeks before and six days after run on the same fuel. Data: 119 decoded LogAutosave binaries, Mar 1 → Sep 29, about 25 hours of running.</p>
+  <p class="lede">The trim went live on <b>May 4 2026 between 17:25 and 17:38</b>. Before = every sample without trim, Mar 1 → May 4 (about 15 hours of running). After = every sample with trim, May 4 → Sep 29 (about 10 hours). Data: 119 decoded LogAutosave binaries.</p>
   <div class="legend" id="eraLegend"></div>
 </header>
 
@@ -93,18 +93,18 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
     <span class="q">Question 1 · Did knock sensor peaks reduce after the trim?</span>
     <span class="a">Yes at idle and in boost. No at cruise.</span>
     <ul>
-      <li>Idle, cyl 6 readings above 2× normal: <b>0.082 % → 0.005 %</b> of samples on the same fuel (−94 %). Trimmed cyl 4 fell too; untrimmed cyl 1 did not.</li>
-      <li>Boost, cyl 6 above 2×: <b>0.77 % → 0.29 %</b> (−63 %), then 0.17 %. Cyl 1 fell as well, so in boost the drop is engine-wide.</li>
-      <li>Cruise, cyl 6 above 2×: 0.056 % → 0.117 %. Peaks rose.</li>
+      <li>Idle, cyl 6 readings above 2× normal: <b>0.066 % → 0.015 %</b> of samples (−78 %). Cyl 4 fell too.</li>
+      <li>Boost, cyl 6 above 2×: <b>0.58 % → 0.19 %</b> (−67 %). Every cylinder fell in boost, so this part is engine-wide.</li>
+      <li>Cruise, cyl 6 above 2×: 0.048 % → 0.42 %. Peaks rose, on cyl 6 and on cyl 1, 3 and 4.</li>
     </ul>
   </div>
   <div class="answer">
     <span class="q">Question 2 · Did misfire at idle reduce after the trim?</span>
-    <span class="a">Yes on the same fuel. Later, partly.</span>
+    <span class="a">Yes.</span>
     <ul>
-      <li>Sharp RPM sags at idle (more than 15 rpm below the 0.28 s median): <b>1.12 → 0.55 per minute</b> (−51 %). Every depth from 10 to 25 rpm fell 37–54 %.</li>
-      <li>Lean lambda blips (more than 0.02 λ): <b>0.48 → 0.32 per minute</b> (−33 %); above 0.03 λ, −48 %. They kept falling later (0.10).</li>
-      <li>From May 11 on, sharp sags went back to about the pre-trim rate as fuel and idle settings changed. There is no misfire channel; these are the two standard proxies.</li>
+      <li>Rich lambda blips at idle (more than 0.02 λ below the 0.6 s median): <b>0.158 → 0.075 per minute</b> (−53 %). Bigger than 0.03 λ: 0.105 → 0.033 (−69 %).</li>
+      <li>Blips of 0.01 λ or less, which are sensor-noise scale, didn't change.</li>
+      <li>There is no misfire channel. A misfire reads rich on this wideband, so rich blips are the proxy. Idle RPM isn't used because of the throttle-body problems.</li>
     </ul>
   </div>
 </div>
@@ -117,7 +117,7 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
   <p>Each line shows the share of samples where <code>Knock voltage peak cyl 6</code> is more than <i>k</i> times the median for its 250 rpm × 10 kPa cell, for every <i>k</i> from 1.25 to 3. One median per cell, pooled over all three periods. A line lower and to the left means fewer and smaller peaks. Log scale; points at zero are drawn on the floor.</p>
   <div class="legend" id="legExc"></div>
   <div class="grid3" id="excPanels"></div>
-  <p class="note">Idle = idle PID active (<code>Idle state</code> 2), CLT ≥ 80 °C. Cruise = MAP 30–95 kPa, 1500–4000 rpm. Boost = MAP 105–175 kPa, 3500–6000 rpm, the range both periods reach. The same-fuel after period has 80 min of idle, 64 min of cruise and 32 s of boost.</p>
+  <p class="note">Idle = idle PID active (<code>Idle state</code> 2), CLT ≥ 80 °C. Cruise = MAP 30–95 kPa, 1500–4000 rpm. Boost = MAP 105–175 kPa, 3500–6000 rpm, the range both periods reach. Coverage, before / after: warm idle 4.4 h / 4.2 h, cruise 6.9 h / 3.1 h, boost in this band 8.4 min / 2.4 min.</p>
 </section>
 
 <section id="s-cyl">
@@ -129,7 +129,7 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
     <div class="chart"><div class="ctitle">Warm idle (% above 1.5×)</div><div id="cylIdle"></div></div>
     <div class="chart"><div class="ctitle">Boost (% above 1.5×)</div><div id="cylBoost"></div></div>
   </div>
-  <p class="note">In boost cyl 1 and cyl 3 fell as much as cyl 6, and boost overshoot stopped at the same time (part 3). The boost drop is real but can't be credited to the trim alone.</p>
+  <p class="note">In boost, cyl 1 and cyl 3 fell as much as cyl 6, so the boost drop isn't specific to the trimmed cylinders. At idle, untrimmed cyl 1 went the other way (0.98 → 3.79 %).</p>
 </section>
 
 <section id="s-kdrive">
@@ -144,12 +144,12 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
   <div class="eyebrow">1d · Knock voltage peak cyl 6 vs Boost</div>
   <h2>Every boost sample, by period</h2>
   <p>Samples with <code>Boost</code> above 5 kPa, 3000–6500 rpm, fuel on, up to 2,500 per panel. Same axes on all three. Hover a dot for its RPM and log.</p>
-  <div class="grid3" id="scatters"></div>
+  <div class="grid2" id="scatters"></div>
 </section>
 
 <section id="s-pulls">
   <div class="eyebrow">1e · Single pulls</div>
-  <h2>Full-pedal pulls on the same fuel</h2>
+  <h2>Full-pedal pulls before and after</h2>
   <p>Boost on top, cyl 6 knock voltage below, on a shared time axis. Pedal ≥ 90 % and at least 1.5 s in boost.</p>
   <div id="pullPairs" style="display:grid;gap:18px"></div>
 </section>
@@ -157,29 +157,26 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 <h2 class="part">Question 2 · Idle misfire</h2>
 
 <section id="s-dips">
-  <div class="eyebrow">2a · RPM dips</div>
-  <h2>Fewer sharp RPM sags and lean blips at idle</h2>
-  <p>A misfire takes one cylinder's push out of the crank, so RPM sags for a sample or two. Count of sags per minute of steady warm idle, for every depth from 5 to 50 rpm below a centred 0.28 s (7-sample) rolling median. The short window keeps sharp sags and drops the slow ~1 Hz idle hunt. Steady idle = idle PID active, throttle closed, RPM slew under 300 rpm/s, CLT ≥ 80 °C, at least 4 s (the <code>emu-black-idle-stability</code> gate). Log scale.</p>
+  <div class="eyebrow">2a · Rich lambda blips</div>
+  <h2>Fewer rich blips at idle</h2>
+  <p>A misfire reads rich on this wideband. Count of rich blips per minute of steady warm idle: runs where <code>Lambda 1</code> drops below its centred 0.6 s (15-sample) rolling median by more than the size on the x axis, while lambda is valid. Steady idle = idle PID active, throttle closed, RPM slew under 300 rpm/s, CLT ≥ 80 °C, at least 4 s (the <code>emu-black-idle-stability</code> gate). Log scale.</p>
   <div class="legend" id="legDips"></div>
-  <div class="grid2">
-    <div class="chart"><div class="ctitle">RPM sags per minute vs sag depth</div><div id="dips"></div></div>
-    <div class="chart"><div class="ctitle">Lean lambda blips per minute vs blip size</div><div id="lean"></div></div>
-  </div>
-  <p class="note">5 rpm wiggles are ordinary ripple and don't change. The same-fuel drop sits at 10–25 rpm. Sags deeper than 30 rpm are rare in every period (under 0.15 per minute). Lean blips: <code>Lambda 1</code> rising above its centred 0.6 s median while lambda is valid; unburned air from a misfire reads lean.</p>
+  <div class="chart"><div class="ctitle">Rich lambda blips per minute vs blip size</div><div id="lean"></div></div>
+  <p class="note">Blips of 0.01 λ or less didn't change; that is sensor-noise scale. From 0.015 λ up the rate fell 35–69 %. Idle RPM isn't used here: throttle-body problems dominate it over this period.</p>
   <details><summary>Table view</summary><div class="tbl" id="tblMis"></div></details>
 </section>
 
 <section id="s-trace">
   <div class="eyebrow">2b · What it looks like</div>
-  <h2>Thirty seconds of warm idle, before and after</h2>
-  <p>For each period, the drive whose rate of sags deeper than 25 rpm is closest to that period's average, middle 30 s of its longest steady stretch. RPM with the idle target, then <code>Lambda 1</code>. A slow swing is the idle-PID hunt, which the sag count filters out.</p>
+  <h2>Thirty seconds of warm idle lambda, before and after</h2>
+  <p>For each period, the drive whose rate of rich blips bigger than 0.02 λ is closest to that period's average, middle 30 s of its longest steady stretch.</p>
   <div class="grid2" id="traces"></div>
 </section>
 
 <section id="s-mdrive">
   <div class="eyebrow">2c · Drive by drive</div>
-  <h2>Sharp sags deeper than 15 rpm, per drive</h2>
-  <p>Per-drive rates scatter widely on both sides. The six same-fuel days sit at the low end of the before spread; later drives spread back out.</p>
+  <h2>Rich blips bigger than 0.02 λ, per drive</h2>
+  <p>Most drives have none on either side. The before period has more drives with a cluster of them.</p>
   <div class="legend" id="legMdrive"></div>
   <div class="chart"><div id="mdrive"></div></div>
 </section>
@@ -196,8 +193,8 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
 
 <section id="s-boost">
   <div class="eyebrow">3b · Boost</div>
-  <h2>Boost overshoot stopped around the same time</h2>
-  <p>Each dot is one pull. Before the trim, pulls often overshot target: peaks to 105 kPa on E57 and 136 kPa on pump fuel in March, against targets of 100–116. After it, peaks sit at or under target, top 89 kPa. Grey = pump-fuel weeks before Mar 29.</p>
+  <h2>How boost levels changed</h2>
+  <p>Each dot is one pull. Before the trim, pulls often overshot target, with peaks to 136 kPa against targets up to 116. After it, peaks sit at or under target and top out at 89 kPa.</p>
   <div class="legend" id="legBoost"></div>
   <div class="grid2">
     <div class="chart"><div class="ctitle">Peak boost by date (kPa gauge)</div><div id="boostDate"></div></div>
@@ -210,10 +207,10 @@ footer{padding-block:28px 0;font-size:13px;color:var(--muted);display:grid;gap:6
   <h2>Where the numbers come from</h2>
   <ul class="plain">
     <li>The <code>.emublog3</code> autosaves were decoded directly (504-byte records, 25 Hz), with every channel used here matched exactly against two CSV exports (Apr 8 and May 30). 20 duplicate or empty autosaves were dropped. Each sample's period comes from its own logged <code>Injector 6 trim</code> and <code>Ethanol content</code>.</li>
-    <li>The same-fuel after period is six days. Idle and cruise are well covered; boost is 32 s, so the boost answer leans on the later period, where ethanol is lower.</li>
-    <li>Other work happened around May 4 (idle airflow, VE, lambda settings) and boost behaviour changed. The idle knock result has a built-in control (cyl 1); the misfire proxies don't.</li>
-    <li>25 Hz logging can't see individual firings at idle (~55 per second). Sags and lean blips are the outline of a misfire, not a count of them. The window lengths (0.28 s RPM, 0.6 s lambda) were chosen so the ~1 Hz idle hunt doesn't register; a 1 s window counted hunt troughs as dips.</li>
-    <li>Knock-voltage CoV in boost (<code>emu-black-knock-cov</code> method, MAP &gt; 100 kPa): 25.1 → 20.4 → 21.2 %. Two knock counts appear in the CSV exports all year, both after the trim and both on cyl 1.</li>
+    <li>Fuel differs between the two groups. Before = pump fuel (Mar 1–29) then E57; after = E57 (May 4–10), E25, then E14 from Aug 22. Ethanol suppresses knock, so lower ethanol after the trim works against the knock result, not for it.</li>
+    <li>Other work happened over the same months (idle airflow, VE, lambda settings, ignition smoothing in June). The idle knock result has a built-in control (cyl 1); the misfire proxies don't.</li>
+    <li>25 Hz logging can't see individual firings at idle (~55 per second), and the wideband smooths them further. A rich blip is the outline of a misfire, not a count of them.</li>
+    <li>Knock-voltage CoV in boost (<code>emu-black-knock-cov</code> method, MAP &gt; 100 kPa): 24.1 → 21.5 %. Two knock counts appear in the CSV exports all year, both after the trim and both on cyl 1.</li>
   </ul>
   <div class="tbl" id="tblData"></div>
 </section>
@@ -273,7 +270,7 @@ function grouped(container,cats,val,o){
   const f=frame(container,Object.assign({x:[0,cats.length],xt:[],m:{l:46,b:34,r:10}},o));
   const pts=[];
   cats.forEach((c,ci)=>{const cx=f.X(ci+0.5);txt(f.g,cx,f.H-f.m.b+17,c.label,"alab","middle");
-    [0,1,2].forEach(g=>{const v=val(c,g);if(v==null)return;const bw=Math.min(24,(f.X(1)-f.X(0))/4.6),gap=Math.min(10,(f.X(1)-f.X(0))/14),x=cx+(g-1)*(bw+gap)-bw/2;bar(f,x,bw,Math.min(v,o.y[1]),"d"+g);
+    [0,1].forEach(g=>{const v=val(c,g);if(v==null)return;const bw=Math.min(24,(f.X(1)-f.X(0))/4.6),gap=Math.min(10,(f.X(1)-f.X(0))/14),x=cx+(g-0.5)*(bw+gap)-bw/2;bar(f,x,bw,Math.min(v,o.y[1]),"d"+g);
       if(o.labels!==false)txt(f.g,x+bw/2,f.Y(Math.min(v,o.y[1]))-5,o.vf?o.vf(v):v,"lbl","middle");pts.push([x+bw/2,f.Y(Math.min(v,o.y[1])),`<b>${c.label}</b><br>${G[g]}<br>${o.tf?o.tf(c,g,v):v}`])})});
   hoverPoints(f,pts);return f;
 }
@@ -287,7 +284,7 @@ function switchLine(f){el("line",{x1:f.X(SWITCH),x2:f.X(SWITCH),y1:f.m.t,y2:f.H-
 const Q = DATA.q;
 const L10 = v => Math.log10(v);
 const fmtLog = v => { const x = Math.pow(10, v); return x >= 1 ? String(+x.toFixed(0)) : String(+x.toPrecision(1)); };
-legend("eraLegend", [0, 1, 2]);
+legend("eraLegend", [0, 1]);
 
 /* curve panel on a log y axis: series = [{g, xs, ys}] */
 function logCurves(container, series, o) {
@@ -306,18 +303,18 @@ function logCurves(container, series, o) {
 
 /* 1a exceedance */
 (function () {
-  legend("legExc", [0, 1, 2], true);
+  legend("legExc", [0, 1], true);
   const host = document.getElementById("excPanels"), ks = Q.knock.ks;
   [["idle", "Warm idle", 0.001, 2], ["cruise", "Cruise", 0.001, 10], ["boost", "Boost", 0.01, 50]].forEach(([reg, label, floor, top]) => {
     const c = document.createElement("div"); c.className = "chart"; c.innerHTML = `<div class="ctitle">${label}</div>`; host.appendChild(c);
-    const series = [0, 1, 2].map(g => { const r = Q.knock.rows.find(q => q.reg === reg && q.g === g && q.cyl === 6); return { g, xs: ks, ys: r.pct }; });
+    const series = [0, 1].map(g => { const r = Q.knock.rows.find(q => q.reg === reg && q.g === g && q.cyl === 6); return { g, xs: ks, ys: r.pct }; });
     logCurves(c, series, { w: 360, h: 300, floor, top, x: [1.2, 3.05], xt: [1.5, 2, 2.5, 3], xf: v => v + "×", xl: "Peak above k × normal", yl: "% of samples (log)", xname: "above", vf: v => v.toFixed(3) + " %", aria: `Cyl 6 knock peak exceedance, ${label}` });
   });
 })();
 
 /* 1b per cylinder (>1.5x = index of 1.5 in ks) */
 (function () {
-  legend("legCyl", [0, 1, 2]);
+  legend("legCyl", [0, 1]);
   const i15 = Q.knock.ks.indexOf(1.5), i2 = Q.knock.ks.indexOf(2);
   const val = (reg, g, c, i) => { const r = Q.knock.rows.find(q => q.reg === reg && q.g === g && q.cyl === c); return r ? r.pct[i] : null; };
   const cats = [1, 2, 3, 4, 5, 6].map(c => ({ c, label: "cyl " + c }));
@@ -334,13 +331,13 @@ function driveTimeline(id, rows, yk, o) {
   hoverPoints(f, pts);
 }
 /* 1c */
-legend("legKdrive", [0, 1, 2]);
+legend("legKdrive", [0, 1]);
 driveTimeline("kdrive", Q.knock_drive.filter(r => r.reg === "idle"), "p20", { y: [0, 0.5], yt: [0, 0.1, 0.2, 0.3, 0.4, 0.5], yl: "% idle samples above 2×", aria: "Cyl 6 idle knock peaks per drive", tip: r => `${r.p20.toFixed(3)} % above 2×, ${r.p15.toFixed(2)} % above 1.5×<br>${(r.n / 1500).toFixed(1)} min warm idle` });
 
 /* 1d scatter */
 (function () {
   const host = document.getElementById("scatters");
-  [0, 1, 2].forEach(g => {
+  [0, 1].forEach(g => {
     const c = document.createElement("div"); c.className = "chart"; c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="k${g}"></i>${G[g]}</span></span></div>`; host.appendChild(c);
     const pts = [];
     const f = frame(c, { w: 360, h: 300, m: { l: 44, b: 40, r: 10 }, x: [0, 110], y: [0.3, 2.5], xl: "Boost (kPa gauge)", yl: "Knock cyl 6 (V)", xt: [0, 25, 50, 75, 100], yt: [0.5, 1, 1.5, 2, 2.5], aria: `Cyl 6 knock voltage against boost, ${G[g]}` });
@@ -372,12 +369,11 @@ driveTimeline("kdrive", Q.knock_drive.filter(r => r.reg === "idle"), "p20", { y:
 
 /* 2a misfire curves */
 (function () {
-  legend("legDips", [0, 1, 2], true);
+  legend("legDips", [0, 1], true);
   const M = Q.misfire;
-  logCurves(document.getElementById("dips"), M.groups.map(r => ({ g: r.g, xs: M.ds, ys: r.dips })), { floor: 0.01, top: 100, x: [2, 52], xt: [5, 10, 15, 20, 25, 30, 40, 50], xf: v => v, xl: "Sag deeper than (rpm below 0.28 s median)", yl: "Sags per minute (log)", xname: "sags deeper than", vf: v => v.toFixed(2) + " /min", aria: "Idle RPM dip rate versus depth" });
-  logCurves(document.getElementById("lean"), M.groups.map(r => ({ g: r.g, xs: M.xs, ys: r.lean })), { floor: 0.005, top: 20, x: [0, 0.065], xt: [0.01, 0.02, 0.03, 0.04, 0.06], xf: v => "+" + v.toFixed(3).replace(/0$/, ""), xl: "Lean blip bigger than (λ above 0.6 s median)", yl: "Blips per minute (log)", xname: "blips bigger than", vf: v => v.toFixed(3) + " /min", aria: "Idle lean lambda blip rate versus size" });
-  const rows = []; M.ds.forEach((d, i) => rows.push([`RPM sag > ${d} rpm`, ...M.groups.map(r => r.dips[i].toFixed(2))]));
-  M.xs.forEach((x, i) => rows.push([`Lean blip > ${x.toFixed(3)} λ`, ...M.groups.map(r => r.lean[i].toFixed(3))]));
+  logCurves(document.getElementById("lean"), M.groups.map(r => ({ g: r.g, xs: M.xs, ys: r.lean })), { floor: 0.005, top: 20, x: [0, 0.065], xt: [0.01, 0.02, 0.03, 0.04, 0.06], xf: v => "+" + v.toFixed(3).replace(/0$/, ""), xl: "Rich blip bigger than (λ below 0.6 s median)", yl: "Blips per minute (log)", xname: "blips bigger than", vf: v => v.toFixed(3) + " /min", aria: "Idle rich lambda blip rate versus size", w: 900, h: 320 });
+  const rows = [];
+  M.xs.forEach((x, i) => rows.push([`Rich blip > ${x.toFixed(3)} λ`, ...M.groups.map(r => r.lean[i].toFixed(3))]));
   rows.push(["Steady idle minutes", ...M.groups.map(r => r.min.toFixed(0))]);
   table("tblMis", ["Events per minute", ...G], rows);
 })();
@@ -387,34 +383,30 @@ driveTimeline("kdrive", Q.knock_drive.filter(r => r.reg === "idle"), "p20", { y:
   const host = document.getElementById("traces");
   Q.idle_traces.forEach(s => {
     const g = s.g, c = document.createElement("div"); c.className = "chart";
-    c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="l k${g}"></i>${s.f} · ${s.rate.toFixed(2)} sags &gt; 25 rpm per min</span></span></div>`; host.appendChild(c);
+    c.innerHTML = `<div class="ctitle"><span class="legend"><span><i class="l k${g}"></i>${s.f} · ${s.rate.toFixed(3)} rich blips &gt; 0.02 λ per min</span></span></div>`; host.appendChild(c);
     const tmax = 30;
-    const r = frame(c, { w: 420, h: 200, m: { l: 50, b: 22, r: 10, t: 10 }, x: [0, tmax], y: [900, 1400], yt: [900, 1000, 1100, 1200, 1300, 1400], yl: "RPM", xf: () => "", aria: "Idle RPM trace" });
-    el("path", { d: linePath(s.t.map((t, i) => [r.X(t), r.Y(Math.max(900, Math.min(1400, s.tgt[i])))])), class: "zero", fill: "none", "stroke-dasharray": "4 4" }, r.g);
-    el("path", { d: linePath(s.t.map((t, i) => [r.X(t), r.Y(Math.max(900, Math.min(1400, s.rpm[i])))])), class: "ln l" + g, "stroke-width": 1.5 }, r.g);
-    txt(r.g, r.X(29.5), r.Y(s.tgt[0]) - 5, "target", "lbl2", "end");
-    const l = frame(c, { w: 420, h: 170, m: { l: 50, b: 36, r: 10, t: 8 }, x: [0, tmax], y: [0.8, 1.1], yt: [0.8, 0.9, 1.0, 1.1], xl: "Time (s)", yl: "Lambda 1", aria: "Idle lambda trace" });
-    let segs = [[]]; s.t.forEach((t, i) => { if (s.lam[i] == null) { if (segs.at(-1).length) segs.push([]); } else segs.at(-1).push([l.X(t), l.Y(Math.max(0.8, Math.min(1.1, s.lam[i])))]); });
+    const l = frame(c, { w: 420, h: 240, m: { l: 50, b: 36, r: 10, t: 10 }, x: [0, tmax], y: [0.8, 1.05], yt: [0.8, 0.85, 0.9, 0.95, 1.0], xl: "Time (s)", yl: "Lambda 1", aria: "Idle lambda trace" });
+    let segs = [[]]; s.t.forEach((t, i) => { if (s.lam[i] == null) { if (segs.at(-1).length) segs.push([]); } else segs.at(-1).push([l.X(t), l.Y(Math.max(0.8, Math.min(1.05, s.lam[i])))]); });
     segs.filter(q => q.length > 1).forEach(q => el("path", { d: linePath(q), class: "ln l" + g, "stroke-width": 1.5 }, l.g));
-    const xs = s.t.map((t, i) => `<b>t = ${t.toFixed(2)} s</b><br>${s.rpm[i]} rpm (target ${s.tgt[i]})<br>λ ${s.lam[i] == null ? "not valid" : s.lam[i].toFixed(3)}<br>knock cyl 6 ${s.k6[i].toFixed(2)} V`);
-    hoverX(r, s.t.map((t, i) => [r.X(t), xs[i]])); hoverX(l, s.t.map((t, i) => [l.X(t), xs[i]]));
+    const xs = s.t.map((t, i) => `<b>t = ${t.toFixed(2)} s</b><br>λ ${s.lam[i] == null ? "not valid" : s.lam[i].toFixed(3)}<br>knock cyl 6 ${s.k6[i].toFixed(2)} V`);
+    hoverX(l, s.t.map((t, i) => [l.X(t), xs[i]]));
   });
 })();
 
 /* 2c */
-legend("legMdrive", [0, 1, 2]);
-driveTimeline("mdrive", Q.misfire_drive, "dip15", { y: [0, 3], yt: [0, 1, 2, 3], yl: "Sags > 15 rpm per minute", aria: "Idle RPM sags deeper than 15 rpm per drive", tip: r => `${r.dip15.toFixed(2)} sags > 15 rpm /min<br>${r.dip25.toFixed(2)} sags > 25 rpm /min<br>lean blips > 0.02: ${r.lean2 == null ? "–" : r.lean2.toFixed(2)} /min<br>${r.min} min steady idle` });
+legend("legMdrive", [0, 1]);
+driveTimeline("mdrive", Q.misfire_drive, "rich2", { y: [0, 1], yt: [0, 0.25, 0.5, 0.75, 1], yl: "Rich blips > 0.02 λ per minute", aria: "Idle rich lambda blips per drive", tip: r => `${r.rich2 == null ? "–" : r.rich2.toFixed(3)} rich blips > 0.02 λ /min<br>${r.min} min steady idle` });
 
 /* 3a EGT */
 (function () {
-  legend("legEgt", [0, 1, 2]);
-  const bands = ["idle", "light", "cruise", "transition"]; const E = DATA.egt.filter(r => r.g <= 2);
+  legend("legEgt", [0, 1]);
+  const bands = ["idle", "light", "cruise", "transition"]; const E = DATA.egt.filter(r => r.g <= 1);
   const f = frame(document.getElementById("egt"), { w: 900, h: 300, m: { l: 96, b: 40 }, x: [-30, 70], y: [0, 4], xl: "Cyl 6 − cyl 3 EGT (°C)", xt: [-20, 0, 20, 40, 60], yt: [], aria: "EGT difference cyl 6 minus cyl 3 by band" });
   el("line", { x1: f.X(0), x2: f.X(0), y1: f.m.t, y2: f.H - f.m.b, class: "zero" }, f.g); const pts = [];
   bands.forEach((b, bi) => {
     const yc = f.Y(3.5 - bi); txt(f.g, f.m.l - 10, yc + 4, b, "alab", "end"); if (bi) el("line", { x1: f.m.l, x2: f.W - f.m.r, y1: f.Y(4 - bi), y2: f.Y(4 - bi), class: "gl" }, f.g);
-    [0, 1, 2].forEach(g => {
-      const r = E.find(q => q.g === g && q.band === b); if (!r) return; const y = yc + (g - 1) * 15;
+    [0, 1].forEach(g => {
+      const r = E.find(q => q.g === g && q.band === b); if (!r) return; const y = yc + (g - 0.5) * 18;
       if (r.lo != null) el("line", { x1: f.X(Math.max(-30, r.lo)), x2: f.X(Math.min(70, r.hi)), y1: y, y2: y, class: "l" + g, "stroke-width": 2, "stroke-linecap": "round", "stroke-opacity": .45 }, f.g);
       const x = f.X(r.mean); el("circle", { cx: x, cy: y, r: 5, class: "d" + g + " ring" }, f.g); txt(f.g, x + 9, y + 4, (r.mean > 0 ? "+" : "") + r.mean.toFixed(0), "lbl");
       pts.push([x, y, `<b>${b} · ${G[g]}</b><br>mean ${r.mean.toFixed(1)} °C over ${r.files} drives<br>per-drive range ${fmt(r.lo, 0)} to ${fmt(r.hi, 0)}`]);
@@ -425,7 +417,7 @@ driveTimeline("mdrive", Q.misfire_drive, "dip15", { y: [0, 3], yt: [0, 1, 2, 3],
 
 /* 3b boost */
 (function () {
-  document.getElementById("legBoost").innerHTML = [0, 1, 2].map(g => `<span><i class="k${g}"></i>${G[g]}</span>`).join("") + `<span><i style="background:var(--muted)"></i>Before · pump fuel (Mar 1 – 29)</span>`;
+  document.getElementById("legBoost").innerHTML = [0, 1].map(g => `<span><i class="k${g}"></i>${G[g]}</span>`).join("");
   const P = DATA.pulls; const x0 = DAY("20260301"), x1 = DAY("20261001");
   const f = frame(document.getElementById("boostDate"), { w: 440, h: 300, m: { l: 44, r: 10 }, x: [x0, x1], y: [20, 140], yl: "Peak boost (kPa)", xt: mticks(x0, x1), xf: mfmt, yt: [20, 50, 80, 110, 140], aria: "Peak boost per pull by date" });
   switchLine(f); const pts = [];
@@ -440,8 +432,7 @@ driveTimeline("mdrive", Q.misfire_drive, "dip15", { y: [0, 3], yt: [0, 1, 2, 3],
 /* 4 data table */
 (function () {
   const F = DATA.files.filter(f => f.g >= 0);
-  const rows = [0, 1, 2].map(g => { const s = F.filter(f => f.g === g); const m = s.reduce((a, f) => a + f.min, 0); return [G[g], s.length, Math.round(m), Math.round(s.reduce((a, f) => a + f.eth * f.min, 0) / m)]; });
-  const s9 = F.filter(f => f.g === 9); rows.unshift(["Before · pump fuel (Mar 1 – 29), context only", s9.length, Math.round(s9.reduce((a, f) => a + f.min, 0)), 9]);
+  const rows = [0, 1].map(g => { const s = F.filter(f => f.g === g); const m = s.reduce((a, f) => a + f.min, 0); return [G[g], s.length, Math.round(m), Math.round(s.reduce((a, f) => a + f.eth * f.min, 0) / m)]; });
   table("tblData", ["Period", "Drives (files)", "Running minutes", "Ethanol %"], rows);
 })();
 </script>

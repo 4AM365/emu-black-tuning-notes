@@ -5,8 +5,9 @@
 ## Observation that prompted this
 After improving per-cylinder fuel trims (FFIM maldistribution correction),
 the knock-sensor signal went "dead smooth" under full boost — even with more timing.
-There were never knock *spikes* before or after; what changed was that the baseline
-noise level stopped "walking around." This is expected and is a sign of health.
+What changed was that the baseline noise level stopped "walking around." This is expected and is a sign of health.
+
+> **Update 2026-10-02:** an earlier version of this note said there were never knock *spikes* before or after. A log study on 119 decoded drives found the peaks did drop: idle and boost peaks above 2× the cell median fell 67–78 % on cyl 6 after the trim (Will's observation was "the spikes went away"). Car-specific numbers: `supra/notes/per_cylinder_trim_results.md`.
 
 ## What the sensor measures
 A knock sensor is a band-pass piezo accelerometer. The ECU windows around each

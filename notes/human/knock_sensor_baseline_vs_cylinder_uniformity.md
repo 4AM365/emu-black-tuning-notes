@@ -11,6 +11,7 @@
 - A fixed cylinder-to-cylinder offset plus the higher cycle-to-cycle COV of lean mixtures makes the windowed energy oscillate. That "walk" is real maldistribution information, not sensor noise.
 - Equalizing per-cylinder lambda flattens it three ways: uniform per-event band energy, no cylinder near the edge, lower COV. On this build the channel went dead-smooth after per-cylinder trims — even with more timing.
 - A flat, smooth baseline at max power is the acoustic fingerprint of health. Watch variance as a uniformity metric — it flags a cylinder near the edge before any spike appears.
+- Spikes drop too: on this build cyl 6 peaks above 2× normal fell 67–78 % at idle and in boost after the trim (2026-10-02 log study).
 
 **When to care:** after changing per-cylinder fuel trims, and whenever the knock baseline starts walking at high load — chase fuel distribution before blaming the sensor or pulling timing.
 
